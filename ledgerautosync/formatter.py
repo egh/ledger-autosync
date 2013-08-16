@@ -1,9 +1,10 @@
 from decimal import Decimal
 
 class Formatter(object):
-    def __init__(self, currency, name):
+    def __init__(self, acctid, currency, name):
         self.currency = currency
         self.name = name
+        self.acctid = acctid
 
     def mk_dynamic_account(self, txn):
         return "Expenses:Misc"
@@ -20,7 +21,7 @@ class Formatter(object):
     def format_txn(self, txn):
         date = "%s"%(txn.date.strftime("%Y/%m/%d"))
         retval = "%s %s\n"%(date, txn.memo)
-        retval += "  ; fid: %s\n"%(txn.id)
+        retval += "  ; fid: %s.%s\n"%(self.acctid, txn.id)
         retval += "  %s  %s\n"%(self.name, self.format_amount(txn))
         retval += "  %s  %s\n"%(self.mk_dynamic_account(txn), self.format_amount(txn, True))
         return retval

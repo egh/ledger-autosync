@@ -12,7 +12,7 @@ def run(ledger, config):
     sync = Synchronizer(ledger)
     for acct in config.accounts():
         (ofx, txns) = sync.get_new_txns(acct,max_days=7)
-        formatter = Formatter(currency=ofx.account.statement.currency, name=acct.description)
+        formatter = Formatter(acctid=ofx.account.account_id, currency=ofx.account.statement.currency, name=acct.description)
         for txn in txns:
             print formatter.format_txn(txn)
 
