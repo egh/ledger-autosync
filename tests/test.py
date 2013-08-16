@@ -8,10 +8,9 @@ from mock import Mock
 class TestGenerate(TestCase):
     def setUp(self):
         self.ofx = OfxParser.parse(file('fixtures/checking.ofx'))
-        self.ofx.account.description = "Foo"
 
     def testIt(self):
-        formatter = ledgerautosync.formatter.Formatter(account=self.ofx.account)
+        formatter = ledgerautosync.formatter.Formatter(currency=self.ofx.account.statement.currency, name="Foo")
         self.assertEqual(formatter.format_txn(self.ofx.account.statement.transactions[0]),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; fid: 0000486
