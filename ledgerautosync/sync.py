@@ -11,8 +11,11 @@ class Synchronizer(object):
     def filter(self, txns):
         return [ txn for txn in txns if not(self.is_txn_synced(txn)) ]
 
-    def get_new_txns(self, acct):
-        days = 7
+    def get_new_txns(self, acct, max_days=999999):
+        if (max_days < 7):
+            days = max_days
+        else:
+            days = 7
         last_txns_len = 0
         while (True):
             raw = acct.download(days)
@@ -22,10 +25,11 @@ class Synchronizer(object):
             if (last_txns_len == len(txns)):
                 # not getting anything new; we have reached the beginning
                 return (ofx, new_txns)
-            elif (len(txns) > len(new_txns)):
-                # got more txns than were new, we've reached a stopping point
+            elif (len(txns) > len(new_txns)) or (max_days >= days):
+                # got more txns than were new or hit max_days, we've reached a stopping point
                 return (ofx, new_txns)
             else:
                 # all new txns, increase how far back we go
                 days = days * 2
+                if (days > max_days): days = max_days
                 last_txns_len = len(txns)
