@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='ledger-autosync',
       version="0.1",
@@ -12,8 +12,15 @@ setup(name='ledger-autosync',
       author='Erik Hetzner',
       author_email='egh@e6h.org',
       url='https://bitbucket.org/egh/ledger-autosync',
+      packages=find_packages(exclude=[
+          'tests']),
       include_package_data=True,
       zip_safe=False,
+      entry_points={
+          'console_scripts': [
+              'ledger-autosync = ledgerautosync.cli:run_default'
+          ]
+      },
       install_requires=[
           "ofxclient",
       ],
