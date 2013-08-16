@@ -18,9 +18,16 @@ def run(ledger, config, min_days=None, max_days=90):
 
 def run_default():
     logging.basicConfig(level=logging.DEBUG)
+
+    parser = argparse.ArgumentParser(description='Synchronize ledger.')
+    parser.add_argument('--max', dest='max_days', type=int, default=90,
+                        help='maximum number of days to process')
+    parser.add_argument('--min', dest='min_days', type=int, default=90,
+                        help='minimum number of days to process')
+    args = parser.parse_args()
     ledger = Ledger()
     config = OfxConfig()
-    run(ledger, config)
+    run(ledger, config, max_days=args.max_days, min_days=args.min_days)
 
 if __name__ == '__main__':
     run_default()
