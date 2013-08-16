@@ -14,8 +14,8 @@ class Synchronizer(object):
         acctid = ofx.account.account_id
         return [ txn for txn in txns if not(self.is_txn_synced(acctid, txn)) ]
 
-    def get_new_txns(self, acct, min_days=None, max_days=999999):
-        if min_days is not None:
+    def get_new_txns(self, acct, min_days=0, max_days=999999):
+        if min_days > 0:
             days = min_days
         elif (max_days < 7):
             days = max_days
@@ -23,20 +23,27 @@ class Synchronizer(object):
             days = 7
         last_txns_len = 0
         while (True):
-            logging.debug("Downloading %d days of transactions."%(days))
+            logging.debug("Downloading %d days of transactions (max_days=%d)."%(days, max_days))
             raw = acct.download(days)
             ofx = OfxParser.parse(raw)
             txns = ofx.account.statement.transactions
             new_txns = self.filter(ofx)
-            if (last_txns_len == len(txns)):
-                # not getting anything new; we have reached the beginning
+            if ((len(txns) > 0) and (last_txns_len == len(txns))):
+                # not getting more txns than last time; we have
+                # reached the beginning
+                logging.debug("Not getting more txns than last time, done.")
                 return (ofx, new_txns)
-            elif (len(txns) > len(new_txns)) or (max_days >= days):
-                # got more txns than were new or hit max_days, we've reached a stopping point
+            elif (len(txns) > len(new_txns)) or (days >= max_days):
+                # got more txns than were new or hit max_days, we've
+                # reached a stopping point
+                if (days >= max_days):
+                    logging.debug("Hit max days.")
+                else:
+                    logging.debug("Got some stale txns.")
                 return (ofx, new_txns)
             else:
-                # all new txns, increase how far back we go
+                # all txns were new, increase how far back we go
                 days = days * 2
-                logging.debug("Increasing days ago to %d."%(days))
                 if (days > max_days): days = max_days
+                logging.debug("Increasing days ago to %d."%(days))
                 last_txns_len = len(txns)
