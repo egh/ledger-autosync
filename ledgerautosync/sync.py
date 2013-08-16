@@ -21,10 +21,10 @@ class Synchronizer(object):
             new_txns = self.filter(txns)
             if (last_txns_len == len(txns)):
                 # not getting anything new; we have reached the beginning
-                return new_txns
+                return (ofx, new_txns)
             elif (len(txns) > len(new_txns)):
                 # got more txns than were new, we've reached a stopping point
-                return new_txns
+                return (ofx, new_txns)
             else:
                 # all new txns, increase how far back we go
                 days = days * 2

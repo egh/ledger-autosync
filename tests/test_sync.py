@@ -28,12 +28,12 @@ class TestSync(TestCase):
         acct = Mock()
         acct.download = Mock(return_value=file('fixtures/checking.ofx').read())
         sync = Synchronizer(ledger)
-        self.assertEqual(len(sync.get_new_txns(acct)), 0)
+        self.assertEqual(len(sync.get_new_txns(acct)[1]), 0)
         
     def test_all_new_txns(self):
         ledger = Ledger("fixtures/empty.lgr")
         acct = Mock()
         acct.download = Mock(return_value=file('fixtures/checking.ofx').read())
         sync = Synchronizer(ledger)
-        self.assertEqual(len(sync.get_new_txns(acct)), 3)
+        self.assertEqual(len(sync.get_new_txns(acct)[1]), 3)
         
