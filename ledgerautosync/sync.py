@@ -1,5 +1,6 @@
 from ofxparse import OfxParser
 from StringIO import StringIO
+import logging
 
 class Synchronizer(object):
     def __init__(self, ledger):
@@ -18,6 +19,7 @@ class Synchronizer(object):
             days = 7
         last_txns_len = 0
         while (True):
+            logging.debug("Downloading %d days of transactions."%(days))
             raw = acct.download(days)
             ofx = OfxParser.parse(raw)
             txns = ofx.account.statement.transactions
@@ -31,5 +33,6 @@ class Synchronizer(object):
             else:
                 # all new txns, increase how far back we go
                 days = days * 2
+                logging.debug("Increasing days ago to %d."%(days))
                 if (days > max_days): days = max_days
                 last_txns_len = len(txns)

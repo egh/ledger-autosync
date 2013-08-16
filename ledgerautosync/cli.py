@@ -6,6 +6,7 @@ from ofxclient.client import Client
 from formatter import Formatter
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledger import Ledger
+import logging
 
 def run(ledger, config):
     sync = Synchronizer(ledger)
@@ -16,6 +17,7 @@ def run(ledger, config):
             print formatter.format_txn(txn)
 
 def run_default():
+    logging.basicConfig(level=logging.DEBUG)
     ledger = Ledger()
     config = OfxConfig()
     run(ledger, config)
