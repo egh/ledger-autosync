@@ -5,12 +5,14 @@ import logging
 class Synchronizer(object):
     def __init__(self, ledger):
         self.ledger = ledger
+
+    def is_txn_synced(self, acctid, txn):
+        return (self.ledger.get_transaction("meta ofxid=%s.%s"%(acctid, txn.id)) != None)
     
-    def is_txn_synced(self, txn):
-        return (self.ledger.get_transaction("meta fid=%s"%(txn.id)) != None)
-    
-    def filter(self, txns):
-        return [ txn for txn in txns if not(self.is_txn_synced(txn)) ]
+    def filter(self, ofx):
+        txns = ofx.account.statement.transactions
+        acctid = ofx.account.account_id
+        return [ txn for txn in txns if not(self.is_txn_synced(acctid, txn)) ]
 
     def get_new_txns(self, acct, max_days=999999):
         if (max_days < 7):
@@ -23,7 +25,7 @@ class Synchronizer(object):
             raw = acct.download(days)
             ofx = OfxParser.parse(raw)
             txns = ofx.account.statement.transactions
-            new_txns = self.filter(txns)
+            new_txns = self.filter(ofx)
             if (last_txns_len == len(txns)):
                 # not getting anything new; we have reached the beginning
                 return (ofx, new_txns)

@@ -21,7 +21,7 @@ class Formatter(object):
     def format_txn(self, txn):
         date = "%s"%(txn.date.strftime("%Y/%m/%d"))
         retval = "%s %s\n"%(date, txn.memo)
-        retval += "  ; fid: %s.%s\n"%(self.acctid, txn.id)
+        retval += "  ; ofxid: %s.%s\n"%(self.acctid, txn.id)
         retval += "  %s  %s\n"%(self.name, self.format_amount(txn))
         retval += "  %s  %s\n"%(self.mk_dynamic_account(txn), self.format_amount(txn, True))
         return retval

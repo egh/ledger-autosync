@@ -14,14 +14,13 @@ class TestSync(TestCase):
         ofx = OfxParser.parse(file('fixtures/checking.ofx'))
         sync = Synchronizer(ledger)
         txns = ofx.account.statement.transactions
-        self.assertEqual(sync.filter(txns), txns)
+        self.assertEqual(sync.filter(ofx), txns)
 
     def test_fully_synced(self):
         ledger = Ledger("fixtures/checking.lgr")
         ofx = OfxParser.parse(file('fixtures/checking.ofx'))
         sync = Synchronizer(ledger)
-        txns = ofx.account.statement.transactions
-        self.assertEqual(sync.filter(txns), [])
+        self.assertEqual(sync.filter(ofx), [])
 
     def test_no_new_txns(self):
         ledger = Ledger("fixtures/checking.lgr")
