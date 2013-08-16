@@ -15,7 +15,7 @@ class Synchronizer(object):
         days = 7
         last_txns_len = 0
         while (True):
-            raw = StringIO(acct.download(days))
+            raw = acct.download(days)
             ofx = OfxParser.parse(raw)
             txns = ofx.account.statement.transactions
             new_txns = self.filter(txns)

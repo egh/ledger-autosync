@@ -26,14 +26,14 @@ class TestSync(TestCase):
     def test_no_new_txns(self):
         ledger = Ledger("fixtures/checking.lgr")
         acct = Mock()
-        acct.download = Mock(return_value=file('fixtures/checking.ofx').read())
+        acct.download = Mock(return_value=file('fixtures/checking.ofx'))
         sync = Synchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct)[1]), 0)
         
     def test_all_new_txns(self):
         ledger = Ledger("fixtures/empty.lgr")
         acct = Mock()
-        acct.download = Mock(return_value=file('fixtures/checking.ofx').read())
+        acct.download = Mock(return_value=file('fixtures/checking.ofx'))
         sync = Synchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct)[1]), 3)
         

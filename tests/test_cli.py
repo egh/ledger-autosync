@@ -10,7 +10,7 @@ class TestCli(TestCase):
         ledger = Ledger('fixtures/empty.lgr')
         config = OfxConfig('fixtures/ofxclient.ini')
         acct = config.accounts()[0]
-        acct.download = Mock(return_value=file('fixtures/checking.ofx').read())
+        acct.download = Mock(return_value=file('fixtures/checking.ofx'))
         config.accounts = Mock(return_value=[acct])
         run(ledger, config)
 
@@ -18,6 +18,6 @@ class TestCli(TestCase):
         ledger = Ledger('fixtures/checking.lgr')
         config = OfxConfig('fixtures/ofxclient.ini')
         acct = config.accounts()[0]
-        acct.download = Mock(return_value=file('fixtures/checking.ofx').read())
+        acct.download = Mock(return_value=file('fixtures/checking.ofx'))
         config.accounts = Mock(return_value=[acct])
         run(ledger, config)
