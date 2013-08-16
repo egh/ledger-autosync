@@ -11,10 +11,11 @@ class Formatter(object):
     def format_amount(self, txn, reverse=False):
         currency = self.currency.upper()
         if currency == "USD": currency = "$"
+        amt = "%0.2f"%(abs(txn.amount))
         if txn.amount.is_signed() != reverse:
-            return "-%s%s"%(currency, str(abs(txn.amount)))
+            return "-%s%s"%(currency, amt)
         else:
-            return "%s%s"%(currency, str(abs(txn.amount)))
+            return "%s%s"%(currency, amt)
             
     def format_txn(self, txn):
         date = "%s"%(txn.date.strftime("%Y/%m/%d"))
