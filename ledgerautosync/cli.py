@@ -15,7 +15,10 @@ def run(ledger, config):
         for txn in txns:
             print formatter.format_txn(txn)
 
-if __name__ == '__main__':
+def run_default():
     ledger = Ledger()
     config = OfxConfig()
     run(ledger, config)
+
+if __name__ == '__main__':
+    run_default()
