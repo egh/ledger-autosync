@@ -5,6 +5,7 @@ import argparse
 from ofxclient.client import Client
 from formatter import Formatter
 from ledgerautosync.sync import Synchronizer
+from ledgerautosync.ledger import Ledger
 
 def run(ledger, config):
     sync = Synchronizer(ledger)
