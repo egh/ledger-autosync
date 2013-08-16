@@ -1,12 +1,12 @@
 from decimal import Decimal
 
 class Formatter(object):
-    def __init__(self, account, account_name):
+    def __init__(self, account):
         self.account = account
-        self.account_name = account_name
+        self.account_name = account.description
 
     def mk_dynamic_account(self, txn):
-        return "Bar"
+        return "Expenses:Misc"
     
     def format_amount(self, txn, reverse=False):
         currency = self.account.statement.currency.upper()
