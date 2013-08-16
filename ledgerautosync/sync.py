@@ -14,8 +14,10 @@ class Synchronizer(object):
         acctid = ofx.account.account_id
         return [ txn for txn in txns if not(self.is_txn_synced(acctid, txn)) ]
 
-    def get_new_txns(self, acct, max_days=999999):
-        if (max_days < 7):
+    def get_new_txns(self, acct, min_days=None, max_days=999999):
+        if min_days is not None:
+            days = min_days
+        elif (max_days < 7):
             days = max_days
         else:
             days = 7
