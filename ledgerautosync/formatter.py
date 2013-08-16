@@ -9,10 +9,13 @@ class Formatter(object):
     def mk_dynamic_account(self, txn):
         return "Expenses:Misc"
     
-    def format_amount(self, amount, reverse=False):
+    def format_amount(self, amount, reverse=False, unlimited=False):
         currency = self.currency.upper()
         if currency == "USD": currency = "$"
-        amt = "%0.2f"%(abs(amount))
+        if unlimited:
+            amt = str(abs(amount))
+        else:
+            amt = "%0.2f"%(abs(amount))
         if amount.is_signed() != reverse:
             return "-%s%s"%(currency, amt)
         else:
@@ -25,7 +28,7 @@ class Formatter(object):
             retval += "%s %s\n"%(date, txn.memo)
             retval += "  ; ofxid: %s.%s\n"%(self.acctid, txn.id)
             retval += "  %s  %s\n"%(self.name, self.format_amount(txn.amount))
-            retval += "  %s  %s\n"%(self.mk_dynamic_account(txn), self.format_amount(txn.amount, True))
+            retval += "  %s  %s\n"%(self.mk_dynamic_account(txn), self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
             trade_date = "%s"%(txn.tradeDate.strftime("%Y/%m/%d"))
             if txn.settleDate is not None:
@@ -33,6 +36,6 @@ class Formatter(object):
             else:
                 retval = "%s %s\n"%(txn.tradeDate, txn.memo)
             retval += "  ; ofxid: %s.%s\n"%(self.acctid, txn.id)
-            retval += "  %s  %s %s @ %s\n"%(self.name, txn.units, txn.security, txn.unit_price)
-            retval += "  %s  %s\n"%(self.name, self.format_amount(txn.units * txn.unit_price, True))
+            retval += "  %s  %s %s @ %s\n"%(self.name, txn.units, txn.security, self.format_amount(txn.unit_price, unlimited=True))
+            retval += "  %s  %s\n"%(self.name, self.format_amount(txn.units * txn.unit_price, reverse=True))
         return retval

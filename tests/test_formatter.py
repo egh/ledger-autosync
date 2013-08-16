@@ -34,6 +34,6 @@ class TestFormatter(TestCase):
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012-07-20 04:00:00 YOU BOUGHT
   ; ofxid: 01234567890.0123456789020201120120720
-  Foo  100.00000 458140100 @ 25.635000000
+  Foo  100.00000 458140100 @ $25.635000000
   Foo  -$2563.50
 """)
