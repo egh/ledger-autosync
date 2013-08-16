@@ -8,7 +8,7 @@ from ledgerautosync.sync import Synchronizer
 from unittest import TestCase
 from mock import Mock
 
-class TestLedger(TestCase):
+class TestSync(TestCase):
     def test_fresh_sync(self):
         ledger = Ledger("fixtures/empty.lgr")
         ofx = OfxParser.parse(file('fixtures/checking.ofx'))
