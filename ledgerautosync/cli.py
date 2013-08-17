@@ -8,6 +8,7 @@ from formatter import Formatter
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledger import Ledger
 import logging
+import sys
 
 def sync(ledger, config, max_days=90, resync=False):
     sync = Synchronizer(ledger)
@@ -26,7 +27,8 @@ def import_ofx(ledger, path, accountname=None):
     for txn in txns:
         print formatter.format_txn(txn)
         
-def run():
+def run(args=None):
+    if args is None: args = sys.argv[1:]
     logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='Synchronize ledger.')
@@ -37,7 +39,7 @@ def run():
     parser.add_argument('PATH', nargs='?', help='do not sync; import from OFX file')
     parser.add_argument('-a', '--account', type=str, default=None,
                         help='set account name for import')
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     ledger = Ledger()
     if args.PATH is None:
         config = OfxConfig()
