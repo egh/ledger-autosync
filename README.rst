@@ -33,6 +33,19 @@ Add this output to your ledger file. When that is done, you can call::
 again, and it should print nothing to stdout, because you already have
 those transactions in your ledger.
 
+Syncing a file
+--------------
+
+Some banks allow users to download OFX files, but do not support
+fetching via the OFX protocol. If you have an OFX file, you can
+convert to ledger::
+
+  ledger-autosync /path/to/file.ofx
+
+This will print unknown transactions in the file to stdout in the same
+way as ordinary sync. If the transaction is already in your ledger, it
+will be ignored.
+
 How it works
 ------------
 
