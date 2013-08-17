@@ -7,7 +7,9 @@ class Synchronizer(object):
         self.ledger = ledger
 
     def is_txn_synced(self, acctid, txn):
-        return (self.ledger.get_transaction("meta ofxid=%s.%s"%(acctid, txn.id)) != None)
+        ofxid = "%s.%s"%(acctid, txn.id)
+        ofxid = ofxid.replace('/', '\\/')
+        return (self.ledger.get_transaction("meta ofxid='%s'"%(ofxid)) != None)
     
     def filter(self, ofx):
         txns = ofx.account.statement.transactions
