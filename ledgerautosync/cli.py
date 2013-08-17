@@ -30,20 +30,20 @@ def run():
     logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='Synchronize ledger.')
-    parser.add_argument('-m', '--max', dest='max_days', type=int, default=90,
+    parser.add_argument('-m', '--max', type=int, default=90,
                         help='maximum number of days to process')
     parser.add_argument('-r', '--resync', action='store_true', default=False,
                         help='do not stop until max days reached')
     parser.add_argument('PATH', nargs='?', help='do not sync; import from OFX file')
-    parser.add_argument('-a', '--account', dest='account_name', type=str, default=None,
+    parser.add_argument('-a', '--account', type=str, default=None,
                         help='set account name for import')
     args = parser.parse_args()
     ledger = Ledger()
     if args.PATH is None:
         config = OfxConfig()
-        sync(ledger, config, max_days=args.max_days, resync=args.resync)
+        sync(ledger, config, max_days=args.max, resync=args.resync)
     else:
-        import_ofx(ledger, args.PATH, args.account_name)
+        import_ofx(ledger, args.PATH, args.account)
 
 if __name__ == '__main__':
     run()
