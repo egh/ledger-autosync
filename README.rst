@@ -33,6 +33,14 @@ Add this output to your ledger file. When that is done, you can call::
 again, and it should print nothing to stdout, because you already have
 those transactions in your ledger.
 
+resync
+~~~~~~
+
+By default, ledger-autosync will process transactions backwards, and
+stop when it sees a transaction that is already in ledger. To force it
+to process all transactions up to the ``--max`` days back in time
+(default: 90), use the ``--resync`` option.
+
 Syncing a file
 --------------
 
