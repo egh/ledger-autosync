@@ -36,6 +36,14 @@ class Formatter(object):
         else:
             return "%s %s"%(txn.payee, txn.memo)
 
+    def format_txn_line(self, acct, amt, extra=None):
+        space_count = 50 - len(acct) - len(amt)
+        if extra:
+            extra_str = " %s"%(extra)
+        else:
+            extra_str = ""
+        return "  %s%s%s%s\n"%(acct, (" " * space_count), amt, extra_str)
+
     def format_txn(self, txn):
         retval = ""
         ofxid = clean_ofx_id("%s.%s"%(self.acctid, txn.id))
@@ -43,8 +51,8 @@ class Formatter(object):
             date = "%s"%(txn.date.strftime("%Y/%m/%d"))
             retval += "%s %s\n"%(date, self.format_payee(txn))
             retval += "  ; ofxid: %s\n"%(ofxid)
-            retval += "  %s  %s\n"%(self.name, self.format_amount(txn.amount))
-            retval += "  %s  %s\n"%(self.mk_dynamic_account(txn), self.format_amount(txn.amount, reverse=True))
+            retval += self.format_txn_line(self.name, self.format_amount(txn.amount))
+            retval += self.format_txn_line(self.mk_dynamic_account(txn), self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
             trade_date = "%s"%(txn.tradeDate.strftime("%Y/%m/%d"))
             if txn.settleDate is not None:
@@ -52,6 +60,7 @@ class Formatter(object):
             else:
                 retval = "%s %s\n"%(txn.tradeDate, txn.memo)
             retval += "  ; ofxid: %s\n"%(ofxid)
-            retval += "  %s  %s %s @ %s\n"%(self.name, txn.units, txn.security, self.format_amount(txn.unit_price, unlimited=True))
-            retval += "  %s  %s\n"%(self.name, self.format_amount(txn.units * txn.unit_price, reverse=True))
+            retval += self.format_txn_line(self.name, str(txn.units), 
+                                           "%s @ %s"%(txn.security, self.format_amount(txn.unit_price, unlimited=True)))
+            retval += self.format_txn_line(self.name, self.format_amount(txn.units * txn.unit_price, reverse=True))
         return retval
