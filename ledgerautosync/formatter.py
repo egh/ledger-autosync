@@ -28,12 +28,20 @@ class Formatter(object):
         else:
             return "%s%s"%(currency, amt)
 
+    def format_payee(self, txn):
+        if (txn.payee is None) or txn.memo.startswith(txn.payee):
+            return txn.memo
+        elif (txn.memo is None) or txn.payee.startswith(txn.memo):
+            return txn.payee
+        else:
+            return "%s %s"%(txn.payee, txn.memo)
+
     def format_txn(self, txn):
         retval = ""
         ofxid = clean_ofx_id("%s.%s"%(self.acctid, txn.id))
         if isinstance(txn, Transaction):
             date = "%s"%(txn.date.strftime("%Y/%m/%d"))
-            retval += "%s %s\n"%(date, txn.memo or txn.payee)
+            retval += "%s %s\n"%(date, self.format_payee(txn))
             retval += "  ; ofxid: %s\n"%(ofxid)
             retval += "  %s  %s\n"%(self.name, self.format_amount(txn.amount))
             retval += "  %s  %s\n"%(self.mk_dynamic_account(txn), self.format_amount(txn.amount, reverse=True))
