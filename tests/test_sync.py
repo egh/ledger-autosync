@@ -11,16 +11,17 @@ from mock import Mock
 class TestSync(TestCase):
     def test_fresh_sync(self):
         ledger = Ledger("fixtures/empty.lgr")
-        ofx = OfxParser.parse(file('fixtures/checking.ofx'))
         sync = Synchronizer(ledger)
-        txns = ofx.account.statement.transactions
-        self.assertEqual(sync.filter(ofx), txns)
+        ofx = OfxParser.parse(file('fixtures/checking.ofx'))
+        txns1 = ofx.account.statement.transactions
+        txns2 = sync.filter(ofx)
+        self.assertEqual(txns1, txns2)
 
     def test_fully_synced(self):
         ledger = Ledger("fixtures/checking.lgr")
-        ofx = OfxParser.parse(file('fixtures/checking.ofx'))
         sync = Synchronizer(ledger)
-        self.assertEqual(sync.filter(ofx), [])
+        txns = sync.parse_file('fixtures/checking.ofx')
+        self.assertEqual(txns, [])
 
     def test_no_new_txns(self):
         ledger = Ledger("fixtures/checking.lgr")
