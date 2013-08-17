@@ -14,7 +14,7 @@ def sync(ledger, config, max_days=90, resync=False):
     sync = Synchronizer(ledger)
     for acct in config.accounts():
         (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
-        formatter = Formatter(acctid=ofx.account.account_id, currency=ofx.account.statement.currency, name=acct.description)
+        formatter = Formatter(fid=ofx.account.institution.fid, acctid=ofx.account.account_id, currency=ofx.account.statement.currency, name=acct.description)
         for txn in txns:
             print formatter.format_txn(txn)
 
@@ -23,7 +23,7 @@ def import_ofx(ledger, path, accountname=None):
     (ofx, txns) = sync.parse_file(path)
     if accountname is None:
         accountname = "%s:%s"%(ofx.account.institution.organization, ofx.account.account_id)
-    formatter = Formatter(acctid=ofx.account.account_id, currency=ofx.account.statement.currency, name=accountname)
+    formatter = Formatter(fid=ofx.account.institution.fid, acctid=ofx.account.account_id, currency=ofx.account.statement.currency, name=accountname)
     for txn in txns:
         print formatter.format_txn(txn)
         

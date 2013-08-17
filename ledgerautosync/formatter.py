@@ -8,10 +8,11 @@ def clean_ofx_id(ofxid):
     return ofxid
 
 class Formatter(object):
-    def __init__(self, acctid, currency, name):
+    def __init__(self, fid, acctid, currency, name):
         self.currency = currency
         self.name = name
         self.acctid = acctid
+        self.fid = fid
 
     def mk_dynamic_account(self, txn):
         return "Expenses:Misc"
@@ -46,7 +47,7 @@ class Formatter(object):
 
     def format_txn(self, txn):
         retval = ""
-        ofxid = clean_ofx_id("%s.%s"%(self.acctid, txn.id))
+        ofxid = clean_ofx_id("%s.%s.%s"%(self.fid, self.acctid, txn.id))
         if isinstance(txn, Transaction):
             date = "%s"%(txn.date.strftime("%Y/%m/%d"))
             retval += "%s %s\n"%(date, self.format_payee(txn))
