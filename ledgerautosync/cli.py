@@ -41,7 +41,7 @@ def run():
     ledger = Ledger()
     if args.PATH is None:
         config = OfxConfig()
-        run(ledger, config, max_days=args.max_days, resync=args.resync)
+        sync(ledger, config, max_days=args.max_days, resync=args.resync)
     else:
         import_ofx(ledger, args.PATH, args.account_name)
 
