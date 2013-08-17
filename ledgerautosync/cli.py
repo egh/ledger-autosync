@@ -32,7 +32,7 @@ def run():
     parser = argparse.ArgumentParser(description='Synchronize ledger.')
     parser.add_argument('-m', '--max', dest='max_days', type=int, default=90,
                         help='maximum number of days to process')
-    parser.add_argument('-r', '--resync', dest='resync', type=bool, default=False,
+    parser.add_argument('-r', '--resync', action='store_true', default=False,
                         help='do not stop until max days reached')
     parser.add_argument('PATH', nargs='?', help='do not sync; import from OFX file')
     parser.add_argument('-a', '--account', dest='account_name', type=str, default=None,
