@@ -1,4 +1,4 @@
-from ledgerautosync.cli import run
+from ledgerautosync.cli import sync
 from ledgerautosync.ledger import Ledger
 from ofxclient.config import OfxConfig
 
@@ -12,7 +12,7 @@ class TestCli(TestCase):
         acct = config.accounts()[0]
         acct.download = Mock(return_value=file('fixtures/checking.ofx'))
         config.accounts = Mock(return_value=[acct])
-        run(ledger, config, 7, 7)
+        sync(ledger, config, 7)
 
     def test_empty_run(self):
         ledger = Ledger('fixtures/checking.lgr')
@@ -20,4 +20,4 @@ class TestCli(TestCase):
         acct = config.accounts()[0]
         acct.download = Mock(return_value=file('fixtures/checking.ofx'))
         config.accounts = Mock(return_value=[acct])
-        run(ledger, config, 7, 7)
+        sync(ledger, config, 7)

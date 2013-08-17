@@ -18,7 +18,7 @@ setup(name='ledger-autosync',
       zip_safe=False,
       entry_points={
           'console_scripts': [
-              'ledger-autosync = ledgerautosync.cli:run_default'
+              'ledger-autosync = ledgerautosync.cli:run'
           ]
       },
       install_requires=[
