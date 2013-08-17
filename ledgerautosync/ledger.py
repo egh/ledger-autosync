@@ -4,6 +4,7 @@ import time
 from subprocess import Popen, PIPE
 from threading import Thread
 from Queue import Queue, Empty
+from ledgerautosync.formatter import clean_ofx_id
 
 def enqueue_output(out, queue):
     item = ""
@@ -42,3 +43,6 @@ class Ledger(object):
             return None
         else:
             return d['transactions']['transaction']
+
+    def get_transaction_by_ofxid(self, ofxid):
+        return self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid)))
