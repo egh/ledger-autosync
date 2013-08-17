@@ -7,7 +7,8 @@ class Synchronizer(object):
         self.ledger = ledger
 
     def parse_file(self, path, accountname=None):
-        return self.filter(OfxParser.parse(file(path)))
+        ofx = OfxParser.parse(file(path))
+        return (ofx, self.filter(ofx))
 
     def is_txn_synced(self, acctid, txn):
         ofxid = "%s.%s"%(acctid, txn.id)

@@ -20,7 +20,7 @@ class TestSync(TestCase):
     def test_fully_synced(self):
         ledger = Ledger("fixtures/checking.lgr")
         sync = Synchronizer(ledger)
-        txns = sync.parse_file('fixtures/checking.ofx')
+        (ofx, txns) = sync.parse_file('fixtures/checking.ofx')
         self.assertEqual(txns, [])
 
     def test_no_new_txns(self):
