@@ -23,6 +23,12 @@ class TestSync(TestCase):
         (ofx, txns) = sync.parse_file('fixtures/checking.ofx')
         self.assertEqual(txns, [])
 
+    def test_partial_sync(self):
+        ledger = Ledger("fixtures/checking-partial.lgr")
+        sync = Synchronizer(ledger)
+        (ofx, txns) = sync.parse_file('fixtures/checking.ofx')
+        self.assertEqual(len(txns), 1)
+
     def test_no_new_txns(self):
         ledger = Ledger("fixtures/checking.lgr")
         acct = Mock()
