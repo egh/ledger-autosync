@@ -46,3 +46,6 @@ class Ledger(object):
 
     def get_transaction_by_ofxid(self, ofxid):
         return self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid)))
+
+    def get_transaction_by_payee(self, payee):
+        return self.get_transaction("payee '%s'"%(payee))
