@@ -38,12 +38,14 @@ def run(args=None):
     parser.add_argument('PATH', nargs='?', help='do not sync; import from OFX file')
     parser.add_argument('-a', '--account', type=str, default=None,
                         help='set account name for import')
+    parser.add_argument('-l', '--ledger', type=str, default=None,
+                        help='specify ledger file to READ for syncing')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='enable debug logging')
     args = parser.parse_args(args)
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
-    ledger = Ledger()
+    ledger = Ledger(args.ledger)
     if args.PATH is None:
         config = OfxConfig()
         sync(ledger, config, max_days=args.max, resync=args.resync)
