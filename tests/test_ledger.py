@@ -20,3 +20,9 @@ class TestLedger(TestCase):
         txn = self.ledger.get_transaction_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")
         self.assertEqual(txn['transaction']['note'],
                          ' ofxid: 1101.1452687~7.0000487')
+                                                                                                             
+    # broken in ledger
+#    def test_multiple_transaction(self):
+#        ledger = Ledger("fixtures/multiple.lgr")
+#        txn = self.ledger.get_transaction_by_payee("Baz")
+#        self.assertEqual(len(txn) > 1)
