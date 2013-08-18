@@ -29,7 +29,6 @@ def import_ofx(ledger, path, accountname=None):
         
 def run(args=None):
     if args is None: args = sys.argv[1:]
-    logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(description='Synchronize ledger.')
     parser.add_argument('-m', '--max', type=int, default=90,
@@ -39,7 +38,11 @@ def run(args=None):
     parser.add_argument('PATH', nargs='?', help='do not sync; import from OFX file')
     parser.add_argument('-a', '--account', type=str, default=None,
                         help='set account name for import')
+    parser.add_argument('-d', '--debug', action='store_true', default=False,
+                        help='enable debug logging')
     args = parser.parse_args(args)
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
     ledger = Ledger()
     if args.PATH is None:
         config = OfxConfig()
