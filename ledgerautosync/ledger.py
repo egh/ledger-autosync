@@ -42,7 +42,7 @@ class Ledger(object):
         if d['transactions'] == '':
             return None
         else:
-            return d['transactions']['transaction']
+            return d['transactions']
 
     def get_transaction_by_ofxid(self, ofxid):
         return self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid)))
