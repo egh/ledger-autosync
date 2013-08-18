@@ -8,7 +8,7 @@ from mock import Mock
 class TestFormatter(TestCase):
     def test_checking(self):
         ofx = OfxParser.parse(file('fixtures/checking.ofx'))
-        formatter = ledgerautosync.formatter.Formatter(fid=ofx.account.institution.fid, acctid=ofx.account.account_id, currency=ofx.account.statement.currency, name="Foo")
+        formatter = ledgerautosync.formatter.Formatter(account=ofx.account, name="Foo")
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; ofxid: 1101.1452687~7.0000486
@@ -30,7 +30,7 @@ class TestFormatter(TestCase):
 
     def test_investments(self):
         ofx = OfxParser.parse(file('fixtures/fidelity.ofx'))
-        formatter = ledgerautosync.formatter.Formatter(fid=ofx.account.institution.fid, acctid=ofx.account.account_id, currency=ofx.account.statement.currency, name="Foo")
+        formatter = ledgerautosync.formatter.Formatter(account=ofx.account, name="Foo")
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012-07-20 04:00:00 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720

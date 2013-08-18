@@ -8,11 +8,11 @@ def clean_ofx_id(ofxid):
     return ofxid
 
 class Formatter(object):
-    def __init__(self, fid, acctid, currency, name):
-        self.currency = currency
+    def __init__(self, account, name):
+        self.acctid=account.account_id
+        self.currency=account.statement.currency
+        self.fid=account.institution.fid
         self.name = name
-        self.acctid = acctid
-        self.fid = fid
 
     def mk_dynamic_account(self, txn):
         return "Expenses:Misc"
