@@ -5,6 +5,12 @@ from subprocess import Popen, PIPE
 from threading import Thread
 from Queue import Queue, Empty
 from ledgerautosync.formatter import clean_ofx_id
+import logging
+
+def clean_payee(payee):
+    payee = payee.replace('/', '\\/')
+    payee = payee.replace('%', '')
+    return payee
 
 def enqueue_output(out, queue):
     item = ""
@@ -48,4 +54,4 @@ class Ledger(object):
         return self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid)))
 
     def get_transaction_by_payee(self, payee):
-        return self.get_transaction("payee '%s'"%(payee))
+        return self.get_transaction("payee '%s'"%(clean_payee(payee)))

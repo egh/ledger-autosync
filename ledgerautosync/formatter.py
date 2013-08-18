@@ -8,15 +8,24 @@ def clean_ofx_id(ofxid):
     return ofxid
 
 class Formatter(object):
-    def __init__(self, account, name):
+    def __init__(self, account, name, ledger=None):
         self.acctid=account.account_id
         self.currency=account.statement.currency
         self.fid=account.institution.fid
         self.name = name
+        self.ledger = ledger
 
     def mk_dynamic_account(self, txn):
-        return "Expenses:Misc"
-    
+        if self.ledger is None:
+            return "Expenses:Misc"
+        else:
+            payee = self.format_payee(txn)
+            txns = self.ledger.get_transaction_by_payee(payee)
+            if txns is None:
+                return "Expenses:Misc"
+            else:
+                return txns['postings']['posting']['account']['name']
+
     def format_amount(self, amount, reverse=False, unlimited=False):
         currency = self.currency.upper()
         if currency == "USD": currency = "$"

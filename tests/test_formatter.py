@@ -1,4 +1,5 @@
-import ledgerautosync.formatter
+from ledgerautosync.formatter import Formatter
+from ledgerautosync.ledger import Ledger
 
 from ofxparse import OfxParser
 
@@ -8,7 +9,7 @@ from mock import Mock
 class TestFormatter(TestCase):
     def test_checking(self):
         ofx = OfxParser.parse(file('fixtures/checking.ofx'))
-        formatter = ledgerautosync.formatter.Formatter(account=ofx.account, name="Foo")
+        formatter = Formatter(account=ofx.account, name="Foo")
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; ofxid: 1101.1452687~7.0000486
@@ -30,10 +31,21 @@ class TestFormatter(TestCase):
 
     def test_investments(self):
         ofx = OfxParser.parse(file('fixtures/fidelity.ofx'))
-        formatter = ledgerautosync.formatter.Formatter(account=ofx.account, name="Foo")
+        formatter = Formatter(account=ofx.account, name="Foo")
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012-07-20 04:00:00 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
   Foo                                      100.00000 458140100 @ $25.635000000
   Foo                                      -$2563.50
+""")
+
+    def test_dynamic_account(self):
+        ofx = OfxParser.parse(file('fixtures/checking.ofx'))
+        ledger = Ledger("fixtures/checking-dynamic-account.lgr")
+        formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[1]),
+"""2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
+  ; ofxid: 1101.1452687~7.0000487
+  Assets:Foo                                 -$34.51
+  Expenses:Bar                                $34.51
 """)
