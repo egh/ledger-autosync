@@ -2,7 +2,22 @@
  ledger-autosync
 =================
 
-Automatically sync your transactions with your `ledger <http://ledger-cli.org/>`_.
+``ledger-autosync`` is a program to pull down transactions from your
+bank and create `ledger <http://ledger-cli.org/>`_ transactions for
+them. It is designed to only create transactions that are not already
+present in your ledger files. This should make it comparable to some
+of the automated synchronization features available in products like
+GnuCash, Mint, etc.
+
+Features
+--------
+
+- supports ledger and hledger
+- like ledger, ledger-autosync will never modify your files directly
+- interactive banking setup via ofxclient [1]
+- multiple banks and accounts
+- import of downloaded OFX files, for banks not supporting automatic
+  download
 
 Quickstart
 ----------
