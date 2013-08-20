@@ -71,7 +71,12 @@ class HLedger(object):
     def __init__(self, ledger_file=None):
         self.args = ["hledger"]
         if ledger_file is not None:
-            args += ["-f", ledger_file]
+            self.args += ["-f", ledger_file]
         
     def check_transaction_by_ofxid(self, ofxid):
-        return (subprocess.check_output(args + ["reg", "tag:ofxid=%s"%(ofxid)]) != '')
+        return (subprocess.check_output(self.args + ["reg", "tag:ofxid=%s"%(ofxid)]) != '')
+
+    def get_account_by_payee(self, payee):
+        lines = subprocess.check_output(self.args + ["bal", "desc:'%s'"%(payee), "--format", "%(account)"]).splitlines()
+        if (len(lines) < 4): return None
+        else: return lines[1]
