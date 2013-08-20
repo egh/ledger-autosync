@@ -1,4 +1,4 @@
-import json
+import xml.etree.ElementTree as ET
 import sys
 import time
 import subprocess
@@ -49,15 +49,15 @@ class Ledger(object):
         self.q.get()
 
     def run(self, cmd):
-        self.p.stdin.write("json %s\n"%(cmd))
-        return json.loads(self.q.get())['ledger']
+        self.p.stdin.write("xml %s\n"%(cmd))
+        return ET.fromstring(self.q.get())
 
     def get_transaction(self, q):
-        d = self.run("reg %s"%(q))
-        if d['transactions'] == '':
+        d = self.run("reg %s"%(q)).findall('.//transactions/transaction')
+        if len(d) == 0:
             return None
         else:
-            return d['transactions']
+            return d[0]
 
     def check_transaction_by_ofxid(self, ofxid):
         return (self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid))) != None)
@@ -65,7 +65,7 @@ class Ledger(object):
     def get_account_by_payee(self, payee):
         txn = self.get_transaction("payee '%s'"%(clean_payee(payee)))
         if txn is None: return None
-        else: return txn['postings']['posting']['account']['name']
+        else: return txn.findall('./postings/posting[2]/account/name')[0].text
 
 class HLedger(object):
     def __init__(self, ledger_file=None):
