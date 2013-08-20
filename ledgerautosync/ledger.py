@@ -73,5 +73,5 @@ class HLedger(object):
         if ledger_file is not None:
             args += ["-f", ledger_file]
         
-    def check_txn_by_ofxid(self, ofxid):
+    def check_transaction_by_ofxid(self, ofxid):
         return (subprocess.check_output(args + ["reg", "tag:ofxid=%s"%(ofxid)]) != '')
