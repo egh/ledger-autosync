@@ -62,8 +62,10 @@ class Ledger(object):
     def check_transaction_by_ofxid(self, ofxid):
         return (self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid))) != None)
     
-    def get_transaction_by_payee(self, payee):
-        return self.get_transaction("payee '%s'"%(clean_payee(payee)))
+    def get_account_by_payee(self, payee):
+        txn = self.get_transaction("payee '%s'"%(clean_payee(payee)))
+        if txn is None: return None
+        else: return txn['postings']['posting']['account']['name']
 
 class HLedger(object):
     def __init__(self, ledger_file=None):

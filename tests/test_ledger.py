@@ -19,10 +19,9 @@ class TestLedger(TestCase):
     def test_nonexistent_transaction(self):
         self.assertFalse(self.ledger.check_transaction_by_ofxid("FOO"))
     
-    def test_transaction_by_payee(self):
-        txn = self.ledger.get_transaction_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")
-        self.assertEqual(txn['transaction']['note'],
-                         ' ofxid: 1101.1452687~7.0000487')
+    def test_get_account_by_payee(self):
+        account = self.ledger.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")
+        self.assertEqual(account, "Bar")
                                                                                                              
     # broken in ledger
 #    def test_multiple_transaction(self):

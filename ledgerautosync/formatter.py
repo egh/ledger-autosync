@@ -20,11 +20,11 @@ class Formatter(object):
             return "Expenses:Misc"
         else:
             payee = self.format_payee(txn)
-            txns = self.ledger.get_transaction_by_payee(payee)
-            if txns is None:
+            account = self.ledger.get_account_by_payee(payee)
+            if account is None:
                 return "Expenses:Misc"
             else:
-                return txns['postings']['posting']['account']['name']
+                return account
 
     def format_amount(self, amount, reverse=False, unlimited=False):
         currency = self.currency.upper()
