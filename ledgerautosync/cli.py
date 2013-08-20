@@ -6,7 +6,7 @@ import argparse
 from ofxclient.client import Client
 from formatter import Formatter
 from ledgerautosync.sync import Synchronizer
-from ledgerautosync.ledger import Ledger
+from ledgerautosync.ledger import mk_ledger
 import logging
 import sys
 
@@ -45,7 +45,7 @@ def run(args=None):
     args = parser.parse_args(args)
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
-    ledger = Ledger(args.ledger)
+    ledger = mk_ledger(args.ledger)
     if args.PATH is None:
         config = OfxConfig()
         sync(ledger, config, max_days=args.max, resync=args.resync)
