@@ -1,6 +1,6 @@
 import os
 import os.path
-from ledgerautosync.ledger import Ledger
+from ledgerautosync.ledger import Ledger, HLedger
 
 from unittest import TestCase
 
@@ -21,7 +21,10 @@ class TestLedger(TestCase):
     
     def test_get_account_by_payee(self):
         account = self.ledger.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")
-        self.assertEqual(account, "Bar")
+        self.assertEqual(account, "Expenses:Bar")
+
+        account = self.hledger.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")
+        self.assertEqual(account, "Expenses:Bar")
                                                                                                              
     # broken in ledger
 #    def test_multiple_transaction(self):
