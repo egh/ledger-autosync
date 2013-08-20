@@ -26,12 +26,12 @@ def enqueue_output(out, queue):
     out.close()
 
 def mk_ledger(ledger_file=None):
-    if subprocess.call(["which", "ledger"]) == 0:
+    if subprocess.call("which ledger > /dev/null", shell=True) == 0:
         return Ledger(ledger_file)
-    elif subprocess.call(["which", "hledger"]) == 0:
+    elif subprocess.call("which hledger > /dev/null", shell=True) == 0:
         return HLedger(ledger_file)
     else:
-        return None
+        raise Exception("Neither ledger nor hledger found!")
 
 class Ledger(object):
     def __init__(self, ledger_file=None):
