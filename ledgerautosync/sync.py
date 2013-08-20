@@ -12,7 +12,7 @@ class Synchronizer(object):
 
     def is_txn_synced(self, acctid, txn):
         ofxid = "%s.%s"%(acctid, txn.id)
-        return (self.ledger.get_transaction_by_ofxid(ofxid) != None)
+        return self.ledger.check_transaction_by_ofxid(ofxid)
     
     def filter(self, ofx):
         txns = ofx.account.statement.transactions

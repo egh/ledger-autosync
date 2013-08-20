@@ -7,17 +7,17 @@ from unittest import TestCase
 class TestLedger(TestCase):
     def setUp(self):
         self.ledger = Ledger("fixtures/checking.lgr")
+        self.hledger = Ledger("fixtures/checking.lgr")
     
     def test_transaction(self):
-        txn = self.ledger.get_transaction_by_ofxid("1101.1452687~7.0000486")
-        self.assertEqual(txn['transaction']['metadata'], 
-                         {u'pair': {u'string': u'1101.1452687~7.0000486', u'key': u'ofxid'}})
-
+        self.assertTrue(self.ledger.check_transaction_by_ofxid("1101.1452687~7.0000486"))
+        self.assertTrue(self.hledger.check_transaction_by_ofxid("1101.1452687~7.0000486"))
+        
 #    def test_transaction_substring(self):
 #        self.assertIsNone(self.ledger.get_transaction_by_ofxid("1452687~7"))
 
     def test_nonexistent_transaction(self):
-        self.assertEqual(self.ledger.get_transaction_by_ofxid("FOO"), None)
+        self.assertFalse(self.ledger.check_transaction_by_ofxid("FOO"))
     
     def test_transaction_by_payee(self):
         txn = self.ledger.get_transaction_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")

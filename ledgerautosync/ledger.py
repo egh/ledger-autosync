@@ -1,6 +1,7 @@
 import json
 import sys
 import time
+import subprocess
 from subprocess import Popen, PIPE
 from threading import Thread
 from Queue import Queue, Empty
@@ -23,6 +24,14 @@ def enqueue_output(out, queue):
             queue.put(item[0:-2])
             item = ""
     out.close()
+
+def mk_ledger(ledger_file=None):
+    if subprocess.call(["which", "ledger"]) == 0:
+        return Ledger(ledger_file)
+    elif subprocess.call(["which", "hledger"]) == 0:
+        return HLedger(ledger_file)
+    else:
+        return None
 
 class Ledger(object):
     def __init__(self, ledger_file=None):
@@ -50,8 +59,17 @@ class Ledger(object):
         else:
             return d['transactions']
 
-    def get_transaction_by_ofxid(self, ofxid):
-        return self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid)))
-
+    def check_transaction_by_ofxid(self, ofxid):
+        return (self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid))) != None)
+    
     def get_transaction_by_payee(self, payee):
         return self.get_transaction("payee '%s'"%(clean_payee(payee)))
+
+class HLedger(object):
+    def __init__(self, ledger_file=None):
+        self.args = ["hledger"]
+        if ledger_file is not None:
+            args += ["-f", ledger_file]
+        
+    def check_txn_by_ofxid(self, ofxid):
+        return (subprocess.check_output(args + ["reg", "tag:ofxid=%s"%(ofxid)]) != '')
