@@ -8,7 +8,6 @@ setup(name='ledger-autosync',
       description="Automatically sync your bank's data with ledger",
       long_description=long_description,
       classifiers=[
-          "Development Status :: 4 - Alpha",
           "Operating System :: OS Independent",
           "Programming Language :: Python",
       ],
