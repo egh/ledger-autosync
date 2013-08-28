@@ -2,17 +2,17 @@
  ledger-autosync
 =================
 
-``ledger-autosync`` is a program to pull down transactions from your
-bank and create `ledger <http://ledger-cli.org/>`_ transactions for
-them. It is designed to only create transactions that are not already
-present in your ledger files. This should make it comparable to some
-of the automated synchronization features available in products like
-GnuCash, Mint, etc.
+ledger-autosync is a program to pull down transactions from your bank
+and create ledger_ transactions for them. It is designed to only
+create transactions that are not already present in your ledger files.
+This should make it comparable to some of the automated
+synchronization features available in products like GnuCash, Mint,
+etc.
 
 Features
 --------
 
-- supports ledger and hledger
+- supports ledger_ and hledger_
 - like ledger, ledger-autosync will never modify your files directly
 - interactive banking setup via ofxclient [1]
 - multiple banks and accounts
@@ -33,7 +33,7 @@ Run ofxclient to set up banking::
 When you have added your institution, quit ofxclient.
 
 Edit the generated ``~/ofxclient.ini`` file. Change the
-``description`` field of your accounts to the name used in ``ledger``.
+``description`` field of your accounts to the name used in ledger.
 
 Run::
 
@@ -76,8 +76,12 @@ will be ignored.
 How it works
 ------------
 
-``ledger-autosync`` stores a unique identifier, provided by your
+ledger-autosync stores a unique identifier, provided by your
 institution for each transaction, as metadata in each transaction.
 When syncing with your bank, it will check if the transaction exists
-by running the ``ledger`` command. If the transaction exists, it does
-nothing. If it does not exist, the transaction is printed to stdout.
+by running the ledger or hledger command. If the transaction exists,
+it does nothing. If it does not exist, the transaction is printed to
+stdout.
+
+.. _ledger: http://ledger-cli.org/
+.. _hledger: http://hledger.org/
