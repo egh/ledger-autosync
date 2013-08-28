@@ -16,8 +16,6 @@ setup(name='ledger-autosync',
       url='https://bitbucket.org/egh/ledger-autosync',
       packages=find_packages(exclude=[
           'tests']),
-      include_package_data=True,
-      zip_safe=False,
       entry_points={
           'console_scripts': [
               'ledger-autosync = ledgerautosync.cli:run'
