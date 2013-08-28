@@ -54,7 +54,11 @@ resync
 By default, ledger-autosync will process transactions backwards, and
 stop when it sees a transaction that is already in ledger. To force it
 to process all transactions up to the ``--max`` days back in time
-(default: 90), use the ``--resync`` option.
+(default: 90), use the ``--resync`` option. This can be useful when
+increasing the ``--max`` option. For instance, if you previously
+synchronized 90 days and now want to get 180 days of transactions,
+ledger-autosync would stop before going back to 180 days without the
+``--resync`` option.
 
 Syncing a file
 --------------
