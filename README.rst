@@ -22,7 +22,11 @@ Features
 Quickstart
 ----------
 
-Install::
+Install from pip::
+
+  $ pip install ledger-autosync
+
+Or install from source::
 
   $ python setup.py install
 
