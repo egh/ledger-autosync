@@ -37,13 +37,13 @@ Edit the generated ``~/ofxclient.ini`` file. Change the
 
 Run::
 
-  ledger-autosync --max 7
+  ledger-autosync
 
-This will download a maximum of 7 days previous activity from your
+This will download a maximum of 90 days previous activity from your
 accounts. The output will be in ledger format and printed to stdout.
 Add this output to your ledger file. When that is done, you can call::
 
-  ledger-autosync --max 7
+  ledger-autosync
 
 again, and it should print nothing to stdout, because you already have
 those transactions in your ledger.
