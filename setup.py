@@ -3,7 +3,13 @@ from setuptools import setup, find_packages
 setup(name='ledger-autosync',
       version="0.1",
       description="Automatically sync your bank's data with ledger",
-      long_description=open("./README.rst", "r").read(),
+      long_description="""
+ledger-autosync is a program to pull down transactions from your
+bank and create `ledger <http://ledger-cli.org/>`_ transactions for
+them. It is designed to only create transactions that are not already
+present in your ledger files. This should make it comparable to some
+of the automated synchronization features available in products like
+GnuCash, Mint, etc.""",
       classifiers=[
           "Development Status :: 4 - Alpha",
           "Operating System :: OS Independent",
