@@ -8,10 +8,14 @@ from Queue import Queue, Empty
 from ledgerautosync.formatter import clean_ofx_id
 import logging
 
-def clean_payee(payee):
-    payee = payee.replace('/', '\\/')
-    payee = payee.replace('%', '')
-    return payee
+def all_or_none(seq):
+    """Returns the first value of seq if all values of seq are equal, or returns None."""
+    if len(seq) == 0: 
+        return None
+    def f(x,y):
+        if (x == y): return x
+        else: return None
+    return reduce(f, seq, seq[0])
 
 def enqueue_output(out, queue):
     item = ""
@@ -48,10 +52,16 @@ class Ledger(object):
         # read output until prompt
         self.q.get()
 
+    @staticmethod
+    def clean_payee(payee):
+        payee = payee.replace('/', '\\/')
+        payee = payee.replace('%', '')
+        return payee
+
     def run(self, cmd):
         self.p.stdin.write("xml %s\n"%(cmd))
         return ET.fromstring(self.q.get())
-
+        
     def get_transaction(self, q):
         d = self.run("reg %s"%(q)).findall('.//transactions/transaction')
         if len(d) == 0:
@@ -61,22 +71,30 @@ class Ledger(object):
 
     def check_transaction_by_ofxid(self, ofxid):
         return (self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid))) != None)
-    
-    def get_account_by_payee(self, payee):
-        txn = self.get_transaction("payee '%s'"%(clean_payee(payee)))
+        
+    def get_account_by_payee(self, payee, exclude):
+        txn = self.run("reg payee '%s'"%(self.clean_payee(payee)))
         if txn is None: return None
-        else: return txn.findall('./postings/posting[2]/account/name')[0].text
+        else: 
+            accts = [ node.text for node in txn.findall('.//transactions/transaction/postings/posting/account/name') ]
+            return all_or_none([ a for a in accts if a != exclude ])
 
 class HLedger(object):
     def __init__(self, ledger_file=None):
         self.args = ["hledger"]
         if ledger_file is not None:
             self.args += ["-f", ledger_file]
+
+    @staticmethod
+    def clean_payee(payee):
+        payee = payee.replace('(', '\(')
+        payee = payee.replace(')', '\)')
+        return payee
         
     def check_transaction_by_ofxid(self, ofxid):
         return (subprocess.check_output(self.args + ["reg", "tag:ofxid=%s"%(ofxid)]) != '')
 
-    def get_account_by_payee(self, payee):
-        lines = subprocess.check_output(self.args + ["bal", "desc:'%s'"%(payee), "--format", "%(account)"]).splitlines()
-        if (len(lines) < 4): return None
-        else: return lines[1]
+    def get_account_by_payee(self, payee, exclude):
+        lines = subprocess.check_output(self.args + ["reg", "desc:%s"%(self.clean_payee(payee))]).splitlines()
+        accts = [ l[32:59].strip() for l in lines ]
+        return all_or_none([ a for a in accts if a != exclude ])

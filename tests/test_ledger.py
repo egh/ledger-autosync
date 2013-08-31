@@ -20,11 +20,21 @@ class TestLedger(TestCase):
         self.assertFalse(self.ledger.check_transaction_by_ofxid("FOO"))
     
     def test_get_account_by_payee(self):
-        account = self.ledger.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")
+        account = self.ledger.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )", exclude="Assets:Foo")
         self.assertEqual(account, "Expenses:Bar")
 
-        account = self.hledger.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )")
+        account = self.hledger.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )", exclude="Assets:Foo")
         self.assertEqual(account, "Expenses:Bar")
+
+    def test_get_ambiguous_account_by_payee(self):
+        ledger = Ledger("fixtures/checking-dynamic-account.lgr")
+        hledger = HLedger("fixtures/checking-dynamic-account.lgr")
+
+        account = ledger.get_account_by_payee("Generic", exclude="Assets:Foo")
+        self.assertEqual(account, None)
+
+        account = hledger.get_account_by_payee("Generic", exclude="Assets:Foo")
+        self.assertEqual(account, None)
                                                                                                              
     # broken in ledger
 #    def test_multiple_transaction(self):

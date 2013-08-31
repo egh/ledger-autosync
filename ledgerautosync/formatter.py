@@ -15,12 +15,12 @@ class Formatter(object):
         self.name = name
         self.ledger = ledger
 
-    def mk_dynamic_account(self, txn):
+    def mk_dynamic_account(self, txn, exclude):
         if self.ledger is None:
             return "Expenses:Misc"
         else:
             payee = self.format_payee(txn)
-            account = self.ledger.get_account_by_payee(payee)
+            account = self.ledger.get_account_by_payee(payee, exclude)
             if account is None:
                 return "Expenses:Misc"
             else:
@@ -62,7 +62,7 @@ class Formatter(object):
             retval += "%s %s\n"%(date, self.format_payee(txn))
             retval += "  ; ofxid: %s\n"%(ofxid)
             retval += self.format_txn_line(self.name, self.format_amount(txn.amount))
-            retval += self.format_txn_line(self.mk_dynamic_account(txn), self.format_amount(txn.amount, reverse=True))
+            retval += self.format_txn_line(self.mk_dynamic_account(txn, exclude=self.name), self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
             trade_date = "%s"%(txn.tradeDate.strftime("%Y/%m/%d"))
             if txn.settleDate is not None:
