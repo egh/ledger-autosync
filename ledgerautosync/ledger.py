@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import os
+import re
 import time
 import subprocess
 from subprocess import Popen, PIPE
@@ -7,6 +8,22 @@ from threading import Thread
 from Queue import Queue, Empty
 from ledgerautosync.formatter import clean_ofx_id
 import logging
+
+def hledger_clean(a):
+    def clean_str(s):
+        s = s.replace('(', '\(')
+        s = s.replace(')', '\)')
+        return s
+    return [ clean_str(s) for s in a ]
+
+def pipe_clean(a):
+    def clean_str(s):
+        s = s.replace('/', '\/')
+        s = s.replace('%', '')
+        if not(re.match(r"^\w+$", s)):
+            s = "'%s'"%(s)
+        return s
+    return [ clean_str(s) for s in a ]
 
 def all_or_none(seq):
     """Returns the first value of seq if all values of seq are equal, or returns None."""
@@ -57,31 +74,28 @@ class Ledger(object):
             # read output until prompt
             self.q.get()
 
-    @staticmethod
-    def clean_payee(payee):
-        payee = payee.replace('/', '\\/')
-        payee = payee.replace('%', '')
-        return payee
-
     def run(self, cmd):
         if self.use_pipe:
-            self.p.stdin.write("xml %s\n"%(cmd))
+            self.p.stdin.write("xml ")
+            self.p.stdin.write(" ".join(pipe_clean(cmd)))
+            self.p.stdin.write("\n")
             return ET.fromstring(self.q.get())
         else:
-            return ET.fromstring(subprocess.check_output(self.args + ["xml"] + cmd.split(" ")))
+            cmd = self.args + ["xml"] + cmd
+            return ET.fromstring(subprocess.check_output(cmd))
             
     def get_transaction(self, q):
-        d = self.run("reg %s"%(q)).findall('.//transactions/transaction')
+        d = self.run(["reg"] + q).findall('.//transactions/transaction')
         if len(d) == 0:
             return None
         else:
             return d[0]
 
     def check_transaction_by_ofxid(self, ofxid):
-        return (self.get_transaction("meta ofxid='%s'"%(clean_ofx_id(ofxid))) != None)
+        return (self.get_transaction(["meta", "ofxid='%s'"%(clean_ofx_id(ofxid))]) != None)
         
     def get_account_by_payee(self, payee, exclude):
-        txn = self.run("reg payee '%s'"%(self.clean_payee(payee)))
+        txn = self.run(["reg", "payee", payee])
         if txn is None: return None
         else: 
             accts = [ node.text for node in txn.findall('.//transactions/transaction/postings/posting/account/name') ]
@@ -93,16 +107,12 @@ class HLedger(object):
         if ledger_file is not None:
             self.args += ["-f", ledger_file]
 
-    @staticmethod
-    def clean_payee(payee):
-        payee = payee.replace('(', '\(')
-        payee = payee.replace(')', '\)')
-        return payee
-        
     def check_transaction_by_ofxid(self, ofxid):
-        return (subprocess.check_output(self.args + ["reg", "tag:ofxid=%s"%(ofxid)]) != '')
+        cmd = hledger_clean(self.args + ["reg", "tag:ofxid=%s"%(ofxid)])
+        return (subprocess.check_output(cmd) != '')
 
     def get_account_by_payee(self, payee, exclude):
-        lines = subprocess.check_output(self.args + ["reg", "desc:%s"%(self.clean_payee(payee))]).splitlines()
+        cmd = hledger_clean(self.args + ["reg", "desc:%s"%(payee)])
+        lines = subprocess.check_output(cmd).splitlines()
         accts = [ l[32:59].strip() for l in lines ]
         return all_or_none([ a for a in accts if a != exclude ])
