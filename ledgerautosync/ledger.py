@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-import sys
+import os
 import time
 import subprocess
 from subprocess import Popen, PIPE
@@ -30,27 +30,32 @@ def enqueue_output(out, queue):
     out.close()
 
 def mk_ledger(ledger_file=None):
-    if subprocess.call("which ledger > /dev/null", shell=True) == 0:
-        return Ledger(ledger_file)
-    elif subprocess.call("which hledger > /dev/null", shell=True) == 0:
-        return HLedger(ledger_file)
+    if os.name == 'posix':
+        if subprocess.call("which ledger > /dev/null", shell=True) == 0:
+            return Ledger(ledger_file)
+        elif subprocess.call("which hledger > /dev/null", shell=True) == 0:
+            return HLedger(ledger_file)
+        else:
+            raise Exception("Neither ledger nor hledger found!")
     else:
-        raise Exception("Neither ledger nor hledger found!")
+        # windows, I guess ... just assume ledger
+        return Ledger(ledger_file)
 
 class Ledger(object):
-    def __init__(self, ledger_file=None):
-        on_posix = 'posix' in sys.builtin_module_names
-        args = ["ledger"]
+    def __init__(self, ledger_file=None, no_pipe=False):
+        self.use_pipe = (os.name == 'posix') and not(no_pipe)
+        self.args = ["ledger"]
         if ledger_file is not None:
-            args += ["-f", ledger_file]
-        self.p = Popen(args, bufsize=1, stdin=PIPE, stdout=PIPE,
-                       close_fds=on_posix)
-        self.q = Queue()
-        self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))
-        self.t.daemon = True # thread dies with the program
-        self.t.start()
-        # read output until prompt
-        self.q.get()
+            self.args += ["-f", ledger_file]
+        if self.use_pipe:
+            self.p = Popen(self.args, bufsize=1, stdin=PIPE, stdout=PIPE,
+                           close_fds=True)
+            self.q = Queue()
+            self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))
+            self.t.daemon = True # thread dies with the program
+            self.t.start()
+            # read output until prompt
+            self.q.get()
 
     @staticmethod
     def clean_payee(payee):
@@ -59,9 +64,12 @@ class Ledger(object):
         return payee
 
     def run(self, cmd):
-        self.p.stdin.write("xml %s\n"%(cmd))
-        return ET.fromstring(self.q.get())
-        
+        if self.use_pipe:
+            self.p.stdin.write("xml %s\n"%(cmd))
+            return ET.fromstring(self.q.get())
+        else:
+            return ET.fromstring(subprocess.check_output(self.args + ["xml"] + cmd.split(" ")))
+            
     def get_transaction(self, q):
         d = self.run("reg %s"%(q)).findall('.//transactions/transaction')
         if len(d) == 0:
