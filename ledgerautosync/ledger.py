@@ -25,6 +25,14 @@ def pipe_clean(a):
         return s
     return [ clean_str(s) for s in a ]
 
+def windows_clean(a):
+    def clean_str(s):
+        s = s.replace('%', '')
+        s = s.replace(' ', '\ ')
+        s = s.replace('/', '\/')
+        return s
+    return [ clean_str(s) for s in a ]
+
 def all_or_none(seq):
     """Returns the first value of seq if all values of seq are equal, or returns None."""
     if len(seq) == 0: 
@@ -82,6 +90,8 @@ class Ledger(object):
             return ET.fromstring(self.q.get())
         else:
             cmd = self.args + ["xml"] + cmd
+            if os.name == 'nt':
+                cmd = windows_clean(cmd)
             return ET.fromstring(subprocess.check_output(cmd))
             
     def get_transaction(self, q):
