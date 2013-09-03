@@ -6,9 +6,9 @@ from unittest import TestCase
 
 class TestLedger(TestCase):
     def setUp(self):
-        self.ledgers = [Ledger("fixtures/checking.lgr"),
-                        HLedger("fixtures/checking.lgr"),
-                        Ledger("fixtures/checking.lgr", no_pipe=True)]
+        self.ledgers = [Ledger(os.path.join('fixtures', 'checking.lgr')),
+                        HLedger(os.path.join('fixtures', 'checking.lgr')),
+                        Ledger(os.path.join('fixtures', 'checking.lgr'), no_pipe=True)]
     def test_transaction(self):
         for ledger in self.ledgers:
             self.assertTrue(ledger.check_transaction_by_ofxid("1101.1452687~7.0000486"))
@@ -26,9 +26,9 @@ class TestLedger(TestCase):
             self.assertEqual(account, "Expenses:Bar", msg="%s != Expenses:Bar with %s"%(account, ledger))
 
     def test_get_ambiguous_account_by_payee(self):
-        ledgers = [Ledger("fixtures/checking-dynamic-account.lgr"),
-                   Ledger("fixtures/checking-dynamic-account.lgr", no_pipe=True),
-                   HLedger("fixtures/checking-dynamic-account.lgr")]
+        ledgers = [Ledger(os.path.join('fixtures', 'checking-dynamic-account.lgr')),
+                   Ledger(os.path.join('fixtures', 'checking-dynamic-account.lgr'), no_pipe=True),
+                   HLedger(os.path.join('fixtures', 'checking-dynamic-account.lgr'))]
         
         for ledger in ledgers:
             account = ledger.get_account_by_payee("Generic", exclude="Assets:Foo")

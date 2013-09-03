@@ -1,5 +1,6 @@
 from ledgerautosync.formatter import Formatter
 from ledgerautosync.ledger import Ledger
+import os.path
 
 from ofxparse import OfxParser
 
@@ -8,7 +9,7 @@ from mock import Mock
 
 class TestFormatter(TestCase):
     def test_checking(self):
-        ofx = OfxParser.parse(file('fixtures/checking.ofx'))
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         formatter = Formatter(account=ofx.account, name="Foo")
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
@@ -30,7 +31,7 @@ class TestFormatter(TestCase):
 """)
 
     def test_investments(self):
-        ofx = OfxParser.parse(file('fixtures/fidelity.ofx'))
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
         formatter = Formatter(account=ofx.account, name="Foo")
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012/07/20 YOU BOUGHT
@@ -40,8 +41,8 @@ class TestFormatter(TestCase):
 """)
 
     def test_dynamic_account(self):
-        ofx = OfxParser.parse(file('fixtures/checking.ofx'))
-        ledger = Ledger("fixtures/checking-dynamic-account.lgr")
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        ledger = Ledger(os.path.join('fixtures', 'checking-dynamic-account.lgr'))
         formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[1]),
 """2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
