@@ -18,10 +18,10 @@ def hledger_clean(a):
 
 def pipe_clean(a):
     def clean_str(s):
-        s = s.replace('/', '\/')
+        s = s.replace('/', '\\\\/')
         s = s.replace('%', '')
         if not(re.match(r"^\w+$", s)):
-            s = "'%s'"%(s)
+            s = "\"%s\""%(s)
         return s
     return [ clean_str(s) for s in a ]
 
@@ -102,7 +102,7 @@ class Ledger(object):
             return d[0]
 
     def check_transaction_by_ofxid(self, ofxid):
-        return (self.get_transaction(["meta", "ofxid='%s'"%(clean_ofx_id(ofxid))]) != None)
+        return (self.get_transaction(["meta", "ofxid=%s"%(clean_ofx_id(ofxid))]) != None)
         
     def get_account_by_payee(self, payee, exclude):
         txn = self.run(["reg", "payee", payee])
