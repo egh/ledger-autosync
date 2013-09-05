@@ -36,6 +36,10 @@ Run ofxclient to set up banking::
 
 When you have added your institution, quit ofxclient.
 
+(At least one user has reported being signed up for a pay service by
+setting up OFX direct connect. Although this seems unusual, please be
+aware of this.)
+
 Edit the generated ``~/ofxclient.ini`` file. Change the
 ``description`` field of your accounts to the name used in ledger.
 
