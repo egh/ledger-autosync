@@ -87,6 +87,7 @@ class Ledger(object):
             self.p.stdin.write("xml ")
             self.p.stdin.write(" ".join(pipe_clean(cmd)))
             self.p.stdin.write("\n")
+            logging.debug(" ".join(pipe_clean(cmd)))
             return ET.fromstring(self.q.get())
         else:
             cmd = self.args + ["xml"] + cmd
