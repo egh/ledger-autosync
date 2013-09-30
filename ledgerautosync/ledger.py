@@ -96,7 +96,7 @@ class Ledger(object):
             return ET.fromstring(subprocess.check_output(cmd))
             
     def get_transaction(self, q):
-        d = self.run(["reg"] + q).findall('.//transactions/transaction')
+        d = self.run(q).findall('.//transactions/transaction')
         if len(d) == 0:
             return None
         else:
@@ -106,7 +106,7 @@ class Ledger(object):
         return (self.get_transaction(["meta", "ofxid=%s"%(clean_ofx_id(ofxid))]) != None)
         
     def get_account_by_payee(self, payee, exclude):
-        txn = self.run(["reg", "--real", "payee", payee])
+        txn = self.run(["--real", "payee", payee])
         if txn is None: return None
         else: 
             accts = [ node.text for node in txn.findall('.//transactions/transaction/postings/posting/account/name') ]
