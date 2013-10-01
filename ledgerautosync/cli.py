@@ -10,20 +10,20 @@ from ledgerautosync.ledger import mk_ledger
 import logging
 import sys
 
-def sync(ledger, config, max_days=90, resync=False):
+def sync(ledger, config, max_days=90, resync=False, indent=4):
     sync = Synchronizer(ledger)
     for acct in config.accounts():
         (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
-        formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger)
+        formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
         for txn in txns:
             print formatter.format_txn(txn)
 
-def import_ofx(ledger, path, accountname=None):
+def import_ofx(ledger, path, accountname=None, indent=4):
     sync = Synchronizer(ledger)
     (ofx, txns) = sync.parse_file(path)
     if accountname is None:
         accountname = "%s:%s"%(ofx.account.institution.organization, ofx.account.account_id)
-    formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger)
+    formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent)
     for txn in txns:
         print formatter.format_txn(txn)
         
@@ -40,6 +40,8 @@ def run(args=None):
                         help='set account name for import')
     parser.add_argument('-l', '--ledger', type=str, default=None,
                         help='specify ledger file to READ for syncing')
+    parser.add_argument('-i', '--indent', type=int, default=4,
+                        help='number of spaces to use for indentation')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='enable debug logging')
     args = parser.parse_args(args)
@@ -48,9 +50,9 @@ def run(args=None):
     ledger = mk_ledger(args.ledger)
     if args.PATH is None:
         config = OfxConfig()
-        sync(ledger, config, max_days=args.max, resync=args.resync)
+        sync(ledger, config, max_days=args.max, resync=args.resync, indent=args.indent)
     else:
-        import_ofx(ledger, args.PATH, args.account)
+        import_ofx(ledger, args.PATH, args.account, indent=args.indent)
 
 if __name__ == '__main__':
     run()

@@ -8,12 +8,13 @@ def clean_ofx_id(ofxid):
     return ofxid
 
 class Formatter(object):
-    def __init__(self, account, name, ledger=None):
+    def __init__(self, account, name, indent=4, ledger=None):
         self.acctid=account.account_id
         self.currency=account.statement.currency
         self.fid=account.institution.fid
         self.name = name
         self.ledger = ledger
+        self.indent = indent
 
     def mk_dynamic_account(self, txn, exclude):
         if self.ledger is None:
@@ -47,12 +48,14 @@ class Formatter(object):
             return "%s %s"%(txn.payee, txn.memo)
 
     def format_txn_line(self, acct, amt, extra=None):
-        space_count = 50 - len(acct) - len(amt)
+        space_count = 52 - self.indent - len(acct) - len(amt)
+        if space_count < 2:
+            space_count = 2
         if extra:
             extra_str = " %s"%(extra)
         else:
             extra_str = ""
-        return "  %s%s%s%s\n"%(acct, (" " * space_count), amt, extra_str)
+        return "%s%s%s%s%s\n"%(" "*self.indent, acct, " "*space_count, amt, extra_str)
 
     def format_txn(self, txn):
         retval = ""
@@ -60,7 +63,7 @@ class Formatter(object):
         if isinstance(txn, Transaction):
             date = "%s"%(txn.date.strftime("%Y/%m/%d"))
             retval += "%s %s\n"%(date, self.format_payee(txn))
-            retval += "  ; ofxid: %s\n"%(ofxid)
+            retval += "%s; ofxid: %s\n"%(" "*self.indent, ofxid)
             retval += self.format_txn_line(self.name, self.format_amount(txn.amount))
             retval += self.format_txn_line(self.mk_dynamic_account(txn, exclude=self.name), self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
@@ -69,7 +72,7 @@ class Formatter(object):
                 retval = "%s=%s %s\n"%(txn.tradeDate.strftime("%Y/%m/%d"), txn.settleDate.strftime("%Y/%m/%d"), txn.memo)
             else:
                 retval = "%s %s\n"%(txn.tradeDate.strftime("%Y/%m/%d"), txn.memo)
-            retval += "  ; ofxid: %s\n"%(ofxid)
+            retval += "%s; ofxid: %s\n"%(" "*self.indent, ofxid)
             retval += self.format_txn_line(self.name, str(txn.units), 
                                            "%s @ %s"%(txn.security, self.format_amount(txn.unit_price, unlimited=True)))
             retval += self.format_txn_line(self.name, self.format_amount(txn.units * txn.unit_price, reverse=True))
