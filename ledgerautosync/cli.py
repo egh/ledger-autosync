@@ -6,7 +6,7 @@ import argparse
 from ofxclient.client import Client
 from formatter import Formatter
 from ledgerautosync.sync import Synchronizer
-from ledgerautosync.ledger import mk_ledger
+from ledgerautosync.ledger import mk_ledger, Ledger, HLedger
 import logging
 import sys
 
@@ -44,10 +44,19 @@ def run(args=None):
                         help='number of spaces to use for indentation')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='enable debug logging')
+    parser.add_argument('--hledger', action='store_true', default=False,
+                        help='force use of hledger')
+    parser.add_argument('--slow', action='store_true', default=False,
+                        help='use slow, but possibly more robust, method of calling ledger (no subprocess)')
     args = parser.parse_args(args)
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
-    ledger = mk_ledger(args.ledger)
+    if args.hledger:
+        ledger = HLedger(args.ledger)
+    elif args.slow:
+        ledger = Ledger(ledger_file=args.ledger, no_pipe=True)
+    else:
+        ledger = mk_ledger(args.ledger)
     if args.PATH is None:
         config = OfxConfig()
         sync(ledger, config, max_days=args.max, resync=args.resync, indent=args.indent)
