@@ -9,15 +9,20 @@ from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledger import mk_ledger, Ledger, HLedger
 import logging
 import sys
+import traceback
 
 def sync(ledger, config, max_days=90, resync=False, indent=4):
     sync = Synchronizer(ledger)
     for acct in config.accounts():
-        (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
-        formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
-        for txn in txns:
-            print formatter.format_txn(txn)
-
+        try:
+            (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
+            formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
+            for txn in txns:
+                print formatter.format_txn(txn)
+        except:
+            sys.stderr.write("Caught exception processing %s"%(acct.description))
+            traceback.print_exc(file=sys.stderr)
+                             
 def import_ofx(ledger, path, accountname=None, indent=4):
     sync = Synchronizer(ledger)
     (ofx, txns) = sync.parse_file(path)
