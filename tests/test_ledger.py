@@ -19,6 +19,10 @@ class TestLedger(TestCase):
     def test_nonexistent_transaction(self):
         for ledger in self.ledgers:
             self.assertFalse(ledger.check_transaction_by_ofxid("FOO"))
+
+    def test_empty_transaction(self):
+        for ledger in self.ledgers:
+            self.assertTrue(ledger.check_transaction_by_ofxid("empty"))
     
     def test_get_account_by_payee(self):
         for ledger in self.ledgers:

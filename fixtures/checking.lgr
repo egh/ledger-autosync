@@ -12,3 +12,8 @@
   ; ofxid: 1102.1452687~7.0000488
   Assets:Foo                                 -$25.00
   Expenses:Bar                                $25.00
+
+2011/04/07 Empty
+  ; ofxid: empty
+  Assets:Foo                                  -$0.00
+  Expenses:Bar                                 $0.00
