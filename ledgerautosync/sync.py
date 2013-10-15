@@ -29,24 +29,33 @@ class Synchronizer(object):
             logging.debug("Downloading %d days of transactions (max_days=%d)."%(days, max_days))
             raw = acct.download(days)
             ofx = OfxParser.parse(raw)
-            txns = ofx.account.statement.transactions
-            new_txns = self.filter(ofx)
-            if ((len(txns) > 0) and (last_txns_len == len(txns))):
-                # not getting more txns than last time; we have
-                # reached the beginning
-                logging.debug("Not getting more txns than last time, done.")
-                return (ofx, new_txns)
-            elif (len(txns) > len(new_txns)) or (days >= max_days):
-                # got more txns than were new or hit max_days, we've
-                # reached a stopping point
-                if (days >= max_days):
-                    logging.debug("Hit max days.")
-                else:
-                    logging.debug("Got some stale txns.")
-                return (ofx, new_txns)
-            else:
-                # all txns were new, increase how far back we go
+            if not(hasattr(ofx, 'account')):
+                # some banks return this for no txns
                 days = days * 2
                 if (days > max_days): days = max_days
-                logging.debug("Increasing days ago to %d."%(days))
-                last_txns_len = len(txns)
+                logging.debug("empty account: increasing days ago to %d."%(days))
+                last_txns_len = len(0)
+            else:
+                txns = ofx.account.statement.transactions
+                new_txns = self.filter(ofx)
+                logging.debug("txns: %d"%(len(txns)))
+                logging.debug("new txns: %d"%(len(new_txns)))
+                if ((len(txns) > 0) and (last_txns_len == len(txns))):
+                    # not getting more txns than last time; we have
+                    # reached the beginning
+                    logging.debug("Not getting more txns than last time, done.")
+                    return (ofx, new_txns)
+                elif (len(txns) > len(new_txns)) or (days >= max_days):
+                    # got more txns than were new or hit max_days, we've
+                    # reached a stopping point
+                    if (days >= max_days):
+                        logging.debug("Hit max days.")
+                    else:
+                        logging.debug("Got some stale txns.")
+                    return (ofx, new_txns)
+                else:
+                    # all txns were new, increase how far back we go
+                    days = days * 2
+                    if (days > max_days): days = max_days
+                    logging.debug("Increasing days ago to %d."%(days))
+                    last_txns_len = len(txns)
