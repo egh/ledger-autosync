@@ -54,6 +54,9 @@ def run(args=None):
     parser.add_argument('--slow', action='store_true', default=False,
                         help='use slow, but possibly more robust, method of calling ledger (no subprocess)')
     args = parser.parse_args(args)
+    if sys.argv[0][-16:] == "hledger-autosync":
+      args.hledger = True
+
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
     if args.hledger:
