@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import datetime
 import time
 from ofxclient.config import OfxConfig
