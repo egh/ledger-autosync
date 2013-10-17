@@ -16,8 +16,14 @@ class Synchronizer(object):
     
     def filter(self, ofx):
         txns = ofx.account.statement.transactions
+        if len(txns) == 0:
+            sorted_txns = txns
+        elif hasattr(txns[0], 'settleDate'):
+            sorted_txns = sorted(txns, key=lambda t: t.settleDate)
+        else:
+            sorted_txns = sorted(txns, key=lambda t: t.date)
         acctid = ofx.account.account_id
-        return [ txn for txn in txns if not(self.is_txn_synced(acctid, txn)) ]
+        return [ txn for txn in sorted_txns if not(self.is_txn_synced(acctid, txn)) ]
 
     def get_new_txns(self, acct, max_days=999999, resync=False):
         if resync or (max_days < 7):

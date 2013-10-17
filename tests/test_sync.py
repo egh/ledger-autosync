@@ -17,6 +17,14 @@ class TestSync(TestCase):
         txns2 = sync.filter(ofx)
         self.assertEqual(txns1, txns2)
 
+    def test_sync_order(self):
+        ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
+        sync = Synchronizer(ledger)
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking_order.ofx')))
+        txns = sync.filter(ofx)
+        self.assertTrue(txns[0].date < txns[1].date and 
+                        txns[1].date < txns[2].date)
+
     def test_fully_synced(self):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         sync = Synchronizer(ledger)

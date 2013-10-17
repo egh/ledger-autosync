@@ -18,7 +18,7 @@ def sync(ledger, config, max_days=90, resync=False, indent=4):
         try:
             (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
             formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
-            for txn in reversed(txns):
+            for txn in txns:
                 print formatter.format_txn(txn)
         except:
             sys.stderr.write("Caught exception processing %s"%(acct.description))
