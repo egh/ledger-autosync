@@ -118,12 +118,19 @@ class HLedger(object):
         if ledger_file is not None:
             self.args += ["-f", ledger_file]
 
+    def run(self, cmd):
+        cmd = hledger_clean(self.args + cmd)
+        if os.name == 'nt':
+            cmd = windows_clean(cmd)
+        logging.debug(" ".join(cmd))
+        return subprocess.check_output(cmd)
+
     def check_transaction_by_ofxid(self, ofxid):
-        cmd = hledger_clean(self.args + ["reg", "tag:ofxid=%s"%(ofxid)])
-        return (subprocess.check_output(cmd) != '')
+        cmd = ["reg", "tag:ofxid=%s"%(ofxid)]
+        return self.run(cmd) != ''
 
     def get_account_by_payee(self, payee, exclude):
-        cmd = hledger_clean(self.args + ["reg", "desc:%s"%(payee)])
-        lines = subprocess.check_output(cmd).splitlines()
+        cmd = ["reg", "desc:%s"%(payee)]
+        lines = self.run(cmd).splitlines()
         accts = [ l[32:59].strip() for l in lines ]
         return all_or_none([ a for a in accts if a != exclude ])
