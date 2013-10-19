@@ -51,6 +51,8 @@ aware of this.)
 
 Edit the generated ``~/ofxclient.ini`` file. Change the
 ``description`` field of your accounts to the name used in ledger.
+Optionally, move the ``~/ofxclient.ini`` file to your ``~/.config``
+directory.
 
 Run::
 
