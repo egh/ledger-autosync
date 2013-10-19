@@ -11,6 +11,7 @@ from ledgerautosync.ledger import mk_ledger, Ledger, HLedger
 import logging
 import sys
 import traceback
+import os, os.path
 
 def sync(ledger, config, max_days=90, resync=False, indent=4):
     sync = Synchronizer(ledger)
@@ -67,7 +68,12 @@ def run(args=None):
     else:
         ledger = mk_ledger(args.ledger)
     if args.PATH is None:
-        config = OfxConfig()
+        config_dir = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser("~"), '.config'))
+        config_file = os.path.join(config_dir, 'ofxclient.ini')
+        if (os.path.exists(config_file)):
+            config = OfxConfig(file_name=config_file)
+        else:
+            config = OfxConfig()
         sync(ledger, config, max_days=args.max, resync=args.resync, indent=args.indent)
     else:
         import_ofx(ledger, args.PATH, args.account, indent=args.indent)
