@@ -51,15 +51,11 @@ class Formatter(object):
         return date.strftime("%Y/%m/%d")
 
 
-    def format_txn_line(self, acct, amt, extra=None):
+    def format_txn_line(self, acct, amt, suffix=""):
         space_count = 52 - self.indent - len(acct) - len(amt)
         if space_count < 2:
             space_count = 2
-        if extra:
-            extra_str = " %s"%(extra)
-        else:
-            extra_str = ""
-        return "%s%s%s%s%s\n"%(" "*self.indent, acct, " "*space_count, amt, extra_str)
+        return "%s%s%s%s%s\n"%(" "*self.indent, acct, " "*space_count, amt, suffix)
 
     def format_txn(self, txn):
         retval = ""
@@ -76,7 +72,7 @@ class Formatter(object):
             else:
                 retval = "%s %s\n"%(txn.tradeDate.strftime("%Y/%m/%d"), txn.memo)
             retval += "%s; ofxid: %s\n"%(" "*self.indent, ofxid)
-            retval += self.format_txn_line(self.name, str(txn.units), 
-                                           "%s @ %s"%(txn.security, self.format_amount(txn.unit_price, unlimited=True)))
+            retval += self.format_txn_line(acct=self.name, amt=str(txn.units), 
+                                           suffix=" %s @ %s"%(txn.security, self.format_amount(txn.unit_price, unlimited=True)))
             retval += self.format_txn_line(self.name, self.format_amount(txn.units * txn.unit_price, reverse=True))
         return retval
