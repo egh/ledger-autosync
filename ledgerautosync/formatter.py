@@ -47,6 +47,10 @@ class Formatter(object):
         else:
             return "%s %s"%(txn.payee, txn.memo)
 
+    def format_date(self, date):
+        return date.strftime("%Y/%m/%d")
+
+
     def format_txn_line(self, acct, amt, extra=None):
         space_count = 52 - self.indent - len(acct) - len(amt)
         if space_count < 2:
@@ -61,8 +65,7 @@ class Formatter(object):
         retval = ""
         ofxid = clean_ofx_id("%s.%s.%s"%(self.fid, self.acctid, txn.id))
         if isinstance(txn, Transaction):
-            date = "%s"%(txn.date.strftime("%Y/%m/%d"))
-            retval += "%s %s\n"%(date, self.format_payee(txn))
+            retval += "%s %s\n"%(self.format_date(txn.date), self.format_payee(txn))
             retval += "%s; ofxid: %s\n"%(" "*self.indent, ofxid)
             retval += self.format_txn_line(self.name, self.format_amount(txn.amount))
             retval += self.format_txn_line(self.mk_dynamic_account(txn, exclude=self.name), self.format_amount(txn.amount, reverse=True))
