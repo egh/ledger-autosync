@@ -50,6 +50,12 @@ class Formatter(object):
     def format_date(self, date):
         return date.strftime("%Y/%m/%d")
 
+    def format_balance(self, acct):
+        retval = ""
+        if (hasattr(acct.statement, 'balance')):
+            retval += "%s --Autosync Balance Assertion\n"%(self.format_date(acct.statement.end_date))
+            retval += self.format_txn_line(self.name, self.format_amount(Decimal("0")), " = %s"%(self.format_amount(acct.statement.balance)))
+        return retval
 
     def format_txn_line(self, acct, amt, suffix=""):
         space_count = 52 - self.indent - len(acct) - len(amt)

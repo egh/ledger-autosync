@@ -21,6 +21,7 @@ def sync(ledger, config, max_days=90, resync=False, indent=4):
             formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
             for txn in txns:
                 print formatter.format_txn(txn)
+            #print formatter.format_balance(ofx.account)
         except:
             sys.stderr.write("Caught exception processing %s"%(acct.description))
             traceback.print_exc(file=sys.stderr)
@@ -33,6 +34,7 @@ def import_ofx(ledger, path, accountname=None, indent=4):
     formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent)
     for txn in txns:
         print formatter.format_txn(txn)
+    #print formatter.format_balance(ofx.account)
         
 def run(args=None):
     if args is None: args = sys.argv[1:]
