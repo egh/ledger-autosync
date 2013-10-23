@@ -10,11 +10,13 @@ def clean_ofx_id(ofxid):
 class Formatter(object):
     def __init__(self, account, name, indent=4, ledger=None):
         self.acctid=account.account_id
-        self.currency=account.statement.currency
         self.fid=account.institution.fid
         self.name = name
         self.ledger = ledger
         self.indent = indent
+        self.currency = account.statement.currency
+        self.currency = self.currency.upper()
+        if self.currency == "USD": self.currency = "$"
 
     def mk_dynamic_account(self, txn, exclude):
         if self.ledger is None:
@@ -28,16 +30,14 @@ class Formatter(object):
                 return account
 
     def format_amount(self, amount, reverse=False, unlimited=False):
-        currency = self.currency.upper()
-        if currency == "USD": currency = "$"
         if unlimited:
             amt = str(abs(amount))
         else:
             amt = "%0.2f"%(abs(amount))
         if amount.is_signed() != reverse:
-            return "-%s%s"%(currency, amt)
+            return "-%s%s"%(self.currency, amt)
         else:
-            return "%s%s"%(currency, amt)
+            return "%s%s"%(self.currency, amt)
 
     def format_payee(self, txn):
         if (txn.payee is None) or txn.memo.startswith(txn.payee):
