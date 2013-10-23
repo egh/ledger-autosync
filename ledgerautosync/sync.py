@@ -40,7 +40,7 @@ class Synchronizer(object):
                 days = days * 2
                 if (days > max_days): days = max_days
                 logging.debug("empty account: increasing days ago to %d."%(days))
-                last_txns_len = len(0)
+                last_txns_len = 0
             else:
                 txns = ofx.account.statement.transactions
                 new_txns = self.filter(ofx)
