@@ -60,3 +60,22 @@ class TestFormatter(TestCase):
   Assets:Foo                                 -$34.51
   Expenses:Bar                                $34.51
 """)
+
+    def test_balance_assertion(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
+        formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        self.assertEqual(formatter.format_balance(ofx.account.statement),
+"""2013/05/25 --Autosync Balance Assertion
+    Assets:Foo                                 $0.00 = $100.99
+""")
+
+    def test_initial_balance(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
+        formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        self.assertEqual(formatter.format_initial_balance(ofx.account.statement),
+"""2000/01/01 --Autosync Initial Balance
+    Assets:Foo                               $160.49
+    Assets:Equity                           -$160.49
+""")

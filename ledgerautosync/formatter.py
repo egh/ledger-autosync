@@ -50,11 +50,26 @@ class Formatter(object):
     def format_date(self, date):
         return date.strftime("%Y/%m/%d")
 
-    def format_balance(self, acct):
+    def format_balance(self, statement):
         retval = ""
-        if (hasattr(acct.statement, 'balance')):
-            retval += "%s --Autosync Balance Assertion\n"%(self.format_date(acct.statement.end_date))
-            retval += self.format_txn_line(self.name, self.format_amount(Decimal("0")), " = %s"%(self.format_amount(acct.statement.balance)))
+        if (hasattr(statement, 'balance_date')):
+            date = statement.balance_date
+        else:
+            date = statement.end_date
+        if (hasattr(statement, 'balance')):
+            retval += "%s --Autosync Balance Assertion\n"%(self.format_date(date))
+            retval += self.format_txn_line(self.name, self.format_amount(Decimal("0")), " = %s"%(self.format_amount(statement.balance)))
+        return retval
+
+    def format_initial_balance(self, statement):
+        retval = ""
+        if (hasattr(statement, 'balance')):
+            initbal = statement.balance
+            for txn in statement.transactions:
+                initbal -= txn.amount
+            retval += "%s --Autosync Initial Balance\n"%(self.format_date(statement.start_date))
+            retval += self.format_txn_line(self.name, self.format_amount(initbal))
+            retval += self.format_txn_line("Assets:Equity", self.format_amount(initbal, reverse=True))
         return retval
 
     def format_txn_line(self, acct, amt, suffix=""):
