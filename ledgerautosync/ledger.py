@@ -56,12 +56,13 @@ def enqueue_output(out, queue):
 
 def mk_ledger(ledger_file=None):
     if os.name == 'posix':
-        if subprocess.call("which ledger > /dev/null", shell=True) == 0:
+        if ((subprocess.call("which ledger > /dev/null", shell=True) == 0) and
+            (Popen(["ledger", "--version"], stdout=PIPE).communicate()[0]).startswith("Ledger 3")):
             return Ledger(ledger_file)
         elif subprocess.call("which hledger > /dev/null", shell=True) == 0:
             return HLedger(ledger_file)
         else:
-            raise Exception("Neither ledger nor hledger found!")
+            raise Exception("Neither ledger 3 nor hledger found!")
     else:
         # windows, I guess ... just assume ledger
         return Ledger(ledger_file)
