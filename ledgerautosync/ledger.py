@@ -81,7 +81,11 @@ class Ledger(object):
             self.t.daemon = True # thread dies with the program
             self.t.start()
             # read output until prompt
-            self.q.get()
+            try:
+                self.q.get(True, 5)
+            except Empty:
+                logging.error("Could not get prompt from ledger!")
+                exit(1)
 
     def run(self, cmd):
         if self.use_pipe:
@@ -89,7 +93,11 @@ class Ledger(object):
             self.p.stdin.write(" ".join(pipe_clean(cmd)))
             self.p.stdin.write("\n")
             logging.debug(" ".join(pipe_clean(cmd)))
-            return ET.fromstring(self.q.get())
+            try:
+                return ET.fromstring(self.q.get(True, 5))
+            except Empty:
+                logging.error("Could not get prompt from ledger!")
+                exit(1)
         else:
             cmd = self.args + ["xml"] + cmd
             if os.name == 'nt':
