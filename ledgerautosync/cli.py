@@ -13,13 +13,14 @@ import sys
 import traceback
 import os, os.path
 
-def sync(ledger, config, max_days=90, resync=False, indent=4):
+def sync(ledger, config, max_days=90, resync=False, indent=4, initial=False):
     sync = Synchronizer(ledger)
     for acct in config.accounts():
         try:
             (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
             formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
-            #print formatter.format_initial_balance(ofx.account.statement)
+            if initial:
+                print formatter.format_initial_balance(ofx.account.statement)
             for txn in txns:
                 print formatter.format_txn(txn)
             #print formatter.format_balance(ofx.account.statement)
@@ -29,13 +30,14 @@ def sync(ledger, config, max_days=90, resync=False, indent=4):
             sys.stderr.write("Caught exception processing %s"%(acct.description))
             traceback.print_exc(file=sys.stderr)
                              
-def import_ofx(ledger, path, accountname=None, indent=4):
+def import_ofx(ledger, path, accountname=None, indent=4, initial=False):
     sync = Synchronizer(ledger)
     (ofx, txns) = sync.parse_file(path)
     if accountname is None:
         accountname = "%s:%s"%(ofx.account.institution.organization, ofx.account.account_id)
     formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent)
-    #print formatter.format_initial_balance(ofx.account.statement)
+    if initial:
+        print formatter.format_initial_balance(ofx.account.statement)
     for txn in txns:
         print formatter.format_txn(txn)
     #print formatter.format_balance(ofx.account.statement)
@@ -55,6 +57,8 @@ def run(args=None):
                         help='specify ledger file to READ for syncing')
     parser.add_argument('-i', '--indent', type=int, default=4,
                         help='number of spaces to use for indentation')
+    parser.add_argument('--initial', action='store_true', default=False,
+                        help='create initial balance entries')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='enable debug logging')
     parser.add_argument('--hledger', action='store_true', default=False,
@@ -80,9 +84,9 @@ def run(args=None):
             config = OfxConfig(file_name=config_file)
         else:
             config = OfxConfig()
-        sync(ledger, config, max_days=args.max, resync=args.resync, indent=args.indent)
+        sync(ledger, config, max_days=args.max, resync=args.resync, indent=args.indent, initial=args.initial)
     else:
-        import_ofx(ledger, args.PATH, args.account, indent=args.indent)
+        import_ofx(ledger, args.PATH, args.account, indent=args.indent, initial=args.initial)
 
 if __name__ == '__main__':
     run()
