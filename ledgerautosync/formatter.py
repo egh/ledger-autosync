@@ -18,6 +18,9 @@ class Formatter(object):
         self.currency = self.currency.upper()
         if self.currency == "USD": self.currency = "$"
 
+    def mk_ofxid(self, txnid):
+        return clean_ofx_id("%s.%s.%s"%(self.fid, self.acctid, txnid))
+
     def mk_dynamic_account(self, txn, exclude):
         if self.ledger is None:
             return "Expenses:Misc"
@@ -80,7 +83,7 @@ class Formatter(object):
 
     def format_txn(self, txn):
         retval = ""
-        ofxid = clean_ofx_id("%s.%s.%s"%(self.fid, self.acctid, txn.id))
+        ofxid = self.mk_ofxid(txn.id)
         if isinstance(txn, Transaction):
             retval += "%s %s\n"%(self.format_date(txn.date), self.format_payee(txn))
             retval += "%s; ofxid: %s\n"%(" "*self.indent, ofxid)
