@@ -71,6 +71,7 @@ class Formatter(object):
             for txn in statement.transactions:
                 initbal -= txn.amount
             retval += "%s --Autosync Initial Balance\n"%(self.format_date(statement.start_date))
+            retval += "%s; ofxid: %s\n"%(" "*self.indent, self.mk_ofxid("AUTOSYNC_INITIAL"))
             retval += self.format_txn_line(self.name, self.format_amount(initbal))
             retval += self.format_txn_line("Assets:Equity", self.format_amount(initbal, reverse=True))
         return retval
