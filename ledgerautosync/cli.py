@@ -13,6 +13,11 @@ import sys
 import traceback
 import os, os.path
 
+def maybe_print_initial(ofx, ledger, formatter):
+    if (not(ledger.check_transaction_by_ofxid(formatter.mk_ofxid("AUTOSYNC_INITIAL"))) and
+        not(ledger.check_transaction_by_ofxid("ALL.AUTOSYNC_INITIAL"))):
+        print formatter.format_initial_balance(ofx.account.statement)
+
 def sync(ledger, config, max_days=90, resync=False, indent=4, initial=False):
     sync = Synchronizer(ledger)
     for acct in config.accounts():
@@ -20,7 +25,7 @@ def sync(ledger, config, max_days=90, resync=False, indent=4, initial=False):
             (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
             formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
             if initial:
-                print formatter.format_initial_balance(ofx.account.statement)
+                maybe_print_initial(ofx, ledger, formatter)
             for txn in txns:
                 print formatter.format_txn(txn)
             #print formatter.format_balance(ofx.account.statement)
@@ -37,7 +42,7 @@ def import_ofx(ledger, path, accountname=None, indent=4, initial=False):
         accountname = "%s:%s"%(ofx.account.institution.organization, ofx.account.account_id)
     formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent)
     if initial:
-        print formatter.format_initial_balance(ofx.account.statement)
+        maybe_print_initial(ofx, ledger, formatter)
     for txn in txns:
         print formatter.format_txn(txn)
     #print formatter.format_balance(ofx.account.statement)
