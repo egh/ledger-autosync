@@ -42,18 +42,6 @@ def all_or_none(seq):
         else: return None
     return reduce(f, seq, seq[0])
 
-def enqueue_output(out, queue):
-    item = ""
-    buff = ""
-    while (buff != None):
-        buff = out.read(1)
-        if (buff != None):
-            item += buff
-        if item.endswith("] "): # prompt
-            queue.put(item[0:-2])
-            item = ""
-    out.close()
-
 def mk_ledger(ledger_file=None):
     if os.name == 'posix':
         if ((subprocess.call("which ledger > /dev/null", shell=True) == 0) and
@@ -69,6 +57,17 @@ def mk_ledger(ledger_file=None):
 
 class Ledger(object):
     def __init__(self, ledger_file=None, no_pipe=False):
+        self._item = ""
+        def enqueue_output(out, queue):
+            buff = ""
+            while (buff != None):
+                buff = out.read(1)
+                if (buff != None):
+                    self._item += buff
+                if self._item.endswith("] "): # prompt
+                    queue.put(self._item[0:-2])
+                    self._item = ""
+            out.close()
         self.use_pipe = (os.name == 'posix') and not(no_pipe)
         self.args = ["ledger"]
         if ledger_file is not None:
@@ -84,7 +83,8 @@ class Ledger(object):
             try:
                 self.q.get(True, 5)
             except Empty:
-                logging.error("Could not get prompt from ledger!")
+                logging.error("Could not get prompt (]) from ledger!")
+                logging.error("Received: %s"%(self._item))
                 exit(1)
 
     def run(self, cmd):
