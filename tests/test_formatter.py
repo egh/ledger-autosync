@@ -76,7 +76,7 @@ class TestFormatter(TestCase):
         formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
         self.assertEqual(formatter.format_initial_balance(ofx.account.statement),
 """2000/01/01 --Autosync Initial Balance
-    ; ofxid: 1101.1452687~7.AUTOSYNC_INITIAL
+    ; ofxid: 1101.1452687~7.autosync_initial
     Assets:Foo                               $160.49
     Assets:Equity                           -$160.49
 """)

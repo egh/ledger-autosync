@@ -5,7 +5,7 @@ from ofxclient.config import OfxConfig
 from ofxparse import OfxParser
 import argparse
 from ofxclient.client import Client
-from formatter import Formatter
+from formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledger import mk_ledger, Ledger, HLedger
 import logging
@@ -14,8 +14,8 @@ import traceback
 import os, os.path
 
 def maybe_print_initial(ofx, ledger, formatter):
-    if (not(ledger.check_transaction_by_ofxid(formatter.mk_ofxid("AUTOSYNC_INITIAL"))) and
-        not(ledger.check_transaction_by_ofxid("ALL.AUTOSYNC_INITIAL"))):
+    if (not(ledger.check_transaction_by_ofxid(formatter.mk_ofxid(AUTOSYNC_INITIAL))) and
+        not(ledger.check_transaction_by_ofxid(ALL_AUTOSYNC_INITIAL))):
         print formatter.format_initial_balance(ofx.account.statement)
 
 def sync(ledger, config, max_days=90, resync=False, indent=4, initial=False, assertions=False):
