@@ -63,7 +63,7 @@ class Formatter(object):
         else:
             date = statement.end_date
         if (hasattr(statement, 'balance')):
-            retval += "%s --Autosync Balance Assertion\n"%(self.format_date(date))
+            retval += "%s * --Autosync Balance Assertion\n"%(self.format_date(date))
             retval += self.format_txn_line(self.name, self.format_amount(Decimal("0")), " = %s"%(self.format_amount(statement.balance)))
         return retval
 
@@ -73,7 +73,7 @@ class Formatter(object):
             initbal = statement.balance
             for txn in statement.transactions:
                 initbal -= txn.amount
-            retval += "%s --Autosync Initial Balance\n"%(self.format_date(statement.start_date))
+            retval += "%s * --Autosync Initial Balance\n"%(self.format_date(statement.start_date))
             retval += "%s; ofxid: %s\n"%(" "*self.indent, self.mk_ofxid(AUTOSYNC_INITIAL))
             retval += self.format_txn_line(self.name, self.format_amount(initbal))
             retval += self.format_txn_line("Assets:Equity", self.format_amount(initbal, reverse=True))

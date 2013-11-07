@@ -66,7 +66,7 @@ class TestFormatter(TestCase):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
         self.assertEqual(formatter.format_balance(ofx.account.statement),
-"""2013/05/25 --Autosync Balance Assertion
+"""2013/05/25 * --Autosync Balance Assertion
     Assets:Foo                                 $0.00 = $100.99
 """)
 
@@ -75,7 +75,7 @@ class TestFormatter(TestCase):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
         self.assertEqual(formatter.format_initial_balance(ofx.account.statement),
-"""2000/01/01 --Autosync Initial Balance
+"""2000/01/01 * --Autosync Initial Balance
     ; ofxid: 1101.1452687~7.autosync_initial
     Assets:Foo                               $160.49
     Assets:Equity                           -$160.49
