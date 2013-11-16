@@ -14,7 +14,7 @@ Features
 
 - supports ledger_ 3 and hledger_
 - like ledger, ledger-autosync will never modify your files directly
-- interactive banking setup via ofxclient [1]
+- interactive banking setup via ofxclient_
 - multiple banks and accounts
 - import of downloaded OFX files, for banks not supporting automatic
   download
@@ -104,3 +104,4 @@ stdout.
 
 .. _ledger: http://ledger-cli.org/
 .. _hledger: http://hledger.org/
+.. _ofxclient: https://github.com/captin411/ofxclient
