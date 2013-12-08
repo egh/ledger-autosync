@@ -1,0 +1,2 @@
+ofxclient
+ofxparse>=0.14
