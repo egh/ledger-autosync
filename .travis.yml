@@ -7,6 +7,6 @@ before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq hledger
 # command to install dependencies
-# install: "pip install -r requirements.txt"
+install: "sudo python setup.py install"
 # command to run tests
 script: nosetests
