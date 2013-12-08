@@ -102,6 +102,15 @@ by running the ledger or hledger command. If the transaction exists,
 it does nothing. If it does not exist, the transaction is printed to
 stdout.
 
+Assertions
+----------
+
+If you supply the ``--assertions`` flag, ledger-autosync will also
+print out valid ledger assertions based on your bank balances at the
+time of the sync. These otherwise empty transactions tell ledger that
+your balance *should* be something at a given time, and if not, ledger
+will fail with an error.
+
 .. _ledger: http://ledger-cli.org/
 .. _hledger: http://hledger.org/
 .. _ofxclient: https://github.com/captin411/ofxclient
