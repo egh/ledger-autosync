@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from ledgerautosync.cli import sync
 from ledgerautosync.ledger import Ledger
 from ofxclient.config import OfxConfig

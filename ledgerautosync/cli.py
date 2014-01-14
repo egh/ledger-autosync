@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 import datetime
 import time
 from ofxclient.config import OfxConfig
 from ofxparse import OfxParser
 import argparse
 from ofxclient.client import Client
-from formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_INITIAL
+from ledgerautosync.formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledger import mk_ledger, Ledger, HLedger
 import logging
