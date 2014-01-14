@@ -142,4 +142,7 @@ class HLedger(object):
         cmd = ["reg", "-w200", "desc:%s"%(payee)]
         lines = self.run(cmd).splitlines()
         accts = [ l[92:172].strip() for l in lines ]
-        return all_or_none([ a for a in accts if a != exclude ])
+        if accts and accts[-1] != exclude:
+            return accts[-1]
+        else:
+            return None
