@@ -71,7 +71,7 @@ def run(args=None):
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='enable debug logging')
     parser.add_argument('--hledger', action='store_true', default=False,
-                        help='force use of hledger')
+                        help='force use of hledger (on by default if invoked as hledger-autosync)')
     parser.add_argument('--slow', action='store_true', default=False,
                         help='use slow, but possibly more robust, method of calling ledger (no subprocess)')
     args = parser.parse_args(args)
