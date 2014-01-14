@@ -139,7 +139,7 @@ class HLedger(object):
         return self.run(cmd) != ''
 
     def get_account_by_payee(self, payee, exclude):
-        cmd = ["reg", "desc:%s"%(payee)]
+        cmd = ["reg", "-w200", "desc:%s"%(payee)]
         lines = self.run(cmd).splitlines()
-        accts = [ l[32:59].strip() for l in lines ]
+        accts = [ l[92:172].strip() for l in lines ]
         return all_or_none([ a for a in accts if a != exclude ])
