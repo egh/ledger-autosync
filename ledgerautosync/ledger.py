@@ -119,7 +119,9 @@ class Ledger(object):
         if txn is None: return None
         else: 
             accts = [ node.text for node in txn.findall('.//transactions/transaction/postings/posting/account/name') ]
-            return all_or_none([ a for a in accts if a != exclude ])
+            accts_filtered = [ a for a in accts if a != exclude ]
+            if accts_filtered: return accts_filtered[-1]
+            else: return None
 
 class HLedger(object):
     def __init__(self, ledger_file=None):
@@ -142,7 +144,6 @@ class HLedger(object):
         cmd = ["reg", "-w200", "desc:%s"%(payee)]
         lines = self.run(cmd).splitlines()
         accts = [ l[92:172].strip() for l in lines ]
-        if accts and accts[-1] != exclude:
-            return accts[-1]
-        else:
-            return None
+        accts_filtered = [ a for a in accts if a != exclude ]
+        if accts_filtered: return accts_filtered[-1]
+        else: return None
