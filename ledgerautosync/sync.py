@@ -33,7 +33,7 @@ class Synchronizer(object):
             days = 7
         last_txns_len = 0
         while (True):
-            logging.debug("Downloading %d days of transactions (max_days=%d)."%(days, max_days))
+            logging.debug("Downloading %d days of transactions for %s (max_days=%d)."%(days, acct.description, max_days))
             raw = acct.download(days)
             ofx = OfxParser.parse(raw)
             if not(hasattr(ofx, 'account')):

@@ -37,7 +37,8 @@ class TestLedger(TestCase):
         
         for ledger in ledgers:
             account = ledger.get_account_by_payee("Generic", exclude="Assets:Foo")
-            self.assertEqual(account, None)
+            # shoud use the latest
+            self.assertEqual(account, "Expenses:Bar")
                                                                                                              
     # broken in ledger
 #    def test_multiple_transaction(self):
