@@ -6,6 +6,7 @@ from ofxclient.config import OfxConfig
 from ofxparse import OfxParser
 import argparse
 from ofxclient.client import Client
+from ledgerautosync import EmptyInstitutionException
 from ledgerautosync.formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledger import mk_ledger, Ledger, HLedger
@@ -37,12 +38,15 @@ def sync(ledger, config, max_days=90, resync=False, indent=4, initial=False, ass
             sys.stderr.write("Caught exception processing %s"%(acct.description))
             traceback.print_exc(file=sys.stderr)
                              
-def import_ofx(ledger, path, accountname=None, indent=4, initial=False, assertions=False):
+def import_ofx(ledger, path, accountname=None, indent=4, initial=False, assertions=False, fid=None):
     sync = Synchronizer(ledger)
     (ofx, txns) = sync.parse_file(path)
     if accountname is None:
-        accountname = "%s:%s"%(ofx.account.institution.organization, ofx.account.account_id)
-    formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent)
+        if ofx.account.institution is not None:
+            accountname = "%s:%s"%(ofx.account.institution.organization, ofx.account.account_id)
+        else:
+            raise EmptyInstitutionException("Institution provided by OFX is empty and no accountname supplied!")
+    formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent, fid=fid)
     if initial:
         maybe_print_initial(ofx, ledger, formatter)
     for txn in txns:
@@ -67,6 +71,8 @@ def run(args=None):
                         help='number of spaces to use for indentation')
     parser.add_argument('--initial', action='store_true', default=False,
                         help='create initial balance entries')
+    parser.add_argument('--fid', type=int, default=None,
+                        help='pass in fid value for OFX files that do not supply it')
     parser.add_argument('--assertions', action='store_true', default=False,
                         help='create balance assertion entries')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
@@ -96,7 +102,7 @@ def run(args=None):
             config = OfxConfig()
         sync(ledger, config, max_days=args.max, resync=args.resync, indent=args.indent, initial=args.initial, assertions=args.assertions)
     else:
-        import_ofx(ledger, args.PATH, args.account, indent=args.indent, initial=args.initial, assertions=args.assertions)
+        import_ofx(ledger, args.PATH, args.account, indent=args.indent, initial=args.initial, assertions=args.assertions, fid=args.fid)
 
 if __name__ == '__main__':
     run()

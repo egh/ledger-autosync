@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from decimal import Decimal
 from ofxparse.ofxparse import Transaction, InvestmentTransaction
+from ledgerautosync import EmptyInstitutionException
 
 AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s"%(AUTOSYNC_INITIAL)
@@ -12,9 +13,15 @@ def clean_ofx_id(ofxid):
     return ofxid
 
 class Formatter(object):
-    def __init__(self, account, name, indent=4, ledger=None):
+    def __init__(self, account, name, indent=4, ledger=None, fid=None):
         self.acctid=account.account_id
-        self.fid=account.institution.fid
+        if fid is not None:
+            self.fid = fid
+        else:
+            if account.institution is None:
+                raise EmptyInstitutionException("Institution provided by OFX is empty and no fid supplied!")
+            else:
+                self.fid=account.institution.fid
         self.name = name
         self.ledger = ledger
         self.indent = indent
