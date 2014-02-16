@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from ledgerautosync.formatter import Formatter
-from ledgerautosync.ledger import Ledger
+from ledgerautosync.ledgerwrap import Ledger
 import os.path
 
 from ofxparse import OfxParser

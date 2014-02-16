@@ -23,7 +23,7 @@ class Formatter(object):
             else:
                 self.fid=account.institution.fid
         self.name = name
-        self.ledger = ledger
+        self.lgr = ledger
         self.indent = indent
         self.currency = account.statement.currency
         self.currency = self.currency.upper()
@@ -33,11 +33,11 @@ class Formatter(object):
         return clean_ofx_id("%s.%s.%s"%(self.fid, self.acctid, txnid))
 
     def mk_dynamic_account(self, txn, exclude):
-        if self.ledger is None:
+        if self.lgr is None:
             return "Expenses:Misc"
         else:
             payee = self.format_payee(txn)
-            account = self.ledger.get_account_by_payee(payee, exclude)
+            account = self.lgr.get_account_by_payee(payee, exclude)
             if account is None:
                 return "Expenses:Misc"
             else:

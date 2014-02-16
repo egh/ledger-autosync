@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import ledger
 import xml.etree.ElementTree as ET
 import os
 import re
@@ -57,7 +58,7 @@ def mk_ledger(ledger_file=None):
         return Ledger(ledger_file)
 
 class Ledger(object):
-    def __init__(self, ledger_file=None, no_pipe=False):
+    def __init__(self, ledger_file=None, no_pipe=True):
         self._item = ""
         def enqueue_output(out, queue):
             buff = ""
@@ -123,6 +124,26 @@ class Ledger(object):
             accts_filtered = [ a for a in accts if a != exclude ]
             if accts_filtered: return accts_filtered[-1]
             else: return None
+
+class LedgerPython(object):
+    def __init__(self, ledger_file=None):
+        if ledger_file is None:
+            # TODO - better loading
+            raise Exception
+        else:
+            self.session = ledger.Session()
+            self.journal = self.session.read_journal_from_string(open(ledger_file).read())
+
+    def check_transaction_by_ofxid(self, ofxid):
+        q = self.journal.query("-E meta ofxid=\"%s\""%(ofxid))
+        return len(q) > 0
+
+    def get_account_by_payee(self, payee, exclude):
+        q  = self.journal.query("--real payee \"%s\""%(payee))
+        accts = [ p.account for p in q ]
+        accts_filtered = [ a for a in accts if a != exclude ]
+        if accts_filtered: return str(accts_filtered[-1])
+        else: return None
 
 class HLedger(object):
     def __init__(self, ledger_file=None):

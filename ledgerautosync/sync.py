@@ -4,8 +4,8 @@ from StringIO import StringIO
 import logging
 
 class Synchronizer(object):
-    def __init__(self, ledger):
-        self.ledger = ledger
+    def __init__(self, lgr):
+        self.lgr = lgr
 
     def parse_file(self, path, accountname=None):
         ofx = OfxParser.parse(file(path))
@@ -13,7 +13,7 @@ class Synchronizer(object):
 
     def is_txn_synced(self, acctid, txn):
         ofxid = "%s.%s"%(acctid, txn.id)
-        return self.ledger.check_transaction_by_ofxid(ofxid)
+        return self.lgr.check_transaction_by_ofxid(ofxid)
     
     def filter(self, ofx):
         txns = ofx.account.statement.transactions

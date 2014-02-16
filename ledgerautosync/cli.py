@@ -9,7 +9,7 @@ from ofxclient.client import Client
 from ledgerautosync import EmptyInstitutionException
 from ledgerautosync.formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
-from ledgerautosync.ledger import mk_ledger, Ledger, HLedger
+from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger
 import logging
 import sys
 import traceback
