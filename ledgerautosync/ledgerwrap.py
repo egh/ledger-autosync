@@ -126,13 +126,16 @@ class Ledger(object):
             else: return None
 
 class LedgerPython(object):
-    def __init__(self, ledger_file=None):
+    def __init__(self, ledger_file=None, string_read=True):
         if ledger_file is None:
             # TODO - better loading
             raise Exception
         else:
-            self.session = ledger.Session()
-            self.journal = self.session.read_journal_from_string(open(ledger_file).read())
+            if string_read:
+                self.session = ledger.Session()
+                self.journal = self.session.read_journal_from_string(open(ledger_file).read())
+            else:
+                self.journal = ledger.read_journal(ledger_file)
 
     def check_transaction_by_ofxid(self, ofxid):
         q = self.journal.query("-E meta ofxid=\"%s\""%(ofxid))
