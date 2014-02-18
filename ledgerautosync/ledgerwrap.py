@@ -45,17 +45,21 @@ def all_or_none(seq):
     return reduce(f, seq, seq[0])
 
 def mk_ledger(ledger_file=None):
-    if os.name == 'posix':
-        if ((subprocess.call("which ledger > /dev/null", shell=True) == 0) and
-            (Popen(["ledger", "--version"], stdout=PIPE).communicate()[0]).startswith("Ledger 3")):
-            return Ledger(ledger_file)
-        elif subprocess.call("which hledger > /dev/null", shell=True) == 0:
-            return HLedger(ledger_file)
+    try:
+        import ledger
+        return LedgerPython(ledger_file, string_read=False)
+    except ImportError:
+        if os.name == 'posix':
+            if ((subprocess.call("which ledger > /dev/null", shell=True) == 0) and
+                (Popen(["ledger", "--version"], stdout=PIPE).communicate()[0]).startswith("Ledger 3")):
+                return Ledger(ledger_file)
+            elif subprocess.call("which hledger > /dev/null", shell=True) == 0:
+                return HLedger(ledger_file)
+            else:
+                raise Exception("Neither ledger 3 nor hledger found!")
         else:
-            raise Exception("Neither ledger 3 nor hledger found!")
-    else:
-        # windows, I guess ... just assume ledger
-        return Ledger(ledger_file)
+            # windows, I guess ... just assume ledger
+            return Ledger(ledger_file)
 
 class Ledger(object):
     def __init__(self, ledger_file=None, no_pipe=True):
