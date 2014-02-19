@@ -44,7 +44,7 @@ def all_or_none(seq):
         else: return None
     return reduce(f, seq, seq[0])
 
-def mk_ledger(ledger_file=None):
+def mk_ledger(ledger_file):
     try:
         import ledger
         return LedgerPython(ledger_file, string_read=False)

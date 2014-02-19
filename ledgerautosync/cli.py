@@ -11,9 +11,22 @@ from ledgerautosync.formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_I
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger
 import logging
+import re
 import sys
 import traceback
 import os, os.path
+
+def find_ledger_file():
+    """Returns main ledger file path or raise exceptio if it cannot be found."""
+    ledgerrcpath = os.path.abspath(os.path.expanduser("~/.ledgerrc"))
+    if os.environ.has_key("LEDGER_FILE"):
+        return os.path.abspath(os.path.expanduser(os.environ["LEDGER_FILE"]))
+    elif os.path.exists(ledgerrcpath):
+        # hacky
+        ledgerrc = open(ledgerrcpath).read()
+        return os.path.abspath(os.path.expanduser(re.match(r".*--file\s+([^\s]+).*", ledgerrc).group(1)))
+    else:
+        raise Exception("LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument no supplied.")
 
 def maybe_print_initial(ofx, ledger, formatter):
     if (not(ledger.check_transaction_by_ofxid(formatter.mk_ofxid(AUTOSYNC_INITIAL))) and
@@ -85,14 +98,19 @@ def run(args=None):
     if sys.argv[0][-16:] == "hledger-autosync":
       args.hledger = True
 
+    ledger_file = None
+    if args.ledger:
+        ledger_file = args.ledger
+    else:
+        ledger_file = find_ledger_file()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
     if args.hledger:
-        ledger = HLedger(args.ledger)
+        ledger = HLedger(ledger_file)
     elif args.slow:
-        ledger = Ledger(ledger_file=args.ledger, no_pipe=True)
+        ledger = Ledger(ledger_file=ledger_file, no_pipe=True)
     else:
-        ledger = mk_ledger(args.ledger)
+        ledger = mk_ledger(ledger_file)
     if args.PATH is None:
         config_dir = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser("~"), '.config'))
         config_file = os.path.join(config_dir, 'ofxclient.ini')
