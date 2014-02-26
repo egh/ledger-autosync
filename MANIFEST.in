@@ -1,3 +1,4 @@
 include LICENSE
 include fixtures/*
 include tests/*.py
+exclude tests/*.pyc
