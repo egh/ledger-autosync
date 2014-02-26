@@ -26,6 +26,7 @@ setup(name='ledger-autosync',
           "ofxclient",
           "ofxparse>=0.14"
       ],
-      setup_requires=['nose>=1.0'],
+      setup_requires=['nose>=1.0',
+                      'mock'],
       test_suite='tests',
       )
