@@ -28,5 +28,5 @@ setup(name='ledger-autosync',
       ],
       setup_requires=['nose>=1.0',
                       'mock'],
-      test_suite='tests',
+      test_suite = 'nose.collector'
       )
