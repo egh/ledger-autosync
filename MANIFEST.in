@@ -1,0 +1,3 @@
+include LICENSE
+include fixtures/*
+include tests/*.py
