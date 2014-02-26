@@ -53,6 +53,11 @@ def windows_clean(a):
         return s
     return [ clean_str(s) for s in a ]
 
+def clean_payee(s):
+    s = s.replace('%', '')
+    s = s.replace('/', '\/')
+    return s
+
 def all_or_none(seq):
     """Returns the first value of seq if all values of seq are equal, or returns None."""
     if len(seq) == 0: 
@@ -139,7 +144,7 @@ class Ledger(object):
         return (self.get_transaction(["-E", "meta", "ofxid=%s"%(clean_ofx_id(ofxid))]) != None)
         
     def get_account_by_payee(self, payee, exclude):
-        txn = self.run(["--real", "payee", payee])
+        txn = self.run(["--real", "payee", clean_payee(payee)])
         if txn is None: return None
         else: 
             accts = [ node.text for node in txn.findall('.//transactions/transaction/postings/posting/account/name') ]
@@ -164,7 +169,7 @@ class LedgerPython(object):
         return len(q) > 0
 
     def get_account_by_payee(self, payee, exclude):
-        q  = self.journal.query("--real payee \"%s\""%(payee))
+        q  = self.journal.query("--real payee '%s'"%(clean_payee(payee)))
         accts = [ p.account for p in q ]
         accts_filtered = [ a for a in accts if a != exclude ]
         if accts_filtered: return str(accts_filtered[-1])
