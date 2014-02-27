@@ -21,7 +21,6 @@ from ledgerautosync.cli import sync
 from ledgerautosync.ledgerwrap import Ledger, LedgerPython, HLedger
 from ofxclient.config import OfxConfig
 import os.path
-import ledger
 
 from unittest import TestCase
 from mock import Mock

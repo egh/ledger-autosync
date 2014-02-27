@@ -22,7 +22,6 @@ import os.path
 from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
 
 from unittest import TestCase
-import ledger
 
 class TestLedger(TestCase):
     def setUp(self):

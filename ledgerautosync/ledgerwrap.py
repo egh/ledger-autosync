@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-import ledger
 import xml.etree.ElementTree as ET
 import os
 import re
@@ -154,6 +153,11 @@ class Ledger(object):
 
 class LedgerPython(object):
     def __init__(self, ledger_file=None, string_read=True):
+        # sanity check for ledger python interface
+        try:
+            import ledger
+        except ImportError:
+            raise Exception("Ledger python interface not found!")
         if ledger_file is None:
             # TODO - better loading
             raise Exception
