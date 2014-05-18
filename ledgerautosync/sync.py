@@ -56,10 +56,16 @@ class Synchronizer(object):
             ofx = OfxParser.parse(raw)
             if not(hasattr(ofx, 'account')):
                 # some banks return this for no txns
-                days = days * 2
-                if (days > max_days): days = max_days
-                logging.debug("empty account: increasing days ago to %d."%(days))
-                last_txns_len = 0
+                if (days >= max_days):
+                    logging.debug("Hit max days.")
+                    # return None to let the caller know that we don't
+                    # even have account info
+                    return (None, None)
+                else:
+                    days = days * 2
+                    if (days > max_days): days = max_days
+                    logging.debug("empty account: increasing days ago to %d."%(days))
+                    last_txns_len = 0
             else:
                 txns = ofx.account.statement.transactions
                 new_txns = self.filter(ofx)

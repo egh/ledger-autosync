@@ -57,13 +57,14 @@ def sync(ledger, config, max_days=90, resync=False, indent=4, initial=False, ass
     for acct in config.accounts():
         try:
             (ofx, txns) = sync.get_new_txns(acct, resync=resync, max_days=max_days)
-            formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
-            if initial:
-                maybe_print_initial(ofx, ledger, formatter)
-            for txn in txns:
-                print formatter.format_txn(txn)
-            if assertions:
-                print formatter.format_balance(ofx.account.statement)
+            if ofx is not None:
+                formatter = Formatter(account=ofx.account, name=acct.description, ledger=ledger, indent=indent)
+                if initial:
+                    maybe_print_initial(ofx, ledger, formatter)
+                for txn in txns:
+                    print formatter.format_txn(txn)
+                if assertions:
+                    print formatter.format_balance(ofx.account.statement)
         except KeyboardInterrupt:
             raise
         except:
