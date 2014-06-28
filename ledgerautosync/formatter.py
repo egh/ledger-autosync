@@ -72,12 +72,19 @@ class Formatter(object):
             return "%s%s"%(self.currency, amt)
 
     def format_payee(self, txn):
-        if (txn.payee is None) or txn.memo.startswith(txn.payee):
-            return txn.memo
-        elif (txn.memo is None) or txn.payee.startswith(txn.memo):
-            return txn.payee
+        payee = None
+        memo = None
+        if (hasattr(txn, 'payee')): payee = txn.payee
+        if (hasattr(txn, 'memo')): memo = txn.memo
+        
+        if (payee is None) and (memo is None):
+            return "UNKNOWN"
+        if (payee is None) or txn.memo.startswith(payee):
+            return memo
+        elif (memo is None) or payee.startswith(memo):
+            return payee
         else:
-            return "%s %s"%(txn.payee, txn.memo)
+            return "%s %s"%(payee, memo)
 
     def format_date(self, date):
         return date.strftime("%Y/%m/%d")
@@ -124,7 +131,7 @@ class Formatter(object):
             if txn.settleDate is not None:
                 retval = "%s=%s %s\n"%(txn.tradeDate.strftime("%Y/%m/%d"), txn.settleDate.strftime("%Y/%m/%d"), txn.memo)
             else:
-                retval = "%s %s\n"%(txn.tradeDate.strftime("%Y/%m/%d"), txn.memo)
+                retval = "%s %s\n"%(txn.tradeDate.strftime("%Y/%m/%d"), self.format_payee(txn))
             retval += "%s; ofxid: %s\n"%(" "*self.indent, ofxid)
             retval += self.format_txn_line(acct=self.name, amt=str(txn.units), 
                                            suffix=" %s @ %s"%(txn.security, self.format_amount(txn.unit_price, unlimited=True)))
