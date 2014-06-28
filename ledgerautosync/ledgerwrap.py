@@ -55,6 +55,7 @@ def windows_clean(a):
 def clean_payee(s):
     s = s.replace('%', '')
     s = s.replace('/', '\/')
+    s = s.replace("'", "")
     return s
 
 def all_or_none(seq):
