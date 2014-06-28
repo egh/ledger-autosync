@@ -144,13 +144,16 @@ class Ledger(object):
         return (self.get_transaction(["-E", "meta", "ofxid=%s"%(clean_ofx_id(ofxid))]) != None)
         
     def get_account_by_payee(self, payee, exclude):
-        txn = self.run(["--real", "payee", clean_payee(payee)])
-        if txn is None: return None
-        else: 
-            accts = [ node.text for node in txn.findall('.//transactions/transaction/postings/posting/account/name') ]
-            accts_filtered = [ a for a in accts if a != exclude ]
-            if accts_filtered: return accts_filtered[-1]
-            else: return None
+        try:
+            txn = self.run(["--real", "payee", clean_payee(payee)])
+            if txn is None: return None
+            else: 
+                accts = [ node.text for node in txn.findall('.//transactions/transaction/postings/posting/account/name') ]
+                accts_filtered = [ a for a in accts if a != exclude ]
+                if accts_filtered: return accts_filtered[-1]
+                else: return None
+        except:
+            logging.error("Error checking --real payee for %s"%(clean_payee(payee)))
 
 class LedgerPython(object):
     def __init__(self, ledger_file=None, string_read=True):
