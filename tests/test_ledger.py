@@ -59,6 +59,10 @@ class TestLedger(TestCase):
             # shoud use the latest
             self.assertEqual(account, "Expenses:Bar")
                                                                                                              
+    def test_ofx_quoting(self):
+        for lgr in self.ledgers:
+            self.assertEqual(lgr.check_transaction_by_ofxid("1/2"), True, msg="Did not find 1/2 in %s"%(lgr))
+        
     # broken in ledger
 #    def test_multiple_transaction(self):
 #        lgr = Ledger("fixtures/multiple.lgr")

@@ -173,7 +173,7 @@ class LedgerPython(object):
                 self.journal = ledger.read_journal(ledger_file)
 
     def check_transaction_by_ofxid(self, ofxid):
-        q = self.journal.query("-E meta ofxid=\"%s\""%(ofxid))
+        q = self.journal.query("-E meta ofxid=\"%s\""%(clean_ofx_id(ofxid)))
         return len(q) > 0
 
     def get_account_by_payee(self, payee, exclude):
@@ -197,7 +197,7 @@ class HLedger(object):
         return subprocess.check_output(cmd)
 
     def check_transaction_by_ofxid(self, ofxid):
-        cmd = ["reg", "tag:ofxid=%s"%(ofxid)]
+        cmd = ["reg", "tag:ofxid=%s"%(clean_ofx_id(ofxid))]
         return self.run(cmd) != ''
 
     def get_account_by_payee(self, payee, exclude):
