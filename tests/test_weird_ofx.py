@@ -18,7 +18,7 @@
 
 from __future__ import absolute_import
 from ledgerautosync.cli import import_ofx
-from ledgerautosync.ledgerwrap import Ledger
+from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
 from ledgerautosync import EmptyInstitutionException
 import os.path
 
@@ -27,20 +27,24 @@ from mock import Mock
 from nose.tools import raises
 
 class TestCli(TestCase):
+    def setUp(self):
+        self.ledgers = [LedgerPython(os.path.join('fixtures', 'empty.lgr')),
+                        HLedger(os.path.join('fixtures', 'empty.lgr')),
+                        Ledger(os.path.join('fixtures', 'empty.lgr'), no_pipe=True)]
 
     @raises(EmptyInstitutionException)
     def test_no_institution_no_fid(self):
-        lgr = Ledger(os.path.join('fixtures', 'empty.lgr'))
-        ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        import_ofx(lgr, ofxpath, accountname="Assets:Foo")
+        for lgr in self.ledgers:
+            ofxpath = os.path.join('fixtures', 'no-institution.ofx')
+            import_ofx(lgr, ofxpath, accountname="Assets:Foo")
 
     def test_no_institution(self):
-        lgr = Ledger(os.path.join('fixtures', 'empty.lgr'))
-        ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        import_ofx(lgr, ofxpath, accountname="Assets:Foo", fid=1234567890)
+        for lgr in self.ledgers:
+            ofxpath = os.path.join('fixtures', 'no-institution.ofx')
+            import_ofx(lgr, ofxpath, accountname="Assets:Foo", fid=1234567890)
 
     @raises(EmptyInstitutionException)
     def test_no_institution_no_accountname(self):
-        lgr = Ledger(os.path.join('fixtures', 'empty.lgr'))
-        ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        import_ofx(lgr, ofxpath, fid=1234567890)
+        for lgr in self.ledgers:
+            ofxpath = os.path.join('fixtures', 'no-institution.ofx')
+            import_ofx(lgr, ofxpath, fid=1234567890)
