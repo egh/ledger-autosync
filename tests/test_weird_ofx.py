@@ -53,4 +53,3 @@ class TestCli(TestCase):
         for lgr in self.ledgers:
             ofxpath = os.path.join('fixtures', 'apostrophe.ofx')
             import_ofx(lgr, ofxpath, fid=1234567890)
-            raise Exception()
