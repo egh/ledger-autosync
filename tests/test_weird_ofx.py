@@ -23,7 +23,6 @@ from ledgerautosync import EmptyInstitutionException
 import os.path
 
 from unittest import TestCase
-from mock import Mock
 from nose.tools import raises
 
 class TestCli(TestCase):

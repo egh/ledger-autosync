@@ -18,7 +18,6 @@
 
 from __future__ import absolute_import
 from ofxparse import OfxParser
-from StringIO import StringIO
 import logging
 
 class Synchronizer(object):

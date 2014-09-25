@@ -19,12 +19,8 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-import datetime
-import time
 from ofxclient.config import OfxConfig
-from ofxparse import OfxParser
 import argparse
-from ofxclient.client import Client
 from ledgerautosync import EmptyInstitutionException
 from ledgerautosync.formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer

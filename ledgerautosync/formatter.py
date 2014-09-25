@@ -127,7 +127,6 @@ class Formatter(object):
             retval += self.format_txn_line(self.name, self.format_amount(txn.amount))
             retval += self.format_txn_line(self.mk_dynamic_account(txn, exclude=self.name), self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
-            trade_date = "%s"%(txn.tradeDate.strftime("%Y/%m/%d"))
             if txn.settleDate is not None:
                 retval = "%s=%s %s\n"%(txn.tradeDate.strftime("%Y/%m/%d"), txn.settleDate.strftime("%Y/%m/%d"), txn.memo)
             else:

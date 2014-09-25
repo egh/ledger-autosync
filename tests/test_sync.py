@@ -20,7 +20,6 @@ from __future__ import absolute_import
 import os
 import os.path
 from ofxparse import OfxParser
-from ofxclient.config import OfxConfig
 from ledgerautosync.ledgerwrap import Ledger
 from ledgerautosync.sync import Synchronizer
 

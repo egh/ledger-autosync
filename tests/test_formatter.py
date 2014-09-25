@@ -24,7 +24,6 @@ import os.path
 from ofxparse import OfxParser
 
 from unittest import TestCase
-from mock import Mock
 
 class TestFormatter(TestCase):
     def test_checking(self):
