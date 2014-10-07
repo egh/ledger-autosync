@@ -24,7 +24,7 @@ import argparse
 from ledgerautosync import EmptyInstitutionException
 from ledgerautosync.formatter import Formatter, AUTOSYNC_INITIAL, ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
-from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger
+from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger, LedgerPython
 import logging
 import re
 import sys
@@ -110,6 +110,8 @@ def run(args=None):
                         help='force use of hledger (on by default if invoked as hledger-autosync)')
     parser.add_argument('--slow', action='store_true', default=False,
                         help='use slow, but possibly more robust, method of calling ledger (no subprocess)')
+    parser.add_argument('--which', action='store_true', default=False,
+                        help='display which version of ledger/hledger/ledger-python will be used by ledger-autosync to check for previous transactions')
     args = parser.parse_args(args)
     if sys.argv[0][-16:] == "hledger-autosync":
       args.hledger = True
@@ -127,6 +129,17 @@ def run(args=None):
         ledger = Ledger(ledger_file=ledger_file, no_pipe=True)
     else:
         ledger = mk_ledger(ledger_file)
+
+    if args.which:
+        sys.stderr.write("ledger-autosync is using ")
+        if type(ledger) == Ledger:
+            sys.stderr.write("ledger\n")
+        elif type(ledger) == HLedger:
+            sys.stderr.write("hledger\n")
+        elif type(ledger) == LedgerPython:
+            sys.stderr.write("ledger.so (python)\n")
+        exit()
+
     if args.PATH is None:
         config_dir = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser("~"), '.config'))
         config_file = os.path.join(config_dir, 'ofxclient.ini')
