@@ -136,7 +136,9 @@ as hledger-autosync)')
                         help='use slow, but possibly more robust, method of \
 calling ledger (no subprocess)')
     parser.add_argument('--which', action='store_true', default=False,
-                        help='display which version of ledger/hledger/ledger-python will be used by ledger-autosync to check for previous transactions')
+                        help='display which version of ledger (cli), hledger, \
+or ledger (python) will be used by ledger-autosync to check for previous \
+transactions')
     args = parser.parse_args(args)
     if sys.argv[0][-16:] == "hledger-autosync":
         args.hledger = True
@@ -158,7 +160,7 @@ calling ledger (no subprocess)')
     if args.which:
         sys.stderr.write("ledger-autosync is using ")
         if type(ledger) == Ledger:
-            sys.stderr.write("ledger\n")
+            sys.stderr.write("ledger (cli)\n")
         elif type(ledger) == HLedger:
             sys.stderr.write("hledger\n")
         elif type(ledger) == LedgerPython:
