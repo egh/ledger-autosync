@@ -1,5 +1,5 @@
 # Copyright (c) 2013, 2014 Erik Hetzner
-# 
+#
 # This file is part of ledger-autosync
 #
 # ledger-autosync is free software: you can redistribute it and/or
@@ -16,8 +16,10 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
+
 class EmptyInstitutionException(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
