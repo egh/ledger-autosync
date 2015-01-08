@@ -24,25 +24,40 @@ import os.path
 
 from unittest import TestCase
 from mock import Mock
+from nose.plugins.attrib import attr
 
-class TestCli(TestCase):
+class CliTest():
     def test_run(self):
-        for lgr in [LedgerPython(os.path.join('fixtures', 'empty.lgr')),
-                    HLedger(os.path.join('fixtures', 'empty.lgr')),
-                    Ledger(os.path.join('fixtures', 'empty.lgr'), no_pipe=True)]:
-            config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
-            acct = config.accounts()[0]
-            acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
-            config.accounts = Mock(return_value=[acct])
-            sync(lgr, config, 7)
+        config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
+        acct = config.accounts()[0]
+        acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
+        config.accounts = Mock(return_value=[acct])
+        sync(self.empty_lgr, config, 7)
 
     def test_empty_run(self):
-        for lgr in [LedgerPython(os.path.join('fixtures', 'checking.lgr')),
-                    HLedger(os.path.join('fixtures', 'checking.lgr')),
-                    Ledger(os.path.join('fixtures', 'checking.lgr'), no_pipe=True)]:
-            config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
-            acct = config.accounts()[0]
-            acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
-            config.accounts = Mock(return_value=[acct])
-            sync(lgr, config, 7)
+        config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
+        acct = config.accounts()[0]
+        acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
+        config.accounts = Mock(return_value=[acct])
+        sync(self.checking_lgr, config, 7)
 
+
+@attr('hledger')
+class TestCliHledger(TestCase, CliTest):
+    def setUp(self):
+        self.empty_lgr = HLedger(os.path.join('fixtures', 'empty.lgr'))
+        self.checking_lgr = HLedger(os.path.join('fixtures', 'checking.lgr'))
+
+
+@attr('ledger')
+class TestCliLedger(TestCase, CliTest):
+    def setUp(self):
+        self.empty_lgr = Ledger(os.path.join('fixtures', 'empty.lgr'), no_pipe=True)
+        self.checking_lgr = Ledger(os.path.join('fixtures', 'checking.lgr'), no_pipe=True)
+
+
+@attr('ledger-python')
+class TestCliLedgerPython(TestCase, CliTest):
+    def setUp(self):
+        self.empty_lgr = LedgerPython(os.path.join('fixtures', 'empty.lgr'))
+        self.checking_lgr = LedgerPython(os.path.join('fixtures', 'checking.lgr'))

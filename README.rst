@@ -111,6 +111,16 @@ time of the sync. These otherwise empty transactions tell ledger that
 your balance *should* be something at a given time, and if not, ledger
 will fail with an error.
 
+Testing
+-------
+
+ledger-autosync uses nose for tests. To test, run `nosetest` in the
+project directory. This will test the ledger, hledger and
+ledger-python interfaces. To test a single interface, use `nosetest -a
+hledger`. To test the generic code, use `nosetest -a generic`. To test
+both, use `nosetest -a generic -a hledger`. For some reason
+`nosetest -a '!hledger'` will not work.
+
 .. _ledger: http://ledger-cli.org/
 .. _hledger: http://hledger.org/
 .. _ofxclient: https://github.com/captin411/ofxclient

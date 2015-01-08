@@ -24,8 +24,10 @@ from ledgerautosync.ledgerwrap import Ledger
 from ledgerautosync.sync import Synchronizer
 
 from unittest import TestCase
+from nose.plugins.attrib import attr
 from mock import Mock
 
+@attr('generic')
 class TestSync(TestCase):
     def test_fresh_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))

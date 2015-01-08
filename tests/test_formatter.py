@@ -23,8 +23,10 @@ import os.path
 
 from ofxparse import OfxParser
 
+from nose.plugins.attrib import attr
 from unittest import TestCase
 
+@attr('generic')
 class TestFormatter(TestCase):
     def test_checking(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))

@@ -1,5 +1,5 @@
 # Copyright (c) 2013, 2014 Erik Hetzner
-# 
+#
 # This file is part of ledger-autosync
 #
 # ledger-autosync is free software: you can redistribute it and/or
@@ -23,32 +23,42 @@ from ledgerautosync import EmptyInstitutionException
 import os.path
 
 from unittest import TestCase
+from nose.plugins.attrib import attr
 from nose.tools import raises
 
-class TestCli(TestCase):
-    def setUp(self):
-        self.ledgers = [LedgerPython(os.path.join('fixtures', 'empty.lgr')),
-                        HLedger(os.path.join('fixtures', 'empty.lgr')),
-                        Ledger(os.path.join('fixtures', 'empty.lgr'), no_pipe=True)]
-
+class WeirdOfxTest(object):
     @raises(EmptyInstitutionException)
     def test_no_institution_no_fid(self):
-        for lgr in self.ledgers:
-            ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-            import_ofx(lgr, ofxpath, accountname="Assets:Foo")
+        ofxpath = os.path.join('fixtures', 'no-institution.ofx')
+        import_ofx(self.lgr, ofxpath, accountname="Assets:Foo")
 
     def test_no_institution(self):
-        for lgr in self.ledgers:
-            ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-            import_ofx(lgr, ofxpath, accountname="Assets:Foo", fid=1234567890)
+        ofxpath = os.path.join('fixtures', 'no-institution.ofx')
+        import_ofx(self.lgr, ofxpath, accountname="Assets:Foo", fid=1234567890)
 
     @raises(EmptyInstitutionException)
     def test_no_institution_no_accountname(self):
-        for lgr in self.ledgers:
-            ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-            import_ofx(lgr, ofxpath, fid=1234567890)
+        ofxpath = os.path.join('fixtures', 'no-institution.ofx')
+        import_ofx(self.lgr, ofxpath, fid=1234567890)
 
     def test_apostrophe(self):
-        for lgr in self.ledgers:
-            ofxpath = os.path.join('fixtures', 'apostrophe.ofx')
-            import_ofx(lgr, ofxpath, fid=1234567890)
+        ofxpath = os.path.join('fixtures', 'apostrophe.ofx')
+        import_ofx(self.lgr, ofxpath, fid=1234567890)
+
+
+@attr('hledger')
+class TestWeirdOfxHledger(TestCase, WeirdOfxTest):
+    def setUp(self):
+        self.lgr = HLedger(os.path.join('fixtures', 'empty.lgr'))
+
+
+@attr('ledger')
+class TestWeirdOfxLedger(TestCase, WeirdOfxTest):
+    def setUp(self):
+        self.lgr = Ledger(os.path.join('fixtures', 'empty.lgr'), no_pipe=True)
+
+
+@attr('ledger-python')
+class TestWeirdOfxLedgerPython(TestCase, WeirdOfxTest):
+    def setUp(self):
+        self.lgr = LedgerPython(os.path.join('fixtures', 'empty.lgr'))
