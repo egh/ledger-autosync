@@ -7,8 +7,8 @@ before_install:
  - sudo add-apt-repository ppa:mbudde/ledger -y
  - sudo apt-get update
  - sudo apt-get install ledger
- - sudo apt-get install hledger
+# - sudo apt-get install hledger
  - cp /usr/lib/python2.7/dist-packages/ledger.so `pip show pip |grep Location |awk '{print $2}'`
 install: "pip install -r requirements.txt"
 # command to run tests
-script: nosetests
+script: nosetests -a generic -a ledger -a ledger-python
