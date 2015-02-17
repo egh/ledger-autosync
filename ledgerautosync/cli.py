@@ -57,10 +57,10 @@ def maybe_print_initial(ofx, ledger, formatter):
         print formatter.format_initial_balance(ofx.account.statement)
 
 
-def sync(ledger, config, max_days=90, resync=False, indent=4, initial=False,
+def sync(ledger, accounts, max_days=90, resync=False, indent=4, initial=False,
          assertions=False):
     sync = Synchronizer(ledger)
-    for acct in config.accounts():
+    for acct in accounts:
         try:
             (ofx, txns) = sync.get_new_txns(acct, resync=resync,
                                             max_days=max_days)
@@ -103,7 +103,7 @@ empty and no accountname supplied!")
         print formatter.format_balance(ofx.account.statement)
 
 
-def run(args=None):
+def run(args=None, config=None):
     if args is None:
         args = sys.argv[1:]
 
@@ -115,7 +115,8 @@ def run(args=None):
     parser.add_argument('PATH', nargs='?', help='do not sync; import from OFX \
 file')
     parser.add_argument('-a', '--account', type=str, default=None,
-                        help='set account name for import')
+                        help='sync only the named account; \
+if importing from file, set account name for import')
     parser.add_argument('-l', '--ledger', type=str, default=None,
                         help='specify ledger file to READ for syncing')
     parser.add_argument('-i', '--indent', type=int, default=4,
@@ -168,15 +169,19 @@ transactions')
         exit()
 
     if args.PATH is None:
-        config_dir = os.environ.get('XDG_CONFIG_HOME',
-                                    os.path.join(os.path.expanduser("~"),
-                                                 '.config'))
-        config_file = os.path.join(config_dir, 'ofxclient.ini')
-        if (os.path.exists(config_file)):
-            config = OfxConfig(file_name=config_file)
-        else:
-            config = OfxConfig()
-        sync(ledger, config, max_days=args.max, resync=args.resync,
+        if config is None:
+            config_dir = os.environ.get('XDG_CONFIG_HOME',
+                                        os.path.join(os.path.expanduser("~"),
+                                                     '.config'))
+            config_file = os.path.join(config_dir, 'ofxclient.ini')
+            if (os.path.exists(config_file)):
+                config = OfxConfig(file_name=config_file)
+            else:
+                config = OfxConfig()
+        accounts = config.accounts()
+        if args.account:
+            accounts = [acct for acct in accounts if acct.description == args.account]
+        sync(ledger, accounts, max_days=args.max, resync=args.resync,
              indent=args.indent, initial=args.initial,
              assertions=args.assertions)
     else:
