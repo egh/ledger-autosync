@@ -1,0 +1,6 @@
+venv/
+*.pyc
+*.egg
+build/
+dist/
+ledger_autosync.egg-info
