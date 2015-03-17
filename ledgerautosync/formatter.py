@@ -147,7 +147,8 @@ class Formatter(object):
                 self.mk_dynamic_account(txn, exclude=self.name),
                 self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
-            if txn.settleDate is not None:
+            if txn.settleDate is not None and \
+               txn.settleDate != txn.tradeDate:
                 retval = "%s=%s %s\n" % (
                     txn.tradeDate.strftime("%Y/%m/%d"),
                     txn.settleDate.strftime("%Y/%m/%d"),
