@@ -151,7 +151,7 @@ class Formatter(object):
                 retval = "%s=%s %s\n" % (
                     txn.tradeDate.strftime("%Y/%m/%d"),
                     txn.settleDate.strftime("%Y/%m/%d"),
-                    txn.memo)
+                    self.format_payee(txn))
             else:
                 retval = "%s %s\n" % (
                     txn.tradeDate.strftime("%Y/%m/%d"),
