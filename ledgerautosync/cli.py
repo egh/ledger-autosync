@@ -58,7 +58,7 @@ def maybe_print_initial(ofx, ledger, formatter):
 
 
 def sync(ledger, accounts, max_days=90, resync=False, indent=4, initial=False,
-         assertions=False):
+         assertions=False, unknownaccount=None):
     sync = Synchronizer(ledger)
     for acct in accounts:
         try:
@@ -68,7 +68,8 @@ def sync(ledger, accounts, max_days=90, resync=False, indent=4, initial=False,
                 formatter = Formatter(account=ofx.account,
                                       name=acct.description,
                                       ledger=ledger,
-                                      indent=indent)
+                                      indent=indent,
+                                      unknownaccount=unknownaccount)
                 if initial:
                     maybe_print_initial(ofx, ledger, formatter)
                 for txn in txns:
@@ -84,7 +85,7 @@ def sync(ledger, accounts, max_days=90, resync=False, indent=4, initial=False,
 
 
 def import_ofx(ledger, path, accountname=None, indent=4, initial=False,
-               assertions=False, fid=None):
+               assertions=False, fid=None, unknownaccount=None):
     sync = Synchronizer(ledger)
     (ofx, txns) = sync.parse_file(path)
     if accountname is None:
@@ -94,7 +95,7 @@ def import_ofx(ledger, path, accountname=None, indent=4, initial=False,
         else:
             raise EmptyInstitutionException("Institution provided by OFX is \
 empty and no accountname supplied!")
-    formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent, fid=fid)
+    formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent, fid=fid, unknownaccount=unknownaccount)
     if initial:
         maybe_print_initial(ofx, ledger, formatter)
     for txn in txns:
@@ -126,6 +127,9 @@ if importing from file, set account name for import')
     parser.add_argument('--fid', type=int, default=None,
                         help='pass in fid value for OFX files that do not \
 supply it')
+    parser.add_argument('--unknown-account', type=str, dest='unknownaccount',
+                        default='Expenses:Misc',
+                        help='specify account name to use when one can\'t be found by payee')
     parser.add_argument('--assertions', action='store_true', default=False,
                         help='create balance assertion entries')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
@@ -183,11 +187,11 @@ transactions')
             accounts = [acct for acct in accounts if acct.description == args.account]
         sync(ledger, accounts, max_days=args.max, resync=args.resync,
              indent=args.indent, initial=args.initial,
-             assertions=args.assertions)
+             assertions=args.assertions,unknownaccount=args.unknownaccount)
     else:
         import_ofx(ledger, args.PATH, args.account, indent=args.indent,
                    initial=args.initial, assertions=args.assertions,
-                   fid=args.fid)
+                   fid=args.fid,unknownaccount=args.unknownaccount)
 
 if __name__ == '__main__':
     run()

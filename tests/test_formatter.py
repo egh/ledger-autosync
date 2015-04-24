@@ -1,5 +1,5 @@
 # Copyright (c) 2013, 2014 Erik Hetzner
-# 
+#
 # This file is part of ledger-autosync
 #
 # ledger-autosync is free software: you can redistribute it and/or
@@ -106,4 +106,15 @@ class TestFormatter(TestCase):
     ; ofxid: 1101.1452687~7.autosync_initial
     Assets:Foo                               $160.49
     Assets:Equity                           -$160.49
+""")
+
+    def test_unknownaccount(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        formatter = Formatter(account=ofx.account, name="Foo", indent=4,
+                              unknownaccount='Expenses:Unknown')
+        self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
+"""2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
+    ; ofxid: 1101.1452687~7.0000486
+    Foo                                        $0.01
+    Expenses:Unknown                          -$0.01
 """)

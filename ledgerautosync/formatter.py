@@ -33,7 +33,8 @@ def clean_ofx_id(ofxid):
 
 
 class Formatter(object):
-    def __init__(self, account, name, indent=4, ledger=None, fid=None):
+    def __init__(self, account, name, indent=4, ledger=None, fid=None,
+                 unknownaccount=None):
         self.acctid = account.account_id
         if fid is not None:
             self.fid = fid
@@ -48,6 +49,10 @@ class Formatter(object):
         self.indent = indent
         self.currency = account.statement.currency
         self.currency = self.currency.upper()
+        if unknownaccount is not None:
+            self.unknownaccount = unknownaccount
+        else:
+            self.unknownaccount = 'Expenses:Misc'
         if self.currency == "USD":
             self.currency = "$"
 
@@ -56,12 +61,12 @@ class Formatter(object):
 
     def mk_dynamic_account(self, txn, exclude):
         if self.lgr is None:
-            return "Expenses:Misc"
+            return self.unknownaccount
         else:
             payee = self.format_payee(txn)
             account = self.lgr.get_account_by_payee(payee, exclude)
             if account is None:
-                return "Expenses:Misc"
+                return self.unknownaccount
             else:
                 return account
 
