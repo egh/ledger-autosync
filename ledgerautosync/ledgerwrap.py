@@ -158,8 +158,9 @@ class Ledger(object):
             is not None)
 
     def get_account_by_payee(self, payee, exclude):
+        payee_regex = clean_payee(payee).replace("*", "\\\\*")
         try:
-            txn = self.run(["--real", "payee", clean_payee(payee)])
+            txn = self.run(["--real", "payee", payee_regex])
             if txn is None:
                 return None
             else:
@@ -172,7 +173,7 @@ class Ledger(object):
                     return None
         except:
             logging.error("Error checking --real payee for %s" %
-                          (clean_payee(payee)))
+                          (payee_regex))
 
 
 class LedgerPython(object):
