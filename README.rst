@@ -114,12 +114,12 @@ will fail with an error.
 Testing
 -------
 
-ledger-autosync uses nose for tests. To test, run `nosetest` in the
+ledger-autosync uses nose for tests. To test, run `nosetests` in the
 project directory. This will test the ledger, hledger and
-ledger-python interfaces. To test a single interface, use `nosetest -a
-hledger`. To test the generic code, use `nosetest -a generic`. To test
-both, use `nosetest -a generic -a hledger`. For some reason
-`nosetest -a '!hledger'` will not work.
+ledger-python interfaces. To test a single interface, use `nosetests -a
+hledger`. To test the generic code, use `nosetests -a generic`. To test
+both, use `nosetests -a generic -a hledger`. For some reason
+`nosetests -a '!hledger'` will not work.
 
 .. _ledger: http://ledger-cli.org/
 .. _hledger: http://hledger.org/
