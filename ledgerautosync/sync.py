@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import
 from ofxparse import OfxParser
+from ofxparse.ofxparse import InvestmentTransaction
 import logging
 
 
@@ -37,8 +38,11 @@ class Synchronizer(object):
         txns = ofx.account.statement.transactions
         if len(txns) == 0:
             sorted_txns = txns
-        elif hasattr(txns[0], 'settleDate'):
-            sorted_txns = sorted(txns, key=lambda t: t.settleDate)
+        elif all(isinstance(txn, InvestmentTransaction) for txn in txns):
+            if all(txn.settleDate is not None for txn in txns):
+                sorted_txns = sorted(txns, key=lambda t: t.settleDate)
+            else:
+                sorted_txns = sorted(txns, key=lambda t: t.tradeDate)
         else:
             sorted_txns = sorted(txns, key=lambda t: t.date)
         acctid = ofx.account.account_id
