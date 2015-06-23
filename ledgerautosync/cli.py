@@ -38,7 +38,7 @@ def find_ledger_file():
     """Returns main ledger file path or raise exception if it cannot be \
 found."""
     ledgerrcpath = os.path.abspath(os.path.expanduser("~/.ledgerrc"))
-    if os.environ.has_key("LEDGER_FILE"):
+    if "LEDGER_FILE" in os.environ:
         return os.path.abspath(os.path.expanduser(os.environ["LEDGER_FILE"]))
     elif os.path.exists(ledgerrcpath):
         # hacky
@@ -95,7 +95,9 @@ def import_ofx(ledger, path, accountname=None, indent=4, initial=False,
         else:
             raise EmptyInstitutionException("Institution provided by OFX is \
 empty and no accountname supplied!")
-    formatter = Formatter(account=ofx.account, name=accountname, ledger=ledger, indent=indent, fid=fid, unknownaccount=unknownaccount)
+    formatter = Formatter(account=ofx.account, name=accountname,
+                          ledger=ledger, indent=indent, fid=fid,
+                          unknownaccount=unknownaccount)
     if initial:
         maybe_print_initial(ofx, ledger, formatter)
     for txn in txns:
