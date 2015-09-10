@@ -88,11 +88,11 @@ class Formatter(object):
         if (hasattr(txn, 'memo')):
             memo = txn.memo
 
-        if (payee is None) and (memo is None):
+        if (payee is None or payee == '') and (memo is None or memo == ''):
             return "UNKNOWN"
-        if (payee is None) or txn.memo.startswith(payee):
+        if (payee is None or payee == '') or txn.memo.startswith(payee):
             return memo
-        elif (memo is None) or payee.startswith(memo):
+        elif (memo is None or memo == '') or payee.startswith(memo):
             return payee
         else:
             return "%s %s" % (payee, memo)
