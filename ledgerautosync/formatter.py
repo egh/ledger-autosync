@@ -18,6 +18,7 @@
 
 from __future__ import absolute_import
 from decimal import Decimal
+import re
 from ofxparse.ofxparse import Transaction, InvestmentTransaction
 from ledgerautosync import EmptyInstitutionException
 
@@ -152,6 +153,11 @@ class Formatter(object):
                 self.mk_dynamic_account(txn, exclude=self.name),
                 self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
+            security = txn.security
+            if re.search(r'[\s0-9]', security):
+                # Commodities must be quoted in ledger if they have
+                # whitespace or numerals.
+                security = "\"%s\"" % (security)
             if txn.settleDate is not None and \
                txn.settleDate != txn.tradeDate:
                 retval = "%s=%s %s\n" % (
@@ -167,7 +173,7 @@ class Formatter(object):
                 acct=self.name,
                 amt=str(txn.units),
                 suffix=" %s @ %s" % (
-                    txn.security,
+                    security,
                     self.format_amount(txn.unit_price, unlimited=True)))
             retval += self.format_txn_line(
                 self.name,

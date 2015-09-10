@@ -66,14 +66,14 @@ class TestFormatter(TestCase):
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
-  Foo                                      100.00000 458140100 @ $25.635000000
+  Foo                                      100.00000 "458140100" @ $25.635000000
   Foo                                      -$2563.50
 """)
         # test no payee/memo
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[1]),
 """2012/07/27 UNKNOWN
   ; ofxid: 7776.01234567890.0123456789020901120120727
-  Foo                                      128.00000 G7945E105 @ $39.390900000
+  Foo                                      128.00000 "G7945E105" @ $39.390900000
   Foo                                      -$5042.04
 """)
 
