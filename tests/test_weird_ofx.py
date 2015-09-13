@@ -48,6 +48,7 @@ class WeirdOfxTest(object):
     def test_one_settleDate(self):
         ofxpath = os.path.join('fixtures', 'fidelity-one-dtsettle.ofx')
         import_ofx(self.lgr, ofxpath, fid=1234567890)
+
     
 @attr('hledger')
 class TestWeirdOfxHledger(TestCase, WeirdOfxTest):

@@ -118,3 +118,14 @@ class TestFormatter(TestCase):
     Foo                                        $0.01
     Expenses:Unknown                          -$0.01
 """)
+
+    def test_quote_commodity(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
+        formatter = Formatter(account=ofx.account, name="Foo", indent=4,
+                              unknownaccount='Expenses:Unknown')
+        self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
+"""2012/07/27 
+  ; ofxid: 7776.01234567890.0123456789020901120120727
+  Foo                                      128.00000 "G7945E105" @ $39.390900000
+  Foo                                      -$5042.04
+""")

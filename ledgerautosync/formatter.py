@@ -105,8 +105,10 @@ class Formatter(object):
         retval = ""
         if (hasattr(statement, 'balance_date')):
             date = statement.balance_date
-        else:
+        elif (hasattr(statement, 'end_date')):
             date = statement.end_date
+        else:
+            return retval
         if (hasattr(statement, 'balance')):
             retval += "%s * --Autosync Balance Assertion\n" % \
                       (self.format_date(date))
