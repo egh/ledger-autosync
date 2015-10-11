@@ -20,6 +20,7 @@ from __future__ import absolute_import
 from ledgerautosync.formatter import Formatter
 from ledgerautosync.ledgerwrap import Ledger
 import os.path
+from decimal import Decimal
 
 from ofxparse import OfxParser
 
@@ -132,3 +133,27 @@ class TestFormatter(LedgerTestCase):
   Foo  100.00000 "458140100" @ $25.635000000
   Foo  -$2563.50
 """)
+
+    def test_format_amount(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
+        formatter = Formatter(account=ofx.account, name="Foo",
+                              unknownaccount='Expenses:Unknown')
+        self.assertEqual("$10.00",
+                         formatter.format_amount(Decimal("10.001")),
+                         "Formats to 2 points precision, $ by default")
+        self.assertEqual("10.00 USD",
+                         formatter.format_amount(Decimal(10), currency="USD"),
+                         "Longer commodity names come after")
+        self.assertEqual("-$10.00",
+                         formatter.format_amount(Decimal(10), reverse=True),
+                         "Reverse flag works.")
+        self.assertEqual("10.00 \"ABC123\"",
+                         formatter.format_amount(Decimal(10), currency="ABC123"),
+                         "Currencies with numbers are quoted")
+        self.assertEqual("10.00 \"A BC\"",
+                         formatter.format_amount(Decimal(10), currency="A BC"),
+                         "Currencies with whitespace are quoted")
+        self.assertEqual("$10.001",
+                         formatter.format_amount(Decimal("10.001"),
+                                                 unlimited=True))
+                         # "Unlimited flag works.")

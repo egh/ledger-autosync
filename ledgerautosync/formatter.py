@@ -71,15 +71,27 @@ class Formatter(object):
             else:
                 return account
 
-    def format_amount(self, amount, reverse=False, unlimited=False):
+    def format_amount(self, amount, reverse=False, unlimited=False, currency=None):
+        if currency is None:
+            currency = self.currency
+        # Commodities must be quoted in ledger if they have
+        # whitespace or numerals.
+        if re.search(r'[\s0-9]', currency):
+            currency = "\"%s\"" % (currency)
         if unlimited:
             amt = str(abs(amount))
         else:
             amt = "%0.2f" % (abs(amount))
         if amount.is_signed() != reverse:
-            return "-%s%s" % (self.currency, amt)
+            prefix = "-"
         else:
-            return "%s%s" % (self.currency, amt)
+            prefix = ""
+        if len(currency) == 1:
+            # $ comes before
+            return "%s%s%s" % (prefix, currency, amt)
+        else:
+            # USD comes after
+            return "%s%s %s" % (prefix, amt, currency)
 
     def format_payee(self, txn):
         payee = None
@@ -155,11 +167,6 @@ class Formatter(object):
                 self.mk_dynamic_account(txn, exclude=self.name),
                 self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
-            security = txn.security
-            if re.search(r'[\s0-9]', security):
-                # Commodities must be quoted in ledger if they have
-                # whitespace or numerals.
-                security = "\"%s\"" % (security)
             if txn.settleDate is not None and \
                txn.settleDate != txn.tradeDate:
                 retval = "%s=%s %s\n" % (
@@ -173,10 +180,8 @@ class Formatter(object):
             retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
             retval += self.format_txn_line(
                 acct=self.name,
-                amt=str(txn.units),
-                suffix=" %s @ %s" % (
-                    security,
-                    self.format_amount(txn.unit_price, unlimited=True)))
+                amt=self.format_amount(txn.units, currency=txn.security, unlimited=True),
+                suffix=" @ %s" % (self.format_amount(txn.unit_price, unlimited=True)))
             retval += self.format_txn_line(
                 self.name,
                 self.format_amount(txn.units * txn.unit_price, reverse=True))
