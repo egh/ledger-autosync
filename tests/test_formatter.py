@@ -71,14 +71,14 @@ class TestFormatter(LedgerTestCase):
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
   Foo  100.00000 "458140100" @ $25.635000000
-  Foo  -$2563.50
+  Assets:Unknown  -$2563.50
 """)
         # test no payee/memo
         self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[1]),
 """2012/07/27 UNKNOWN
   ; ofxid: 7776.01234567890.0123456789020901120120727
   Foo  128.00000 "G7945E105" @ $39.390900000
-  Foo  -$5042.04
+  Assets:Unknown  -$5042.04
 """)
 
     def test_dynamic_account(self):
@@ -125,18 +125,29 @@ class TestFormatter(LedgerTestCase):
 
     def test_quote_commodity(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo",
-                              unknownaccount='Expenses:Unknown')
+        formatter = Formatter(account=ofx.account, name="Foo")
         self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
   Foo  100.00000 "458140100" @ $25.635000000
-  Foo  -$2563.50
+  Assets:Unknown  -$2563.50
+""")
+
+    # Check that <TRANSFER> txns are parsed.
+    def test_transfer_txn(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
+        formatter = Formatter(account=ofx.account, name="Foo",
+                              unknownaccount='Expenses:Unknown')
+        self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[2]),
+"""2014/06/30 UNKNOWN
+    ; ofxid: 1234.12345678.123456-01.3
+    Foo  -9.060702 BAZ @ $21.928764
+    Foo  $198.69
 """)
 
     def test_format_amount(self):
-        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo",
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
+        formatter = Formatter(account=ofx.account, name="Foo", indent=4,
                               unknownaccount='Expenses:Unknown')
         self.assertEqual("$10.00",
                          formatter.format_amount(Decimal("10.001")),

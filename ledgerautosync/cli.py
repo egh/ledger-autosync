@@ -130,7 +130,7 @@ if importing from file, set account name for import')
                         help='pass in fid value for OFX files that do not \
 supply it')
     parser.add_argument('--unknown-account', type=str, dest='unknownaccount',
-                        default='Expenses:Misc',
+                        default=None,
                         help='specify account name to use when one can\'t be found by payee')
     parser.add_argument('--assertions', action='store_true', default=False,
                         help='create balance assertion entries')

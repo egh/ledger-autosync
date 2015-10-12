@@ -62,12 +62,12 @@ class Formatter(object):
 
     def mk_dynamic_account(self, txn, exclude):
         if self.lgr is None:
-            return self.unknownaccount
+            return self.unknownaccount or 'Expenses:Misc'
         else:
             payee = self.format_payee(txn)
             account = self.lgr.get_account_by_payee(payee, exclude)
             if account is None:
-                return self.unknownaccount
+                return self.unknownaccount or 'Expenses:Misc'
             else:
                 return account
 
@@ -167,6 +167,20 @@ class Formatter(object):
                 self.mk_dynamic_account(txn, exclude=self.name),
                 self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
+            acct1 = self.name
+            acct2 = self.name
+            if re.match('(buy|sell)', txn.type):
+                acct2 = self.unknownaccount or 'Assets:Unknown'
+            if txn.type == 'transfer' or txn.type == 'jrnlsec':
+                # both sides are the same, internal transfer
+                pass
+            if txn.type == 'reinvest':
+                # reinvestment of income
+                # TODO: make this configurable
+                acct2 = 'Income:Interest'
+            else:
+                # ???
+                pass
             if txn.settleDate is not None and \
                txn.settleDate != txn.tradeDate:
                 retval = "%s=%s %s\n" % (
@@ -179,10 +193,10 @@ class Formatter(object):
                     self.format_payee(txn))
             retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
             retval += self.format_txn_line(
-                acct=self.name,
+                acct=acct1,
                 amt=self.format_amount(txn.units, currency=txn.security, unlimited=True),
                 suffix=" @ %s" % (self.format_amount(txn.unit_price, unlimited=True)))
             retval += self.format_txn_line(
-                self.name,
-                self.format_amount(txn.units * txn.unit_price, reverse=True))
+                acct=acct2,
+                amt=self.format_amount(txn.units * txn.unit_price, reverse=True))
         return retval
