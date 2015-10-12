@@ -167,4 +167,11 @@ class TestFormatter(LedgerTestCase):
         self.assertEqual("$10.001",
                          formatter.format_amount(Decimal("10.001"),
                                                  unlimited=True))
-                         # "Unlimited flag works.")
+
+    def test_position(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
+        formatter = Formatter(account=ofx.account, name="Foo", indent=4,
+                              unknownaccount='Expenses:Unknown')
+        self.assertEqual(formatter.format_position(ofx.account.statement.positions[0]),
+                         """P 2014/06/30 06:00:00 FOO 22.517211
+""")

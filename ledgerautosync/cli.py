@@ -76,6 +76,10 @@ def sync(ledger, accounts, max_days=90, resync=False, indent=4, initial=False,
                     print formatter.format_txn(txn)
                 if assertions:
                     print formatter.format_balance(ofx.account.statement)
+                if hasattr(ofx.account.statement, 'positions'):
+                    for pos in ofx.account.statement.positions:
+                        print formatter.format_position(pos)
+
         except KeyboardInterrupt:
             raise
         except:
@@ -104,6 +108,9 @@ empty and no accountname supplied!")
         print formatter.format_txn(txn)
     if assertions:
         print formatter.format_balance(ofx.account.statement)
+    if hasattr(ofx.account.statement, 'positions'):
+        for pos in ofx.account.statement.positions:
+            print formatter.format_position(pos)
 
 
 def run(args=None, config=None):

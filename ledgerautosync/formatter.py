@@ -50,10 +50,7 @@ class Formatter(object):
         self.indent = indent
         self.currency = account.statement.currency
         self.currency = self.currency.upper()
-        if unknownaccount is not None:
-            self.unknownaccount = unknownaccount
-        else:
-            self.unknownaccount = 'Expenses:Misc'
+        self.unknownaccount = unknownaccount
         if self.currency == "USD":
             self.currency = "$"
 
@@ -200,3 +197,9 @@ class Formatter(object):
                 acct=acct2,
                 amt=self.format_amount(txn.units * txn.unit_price, reverse=True))
         return retval
+
+    def format_position(self, pos):
+        if hasattr(pos, 'date') and hasattr(pos, 'security') and \
+           hasattr(pos, 'unit_price'):
+            dateStr = pos.date.strftime("%Y/%m/%d %H:%M:%S")
+            return "P %s %s %s\n" % (dateStr, pos.security, pos.unit_price)
