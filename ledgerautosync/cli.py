@@ -50,36 +50,34 @@ found."""
 .ledgerrc file found, and -l argument no supplied.")
 
 
-def maybe_print_initial(ofx, ledger, formatter):
-    if (not(ledger.check_transaction_by_ofxid
-            (formatter.mk_ofxid(AUTOSYNC_INITIAL))) and
-            not(ledger.check_transaction_by_ofxid(ALL_AUTOSYNC_INITIAL))):
-        print formatter.format_initial_balance(ofx.account.statement)
+def print_results(formatter, ofx, ledger, txns, args):
+    if args.initial:
+        if (not(ledger.check_transaction_by_ofxid
+                (formatter.mk_ofxid(AUTOSYNC_INITIAL))) and
+                not(ledger.check_transaction_by_ofxid(ALL_AUTOSYNC_INITIAL))):
+            print formatter.format_initial_balance(ofx.account.statement)
+    for txn in txns:
+        print formatter.format_txn(txn)
+    if args.assertions:
+        print formatter.format_balance(ofx.account.statement)
+    if hasattr(ofx.account.statement, 'positions'):
+        for pos in ofx.account.statement.positions:
+            print formatter.format_position(pos)
 
 
-def sync(ledger, accounts, max_days=90, resync=False, indent=4, initial=False,
-         assertions=False, unknownaccount=None):
+def sync(ledger, accounts, args):
     sync = Synchronizer(ledger)
     for acct in accounts:
         try:
-            (ofx, txns) = sync.get_new_txns(acct, resync=resync,
-                                            max_days=max_days)
+            (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
+                                            max_days=args.max)
             if ofx is not None:
                 formatter = Formatter(account=ofx.account,
                                       name=acct.description,
                                       ledger=ledger,
-                                      indent=indent,
-                                      unknownaccount=unknownaccount)
-                if initial:
-                    maybe_print_initial(ofx, ledger, formatter)
-                for txn in txns:
-                    print formatter.format_txn(txn)
-                if assertions:
-                    print formatter.format_balance(ofx.account.statement)
-                if hasattr(ofx.account.statement, 'positions'):
-                    for pos in ofx.account.statement.positions:
-                        print formatter.format_position(pos)
-
+                                      indent=args.indent,
+                                      unknownaccount=args.unknownaccount)
+                print_results(formatter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
         except:
@@ -88,10 +86,10 @@ def sync(ledger, accounts, max_days=90, resync=False, indent=4, initial=False,
             traceback.print_exc(file=sys.stderr)
 
 
-def import_ofx(ledger, path, accountname=None, indent=4, initial=False,
-               assertions=False, fid=None, unknownaccount=None):
+def import_ofx(ledger, args):
     sync = Synchronizer(ledger)
-    (ofx, txns) = sync.parse_file(path)
+    (ofx, txns) = sync.parse_file(args.PATH)
+    accountname = args.account
     if accountname is None:
         if ofx.account.institution is not None:
             accountname = "%s:%s" % (ofx.account.institution.organization,
@@ -100,17 +98,9 @@ def import_ofx(ledger, path, accountname=None, indent=4, initial=False,
             raise EmptyInstitutionException("Institution provided by OFX is \
 empty and no accountname supplied!")
     formatter = Formatter(account=ofx.account, name=accountname,
-                          ledger=ledger, indent=indent, fid=fid,
-                          unknownaccount=unknownaccount)
-    if initial:
-        maybe_print_initial(ofx, ledger, formatter)
-    for txn in txns:
-        print formatter.format_txn(txn)
-    if assertions:
-        print formatter.format_balance(ofx.account.statement)
-    if hasattr(ofx.account.statement, 'positions'):
-        for pos in ofx.account.statement.positions:
-            print formatter.format_position(pos)
+                          ledger=ledger, indent=args.indent, fid=args.fid,
+                          unknownaccount=args.unknownaccount)
+    print_results(formatter, ofx, ledger, txns, args)
 
 
 def run(args=None, config=None):
@@ -138,7 +128,8 @@ if importing from file, set account name for import')
 supply it')
     parser.add_argument('--unknown-account', type=str, dest='unknownaccount',
                         default=None,
-                        help='specify account name to use when one can\'t be found by payee')
+                        help='specify account name to use when one can\'t be \
+found by payee')
     parser.add_argument('--assertions', action='store_true', default=False,
                         help='create balance assertion entries')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
@@ -193,14 +184,11 @@ transactions')
                 config = OfxConfig()
         accounts = config.accounts()
         if args.account:
-            accounts = [acct for acct in accounts if acct.description == args.account]
-        sync(ledger, accounts, max_days=args.max, resync=args.resync,
-             indent=args.indent, initial=args.initial,
-             assertions=args.assertions,unknownaccount=args.unknownaccount)
+            accounts = [acct for acct in accounts
+                        if acct.description == args.account]
+        sync(ledger, accounts, args)
     else:
-        import_ofx(ledger, args.PATH, args.account, indent=args.indent,
-                   initial=args.initial, assertions=args.assertions,
-                   fid=args.fid,unknownaccount=args.unknownaccount)
+        import_ofx(ledger, args)
 
 if __name__ == '__main__':
     run()
