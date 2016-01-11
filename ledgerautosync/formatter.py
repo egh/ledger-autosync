@@ -30,6 +30,7 @@ def clean_ofx_id(ofxid):
     ofxid = ofxid.replace('/', '_')
     ofxid = ofxid.replace('$', '_')
     ofxid = ofxid.replace(' ', '_')
+    ofxid = ofxid.replace('@', '_')
     return ofxid
 
 
