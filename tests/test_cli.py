@@ -36,7 +36,7 @@ class CliTest():
         config.accounts = Mock(return_value=[acct])
         run(['-l', os.path.join('fixtures', 'empty.lgr')], config)
         acct.download.assert_has_calls([call(7), call(14)])
-        config.accounts.assert_called_once()
+        self.assertEqual(config.accounts.call_count, 1)
 
     def test_filter_account(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
