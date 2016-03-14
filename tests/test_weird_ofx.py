@@ -17,39 +17,45 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.cli import import_ofx
+from ledgerautosync.cli import run
+from ledgerautosync.formatter import Formatter
 from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
+from ledgerautosync.sync import Synchronizer
 from ledgerautosync import EmptyInstitutionException
 import os.path
+from ofxclient.config import OfxConfig
 
 from unittest import TestCase
 from nose.plugins.attrib import attr
 from nose.tools import raises
 
+
 class WeirdOfxTest(object):
     @raises(EmptyInstitutionException)
     def test_no_institution_no_fid(self):
-        ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        import_ofx(self.lgr, ofxpath, accountname="Assets:Foo")
+        config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
+        run([os.path.join('fixtures', 'no-institution.ofx'),
+             '-a', 'Assets:Savings:Foo'], config)
 
     def test_no_institution(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        import_ofx(self.lgr, ofxpath, accountname="Assets:Foo", fid=1234567890)
+        Synchronizer(self.lgr).parse_file(ofxpath)
 
     @raises(EmptyInstitutionException)
     def test_no_institution_no_accountname(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        import_ofx(self.lgr, ofxpath, fid=1234567890)
+        (ofx, txns) = Synchronizer(self.lgr).parse_file(ofxpath)
+        Formatter(ofx.account, name=None)
 
     def test_apostrophe(self):
         ofxpath = os.path.join('fixtures', 'apostrophe.ofx')
-        import_ofx(self.lgr, ofxpath, fid=1234567890)
+        Synchronizer(self.lgr).parse_file(ofxpath)
 
     def test_one_settleDate(self):
         ofxpath = os.path.join('fixtures', 'fidelity-one-dtsettle.ofx')
-        import_ofx(self.lgr, ofxpath, fid=1234567890)
+        Synchronizer(self.lgr).parse_file(ofxpath)
 
-    
+
 @attr('hledger')
 class TestWeirdOfxHledger(TestCase, WeirdOfxTest):
     def setUp(self):

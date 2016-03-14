@@ -167,18 +167,31 @@ class Formatter(object):
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
-            if re.match('(buy|sell)', txn.type):
-                acct2 = self.unknownaccount or 'Assets:Unknown'
-            if txn.type == 'transfer' or txn.type == 'jrnlsec':
-                # both sides are the same, internal transfer
-                pass
-            if txn.type == 'reinvest':
-                # reinvestment of income
-                # TODO: make this configurable
-                acct2 = 'Income:Interest'
+            if isinstance(txn.type, str):
+                # recent versions of ofxparse
+                if re.match('^(buy|sell)', txn.type):
+                    acct2 = self.unknownaccount or 'Assets:Unknown'
+                elif txn.type == 'transfer' or txn.type == 'jrnlsec':
+                    # both sides are the same, internal transfer
+                    pass
+                elif txn.type == 'reinvest':
+                    # reinvestment of income
+                    # TODO: make this configurable
+                    acct2 = 'Income:Interest'
+                else:
+                    # ???
+                    pass
             else:
-                # ???
-                pass
+                # Old version of ofxparse
+                if (txn.type in [0, 1, 3, 4]):
+                    # buymf, sellmf, buystock, sellstock
+                    acct2 = self.unknownaccount or 'Assets:Unknown'
+                elif (txn.type == 2):
+                    # reinvest
+                    acct2 = 'Income:Interest'
+                else:
+                    # ???
+                    pass
             if txn.settleDate is not None and \
                txn.settleDate != txn.tradeDate:
                 retval = "%s=%s %s\n" % (
