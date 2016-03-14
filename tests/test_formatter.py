@@ -138,7 +138,9 @@ class TestFormatter(LedgerTestCase):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
         formatter = Formatter(account=ofx.account, name="Foo",
                               unknownaccount='Expenses:Unknown')
-        self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[2]),
+        if len(ofx.account.statement.transactions) > 2:
+            # older versions of ofxparse would skip these transactions
+            self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[2]),
 """2014/06/30 UNKNOWN
     ; ofxid: 1234.12345678.123456-01.3
     Foo  -9.060702 BAZ @ $21.928764
