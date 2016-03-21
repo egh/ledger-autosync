@@ -113,9 +113,12 @@ class Formatter(object):
 
     def format_balance(self, statement):
         retval = ""
-        if (hasattr(statement, 'balance_date')):
+        # Get date. Ensure the date is a date-like object.
+        if (hasattr(statement, 'balance_date') and
+            hasattr(statement.balance_date, 'strftime')):
             date = statement.balance_date
-        elif (hasattr(statement, 'end_date')):
+        elif (hasattr(statement, 'end_date') and
+              hasattr(statement.end_date, 'strftime')):
             date = statement.end_date
         else:
             return retval
