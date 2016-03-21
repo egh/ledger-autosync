@@ -1,2 +1,3 @@
-ofxclient
+BeautifulSoup4<4.4.0
+ofxclient<2.0.0
 ofxparse>=0.14

@@ -23,8 +23,12 @@ setup(name='ledger-autosync',
           ]
       },
       install_requires=[
-          "ofxclient",
-          "ofxparse>=0.14"
+          # Latest ofxclient is not working.
+          # TODO: Look into it
+          "ofxclient<2.0.0",
+          "ofxparse>=0.14",
+          # 4.4.0 complains about the way ofxparse uses it
+          "BeautifulSoup4<4.4.0",
       ],
       setup_requires=['nose>=1.0',
                       'mock'],
