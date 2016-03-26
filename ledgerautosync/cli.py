@@ -52,9 +52,9 @@ found."""
 
 def print_results(formatter, ofx, ledger, txns, args):
     if args.initial:
-        if (not(ledger.check_transaction_by_ofxid
-                (formatter.mk_ofxid(AUTOSYNC_INITIAL))) and
-                not(ledger.check_transaction_by_ofxid(ALL_AUTOSYNC_INITIAL))):
+        if (not(ledger.check_transaction_by_id
+                ("ofxid", formatter.mk_ofxid(AUTOSYNC_INITIAL))) and
+                not(ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL))):
             print formatter.format_initial_balance(ofx.account.statement)
     for txn in txns:
         print formatter.format_txn(txn)

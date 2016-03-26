@@ -32,7 +32,7 @@ class Synchronizer(object):
 
     def is_txn_synced(self, acctid, txn):
         ofxid = "%s.%s" % (acctid, txn.id)
-        return self.lgr.check_transaction_by_ofxid(ofxid)
+        return self.lgr.check_transaction_by_id("ofxid", ofxid)
 
     def filter(self, ofx):
         txns = ofx.account.statement.transactions

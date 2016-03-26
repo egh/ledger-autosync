@@ -152,9 +152,9 @@ class Ledger(object):
         else:
             return d[0]
 
-    def check_transaction_by_ofxid(self, ofxid):
+    def check_transaction_by_id(self, key, value):
         return (self.get_transaction(
-            ["-E", "meta", "ofxid=%s" % (clean_ofx_id(ofxid))])
+            ["-E", "meta", "%s=%s" % (key, clean_ofx_id(value))])
             is not None)
 
     def get_account_by_payee(self, payee, exclude):
@@ -194,8 +194,8 @@ class LedgerPython(object):
             else:
                 self.journal = ledger.read_journal(ledger_file)
 
-    def check_transaction_by_ofxid(self, ofxid):
-        q = self.journal.query("-E meta ofxid=\"%s\"" % (clean_ofx_id(ofxid)))
+    def check_transaction_by_id(self, key, value):
+        q = self.journal.query("-E meta %s=\"%s\"" % (key, clean_ofx_id(value)))
         return len(q) > 0
 
     def get_account_by_payee(self, payee, exclude):
@@ -221,8 +221,8 @@ class HLedger(object):
         logging.debug(" ".join(cmd))
         return subprocess.check_output(cmd)
 
-    def check_transaction_by_ofxid(self, ofxid):
-        cmd = ["reg", "tag:ofxid=%s" % (clean_ofx_id(ofxid))]
+    def check_transaction_by_id(self, key, value):
+        cmd = ["reg", "tag:%s=%s" % (key, clean_ofx_id(value))]
         return self.run(cmd) != ''
 
     def get_account_by_payee(self, payee, exclude):

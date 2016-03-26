@@ -29,13 +29,13 @@ class LedgerTest(object):
     dynamic_ledger_path = os.path.join('fixtures', 'checking-dynamic-account.lgr')
 
     def check_transaction(self):
-        self.assertTrue(self.lgr.check_transaction_by_ofxid("1101.1452687~7.0000486"))
+        self.assertTrue(self.lgr.check_transaction_by_id("ofxid", "1101.1452687~7.0000486"))
 
     def test_nonexistent_transaction(self):
-        self.assertFalse(self.lgr.check_transaction_by_ofxid("FOO"))
+        self.assertFalse(self.lgr.check_transaction_by_id("ofxid", "FOO"))
 
     def test_empty_transaction(self):
-        self.assertTrue(self.lgr.check_transaction_by_ofxid("empty"))
+        self.assertTrue(self.lgr.check_transaction_by_id("ofxid", "empty"))
 
     def test_get_account_by_payee(self):
         account = self.lgr.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )", exclude="Assets:Foo")
@@ -47,7 +47,7 @@ class LedgerTest(object):
         self.assertEqual(account, "Expenses:Bar")
 
     def test_ofx_quoting(self):
-        self.assertEqual(self.lgr.check_transaction_by_ofxid("1/2"), True,
+        self.assertEqual(self.lgr.check_transaction_by_id("ofxid", "1/2"), True,
                          msg="Did not find 1/2 in %s" % (self.lgr))
 
 
