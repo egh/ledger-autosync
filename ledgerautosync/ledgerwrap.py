@@ -201,7 +201,7 @@ class LedgerPython(object):
     def get_account_by_payee(self, payee, exclude):
         q = self.journal.query("--real payee '%s'" % (clean_payee(payee)))
         accts = [p.account for p in q]
-        accts_filtered = [a for a in accts if a != exclude]
+        accts_filtered = [a for a in accts if a.fullname() != exclude]
         if accts_filtered:
             return str(accts_filtered[-1])
         else:
