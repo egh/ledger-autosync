@@ -35,6 +35,7 @@ class WeirdOfxTest(object):
     def test_no_institution_no_fid(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         run([os.path.join('fixtures', 'no-institution.ofx'),
+             '-l', os.path.join('fixtures', 'empty.lgr'),
              '-a', 'Assets:Savings:Foo'], config)
 
     def test_no_institution(self):
