@@ -147,29 +147,6 @@ class TestOfxFormatter(LedgerTestCase):
     Foo  $198.69
 """)
 
-    def test_format_amount(self):
-        ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
-        formatter = OfxFormatter(account=ofx.account, name="Foo", indent=4,
-                                 unknownaccount='Expenses:Unknown')
-        self.assertEqual("$10.00",
-                         formatter.format_amount(Decimal("10.001")),
-                         "Formats to 2 points precision, $ by default")
-        self.assertEqual("10.00 USD",
-                         formatter.format_amount(Decimal(10), currency="USD"),
-                         "Longer commodity names come after")
-        self.assertEqual("-$10.00",
-                         formatter.format_amount(Decimal(10), reverse=True),
-                         "Reverse flag works.")
-        self.assertEqual("10.00 \"ABC123\"",
-                         formatter.format_amount(Decimal(10), currency="ABC123"),
-                         "Currencies with numbers are quoted")
-        self.assertEqual("10.00 \"A BC\"",
-                         formatter.format_amount(Decimal(10), currency="A BC"),
-                         "Currencies with whitespace are quoted")
-        self.assertEqual("$10.001",
-                         formatter.format_amount(Decimal("10.001"),
-                                                 unlimited=True))
-
     def test_position(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
         formatter = OfxFormatter(account=ofx.account, name="Foo", indent=4,

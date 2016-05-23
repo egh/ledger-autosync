@@ -34,42 +34,21 @@ def clean_ofx_id(ofxid):
     return ofxid
 
 
-class OfxFormatter(object):
-    def __init__(self, account, name, indent=4, ledger=None, fid=None,
-                 unknownaccount=None):
-        self.acctid = account.account_id
-        if fid is not None:
-            self.fid = fid
-        else:
-            if account.institution is None:
-                raise EmptyInstitutionException(
-                    "Institution provided by OFX is empty and no fid supplied!")
-            else:
-                self.fid = account.institution.fid
-        self.name = name
-        self.lgr = ledger
-        self.indent = indent
-        self.currency = account.statement.currency
-        self.currency = self.currency.upper()
-        self.unknownaccount = unknownaccount
+class Formatter(object):
+    def __init__(self, currency='$'):
+        self.currency = currency.upper()
         if self.currency == "USD":
             self.currency = "$"
 
-    def mk_ofxid(self, txnid):
-        return clean_ofx_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
+    def format_txn_line(self, acct, amt, suffix=""):
+        space_count = 52 - self.indent - len(acct) - len(amt)
+        if space_count < 2:
+            space_count = 2
+        return "%s%s%s%s%s\n" % (
+            " " * self.indent, acct, " "*space_count, amt, suffix)
 
-    def mk_dynamic_account(self, txn, exclude):
-        if self.lgr is None:
-            return self.unknownaccount or 'Expenses:Misc'
-        else:
-            payee = self.format_payee(txn)
-            account = self.lgr.get_account_by_payee(payee, exclude)
-            if account is None:
-                return self.unknownaccount or 'Expenses:Misc'
-            else:
-                return account
-
-    def format_amount(self, amount, reverse=False, unlimited=False, currency=None):
+    def format_amount(self, amount, reverse=False, unlimited=False,
+                      currency=None):
         if currency is None:
             currency = self.currency
         # Commodities must be quoted in ledger if they have
@@ -91,6 +70,42 @@ class OfxFormatter(object):
             # USD comes after
             return "%s%s %s" % (prefix, amt, currency)
 
+    def format_date(self, date):
+        return date.strftime("%Y/%m/%d")
+
+
+class OfxFormatter(Formatter):
+    def __init__(self, account, name, indent=4, ledger=None, fid=None,
+                 unknownaccount=None):
+        super(OfxFormatter, self).__init__(account.statement.currency)
+        self.acctid = account.account_id
+        if fid is not None:
+            self.fid = fid
+        else:
+            if account.institution is None:
+                raise EmptyInstitutionException(
+                    "Institution provided by OFX is empty and no fid supplied!")
+            else:
+                self.fid = account.institution.fid
+        self.name = name
+        self.lgr = ledger
+        self.indent = indent
+        self.unknownaccount = unknownaccount
+
+    def mk_ofxid(self, txnid):
+        return clean_ofx_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
+
+    def mk_dynamic_account(self, txn, exclude):
+        if self.lgr is None:
+            return self.unknownaccount or 'Expenses:Misc'
+        else:
+            payee = self.format_payee(txn)
+            account = self.lgr.get_account_by_payee(payee, exclude)
+            if account is None:
+                return self.unknownaccount or 'Expenses:Misc'
+            else:
+                return account
+
     def format_payee(self, txn):
         payee = None
         memo = None
@@ -107,9 +122,6 @@ class OfxFormatter(object):
             return payee
         else:
             return "%s %s" % (payee, memo)
-
-    def format_date(self, date):
-        return date.strftime("%Y/%m/%d")
 
     def format_balance(self, statement):
         retval = ""
@@ -147,13 +159,6 @@ class OfxFormatter(object):
                 "Assets:Equity",
                 self.format_amount(initbal, reverse=True))
         return retval
-
-    def format_txn_line(self, acct, amt, suffix=""):
-        space_count = 52 - self.indent - len(acct) - len(amt)
-        if space_count < 2:
-            space_count = 2
-        return "%s%s%s%s%s\n" % (
-            " " * self.indent, acct, " "*space_count, amt, suffix)
 
     def format_txn(self, txn):
         retval = ""
