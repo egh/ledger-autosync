@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.formatter import Formatter
+from ledgerautosync.formatter import OfxFormatter
 from ledgerautosync.ledgerwrap import Ledger
 import os.path
 from decimal import Decimal
@@ -29,10 +29,10 @@ from tests import LedgerTestCase
 
 
 @attr('generic')
-class TestFormatter(LedgerTestCase):
+class TestOfxFormatter(LedgerTestCase):
     def test_checking(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo")
+        formatter = OfxFormatter(account=ofx.account, name="Foo")
         self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; ofxid: 1101.1452687~7.0000486
@@ -55,7 +55,7 @@ class TestFormatter(LedgerTestCase):
 
     def test_indent(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo", indent=4)
+        formatter = OfxFormatter(account=ofx.account, name="Foo", indent=4)
         # testing indent, so do not use the string collapsing version of assert
         self.assertEqual(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
@@ -66,7 +66,7 @@ class TestFormatter(LedgerTestCase):
 
     def test_investments(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo")
+        formatter = OfxFormatter(account=ofx.account, name="Foo")
         self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
@@ -84,7 +84,7 @@ class TestFormatter(LedgerTestCase):
     def test_dynamic_account(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         ledger = Ledger(os.path.join('fixtures', 'checking-dynamic-account.lgr'))
-        formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        formatter = OfxFormatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[1]),
 """2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
   ; ofxid: 1101.1452687~7.0000487
@@ -95,7 +95,7 @@ class TestFormatter(LedgerTestCase):
     def test_balance_assertion(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
-        formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        formatter = OfxFormatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(formatter.format_balance(ofx.account.statement),
 """2013/05/25 * --Autosync Balance Assertion
   Assets:Foo  $0.00 = $100.99
@@ -104,7 +104,7 @@ class TestFormatter(LedgerTestCase):
     def test_initial_balance(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
-        formatter = Formatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        formatter = OfxFormatter(account=ofx.account, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(formatter.format_initial_balance(ofx.account.statement),
 """2000/01/01 * --Autosync Initial Balance
   ; ofxid: 1101.1452687~7.autosync_initial
@@ -114,8 +114,8 @@ class TestFormatter(LedgerTestCase):
 
     def test_unknownaccount(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo",
-                              unknownaccount='Expenses:Unknown')
+        formatter = OfxFormatter(account=ofx.account, name="Foo",
+                                 unknownaccount='Expenses:Unknown')
         self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; ofxid: 1101.1452687~7.0000486
@@ -125,7 +125,7 @@ class TestFormatter(LedgerTestCase):
 
     def test_quote_commodity(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo")
+        formatter = OfxFormatter(account=ofx.account, name="Foo")
         self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[0]),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
@@ -136,8 +136,8 @@ class TestFormatter(LedgerTestCase):
     # Check that <TRANSFER> txns are parsed.
     def test_transfer_txn(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo",
-                              unknownaccount='Expenses:Unknown')
+        formatter = OfxFormatter(account=ofx.account, name="Foo",
+                                 unknownaccount='Expenses:Unknown')
         if len(ofx.account.statement.transactions) > 2:
             # older versions of ofxparse would skip these transactions
             self.assertEqualLedgerPosting(formatter.format_txn(ofx.account.statement.transactions[2]),
@@ -149,8 +149,8 @@ class TestFormatter(LedgerTestCase):
 
     def test_format_amount(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo", indent=4,
-                              unknownaccount='Expenses:Unknown')
+        formatter = OfxFormatter(account=ofx.account, name="Foo", indent=4,
+                                 unknownaccount='Expenses:Unknown')
         self.assertEqual("$10.00",
                          formatter.format_amount(Decimal("10.001")),
                          "Formats to 2 points precision, $ by default")
@@ -172,8 +172,8 @@ class TestFormatter(LedgerTestCase):
 
     def test_position(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
-        formatter = Formatter(account=ofx.account, name="Foo", indent=4,
-                              unknownaccount='Expenses:Unknown')
+        formatter = OfxFormatter(account=ofx.account, name="Foo", indent=4,
+                                 unknownaccount='Expenses:Unknown')
         self.assertEqual(formatter.format_position(ofx.account.statement.positions[0]),
                          """P 2014/06/30 06:00:00 FOO 22.517211
 """)

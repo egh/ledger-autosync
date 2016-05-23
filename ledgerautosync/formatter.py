@@ -34,7 +34,7 @@ def clean_ofx_id(ofxid):
     return ofxid
 
 
-class Formatter(object):
+class OfxFormatter(object):
     def __init__(self, account, name, indent=4, ledger=None, fid=None,
                  unknownaccount=None):
         self.acctid = account.account_id

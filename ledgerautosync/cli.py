@@ -22,7 +22,7 @@ from __future__ import absolute_import
 from ofxclient.config import OfxConfig
 import argparse
 from ledgerautosync import EmptyInstitutionException
-from ledgerautosync.formatter import Formatter, AUTOSYNC_INITIAL, \
+from ledgerautosync.formatter import OfxFormatter, AUTOSYNC_INITIAL, \
     ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger, LedgerPython
@@ -72,11 +72,11 @@ def sync(ledger, accounts, args):
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
                                             max_days=args.max)
             if ofx is not None:
-                formatter = Formatter(account=ofx.account,
-                                      name=acct.description,
-                                      ledger=ledger,
-                                      indent=args.indent,
-                                      unknownaccount=args.unknownaccount)
+                formatter = OfxFormatter(account=ofx.account,
+                                         name=acct.description,
+                                         ledger=ledger,
+                                         indent=args.indent,
+                                         unknownaccount=args.unknownaccount)
                 print_results(formatter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -97,9 +97,9 @@ def import_ofx(ledger, args):
         else:
             raise EmptyInstitutionException("Institution provided by OFX is \
 empty and no accountname supplied!")
-    formatter = Formatter(account=ofx.account, name=accountname,
-                          ledger=ledger, indent=args.indent, fid=args.fid,
-                          unknownaccount=args.unknownaccount)
+    formatter = OfxFormatter(account=ofx.account, name=accountname,
+                             ledger=ledger, indent=args.indent, fid=args.fid,
+                             unknownaccount=args.unknownaccount)
     print_results(formatter, ofx, ledger, txns, args)
 
 
