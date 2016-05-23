@@ -26,15 +26,14 @@ AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
 
 
-def clean_ofx_id(ofxid):
-    ofxid = ofxid.replace('/', '_')
-    ofxid = ofxid.replace('$', '_')
-    ofxid = ofxid.replace(' ', '_')
-    ofxid = ofxid.replace('@', '_')
-    return ofxid
-
-
 class Formatter(object):
+    @staticmethod
+    def clean_id(id):
+        return id.replace('/', '_').\
+            replace('$', '_').\
+            replace(' ', '_').\
+            replace('@', '_')
+
     def __init__(self, currency='$'):
         self.currency = currency.upper()
         if self.currency == "USD":
@@ -93,7 +92,7 @@ class OfxFormatter(Formatter):
         self.unknownaccount = unknownaccount
 
     def mk_ofxid(self, txnid):
-        return clean_ofx_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
+        return Formatter.clean_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
 
     def mk_dynamic_account(self, txn, exclude):
         if self.lgr is None:

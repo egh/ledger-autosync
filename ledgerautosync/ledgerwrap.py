@@ -24,7 +24,7 @@ import subprocess
 from subprocess import Popen, PIPE
 from threading import Thread
 from Queue import Queue, Empty
-from ledgerautosync.formatter import clean_ofx_id
+from ledgerautosync.formatter import Formatter
 import logging
 
 
@@ -154,7 +154,7 @@ class Ledger(object):
 
     def check_transaction_by_id(self, key, value):
         return (self.get_transaction(
-            ["-E", "meta", "%s=%s" % (key, clean_ofx_id(value))])
+            ["-E", "meta", "%s=%s" % (key, Formatter.clean_id(value))])
             is not None)
 
     def get_account_by_payee(self, payee, exclude):
@@ -195,7 +195,8 @@ class LedgerPython(object):
                 self.journal = ledger.read_journal(ledger_file)
 
     def check_transaction_by_id(self, key, value):
-        q = self.journal.query("-E meta %s=\"%s\"" % (key, clean_ofx_id(value)))
+        q = self.journal.query("-E meta %s=\"%s\"" %
+                               (key, Formatter.clean_id(value)))
         return len(q) > 0
 
     def get_account_by_payee(self, payee, exclude):
@@ -222,7 +223,7 @@ class HLedger(object):
         return subprocess.check_output(cmd)
 
     def check_transaction_by_id(self, key, value):
-        cmd = ["reg", "tag:%s=%s" % (key, clean_ofx_id(value))]
+        cmd = ["reg", "tag:%s=%s" % (key, Formatter.clean_id(value))]
         return self.run(cmd) != ''
 
     def get_account_by_payee(self, payee, exclude):
