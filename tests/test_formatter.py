@@ -17,8 +17,9 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.formatter import Formatter
+from ledgerautosync.formatter import Formatter, CsvFormatter
 from decimal import Decimal
+import csv
 
 from nose.plugins.attrib import attr
 from tests import LedgerTestCase
@@ -58,3 +59,29 @@ class TestFormatter(LedgerTestCase):
                 "Foo",
                 indent_formatter.format_amount(Decimal("10.00"))),
             r'^  Foo.*$')
+
+
+@attr('generic')
+class TestCsvFormatter(LedgerTestCase):
+    def test_format_amount(self):
+        with open('fixtures/paypal.csv', 'rb') as f:
+            dialect = csv.Sniffer().sniff(f.read(1024))
+            f.seek(0)
+            dialect.skipinitialspace = True
+            reader = csv.DictReader(f, dialect=dialect)
+            formatter = CsvFormatter(name='Foo', csv=reader)
+            self.assertEqual(formatter.csv_type, 'paypal')
+            self.assertEqual(
+                formatter.format_txn(reader.next()),
+                """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
+    ; csvid: paypal.XYZ1
+    Foo                                   -20.00 USD
+    Transfer:Paypal                        20.00 USD
+""")
+            self.assertEqual(
+                formatter.format_txn(reader.next()),
+                """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
+    ; csvid: paypal.XYZ2
+    Foo                                    20.00 USD
+    Transfer:Paypal                       -20.00 USD
+""")

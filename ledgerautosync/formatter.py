@@ -21,6 +21,7 @@ from decimal import Decimal
 import re
 from ofxparse.ofxparse import Transaction, InvestmentTransaction
 from ledgerautosync import EmptyInstitutionException
+import datetime
 
 AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
@@ -226,3 +227,49 @@ class OfxFormatter(Formatter):
            hasattr(pos, 'unit_price'):
             dateStr = pos.date.strftime("%Y/%m/%d %H:%M:%S")
             return "P %s %s %s\n" % (dateStr, pos.security, pos.unit_price)
+
+
+class CsvFormatter(Formatter):
+    PAYPAL_FIELDS = ["Date", "Time", "Time Zone", "Name", "Type", "Status", "Currency", "Gross", "Fee", "Net", "From Email Address", "To Email Address", "Transaction ID", "Counterparty Status", "Shipping Address", "Address Status", "Item Title", "Item ID", "Shipping and Handling Amount", "Insurance Amount", "Sales Tax", "Option 1 Name", "Option 1 Value", "Option 2 Name", "Option 2 Value", "Auction Site", "Buyer ID", "Item URL", "Closing Date", "Escrow Id", "Invoice Id", "Reference Txn ID", "Invoice Number", "Custom Number", "Receipt ID", "Balance", "Contact Phone Number", ""]
+
+    def __init__(self, name, csv, indent=4, ledger=None, unknownaccount=None):
+        super(CsvFormatter, self).__init__(
+            ledger=ledger,
+            indent=indent,
+            unknownaccount=unknownaccount)
+        self.name = name
+        self.csv = csv
+        if sorted(self.csv.fieldnames) == sorted(self.PAYPAL_FIELDS):
+            self.csv_type = "paypal"
+        else:
+            raise Exception('Cannot determine CSV type')
+
+    def mk_csv_id_line(self, txn_id):
+        return "%s; csvid: %s.%s\n" % (" " * self.indent,
+                                       self.csv_type,
+                                       Formatter.clean_id(txn_id))
+
+    def format_txn(self, row):
+        retval = ""
+        d = datetime.datetime.strptime(row['Date'], "%m/%d/%Y")
+        payee = "%s %s %s ID: %s, %s"%(row['Name'], row['To Email Address'], row['Item Title'], row['Transaction ID'], row['Type'])
+        retval += "%s %s\n"%(self.format_date(d), re.sub(r"\s+", " ", payee))
+        currency = row['Currency']
+        if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
+            return ""
+        retval += self.mk_csv_id_line(row['Transaction ID'])
+        if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
+            retval += self.format_txn_line(
+                self.name,
+                self.format_amount(Decimal(row['Net']), currency=currency))
+            retval += self.format_txn_line(
+                "Transfer:Paypal",
+                self.format_amount(Decimal(row['Net']), currency=currency, reverse=True))
+        else:
+            retval += self.format_txn_line(
+                self.name,
+                self.format_amount(Decimal(row['Gross']), currency=currency))
+            retval += self.format_txn_line(
+                "Transfer:Paypal",
+                self.format_amount(Decimal(row['Gross']), currency=currency, reverse=True))
+        return retval
