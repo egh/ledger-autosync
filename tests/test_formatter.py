@@ -25,7 +25,7 @@ from tests import LedgerTestCase
 
 
 @attr('generic')
-class TestOfxFormatter(LedgerTestCase):
+class TestFormatter(LedgerTestCase):
     def test_format_amount(self):
         formatter = Formatter()
         self.assertEqual("$10.00",
@@ -47,7 +47,14 @@ class TestOfxFormatter(LedgerTestCase):
         self.assertEqual("$10.001",
                          formatter.format_amount(Decimal("10.001"),
                                                  unlimited=True))
-        eur_formatter = Formatter("EUR")
+        eur_formatter = Formatter(currency="EUR")
         self.assertEqual("10.00 EUR",
                          eur_formatter.format_amount(Decimal("10.00")),
                          "Uses default currency")
+
+        indent_formatter = Formatter(indent=2)
+        self.assertRegexpMatches(
+            indent_formatter.format_txn_line(
+                "Foo",
+                indent_formatter.format_amount(Decimal("10.00"))),
+            r'^  Foo.*$')

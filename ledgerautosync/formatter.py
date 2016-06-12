@@ -34,7 +34,10 @@ class Formatter(object):
             replace(' ', '_').\
             replace('@', '_')
 
-    def __init__(self, currency='$'):
+    def __init__(self, ledger=None, unknownaccount=None, currency='$', indent=4):
+        self.lgr = ledger
+        self.indent = indent
+        self.unknownaccount = unknownaccount
         self.currency = currency.upper()
         if self.currency == "USD":
             self.currency = "$"
@@ -76,7 +79,10 @@ class Formatter(object):
 class OfxFormatter(Formatter):
     def __init__(self, account, name, indent=4, ledger=None, fid=None,
                  unknownaccount=None):
-        super(OfxFormatter, self).__init__(account.statement.currency)
+        super(OfxFormatter, self).__init__(ledger=ledger,
+                                           indent=indent,
+                                           unknownaccount=unknownaccount,
+                                           currency=account.statement.currency)
         self.acctid = account.account_id
         if fid is not None:
             self.fid = fid
@@ -87,9 +93,6 @@ class OfxFormatter(Formatter):
             else:
                 self.fid = account.institution.fid
         self.name = name
-        self.lgr = ledger
-        self.indent = indent
-        self.unknownaccount = unknownaccount
 
     def mk_ofxid(self, txnid):
         return Formatter.clean_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
