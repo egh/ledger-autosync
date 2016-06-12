@@ -75,6 +75,16 @@ class Formatter(object):
     def format_date(self, date):
         return date.strftime("%Y/%m/%d")
 
+    def mk_dynamic_account(self, payee, exclude):
+        if self.lgr is None:
+            return self.unknownaccount or 'Expenses:Misc'
+        else:
+            account = self.lgr.get_account_by_payee(payee, exclude)
+            if account is None:
+                return self.unknownaccount or 'Expenses:Misc'
+            else:
+                return account
+
 
 class OfxFormatter(Formatter):
     def __init__(self, account, name, indent=4, ledger=None, fid=None,
@@ -96,17 +106,6 @@ class OfxFormatter(Formatter):
 
     def mk_ofxid(self, txnid):
         return Formatter.clean_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
-
-    def mk_dynamic_account(self, txn, exclude):
-        if self.lgr is None:
-            return self.unknownaccount or 'Expenses:Misc'
-        else:
-            payee = self.format_payee(txn)
-            account = self.lgr.get_account_by_payee(payee, exclude)
-            if account is None:
-                return self.unknownaccount or 'Expenses:Misc'
-            else:
-                return account
 
     def format_payee(self, txn):
         payee = None
@@ -172,7 +171,7 @@ class OfxFormatter(Formatter):
             retval += self.format_txn_line(
                 self.name, self.format_amount(txn.amount))
             retval += self.format_txn_line(
-                self.mk_dynamic_account(txn, exclude=self.name),
+                self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
                 self.format_amount(txn.amount, reverse=True))
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
