@@ -59,7 +59,8 @@ class Synchronizer(object):
             logging.debug(
                 "Downloading %d days of transactions for %s (max_days=%d)." % (
                     days, acct.description, max_days))
-            raw = acct.download(days)
+            raw = acct.download(days=days)
+
             ofx = OfxParser.parse(raw)
             if not(hasattr(ofx, 'account')):
                 # some banks return this for no txns

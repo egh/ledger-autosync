@@ -31,11 +31,11 @@ class CliTest():
     def test_run(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         acct = config.accounts()[0]
-        acct.download = Mock(side_effect=lambda *args:
+        acct.download = Mock(side_effect=lambda *args, **kwargs:
                              file(os.path.join('fixtures', 'checking.ofx')))
         config.accounts = Mock(return_value=[acct])
         run(['-l', os.path.join('fixtures', 'empty.lgr')], config)
-        acct.download.assert_has_calls([call(7), call(14)])
+        acct.download.assert_has_calls([call(days=7), call(days=14)])
         self.assertEqual(config.accounts.call_count, 1)
 
     def test_filter_account(self):
@@ -44,13 +44,13 @@ class CliTest():
                    if acct.description == 'Assets:Savings:Foo')
         bar = next(acct for acct in config.accounts()
                    if acct.description == 'Assets:Checking:Bar')
-        foo.download = Mock(side_effect=lambda *args:
+        foo.download = Mock(side_effect=lambda *args, **kwargs:
                             file(os.path.join('fixtures', 'checking.ofx')))
         bar.download = Mock()
         config.accounts = Mock(return_value=[foo, bar])
         run(['-l', os.path.join('fixtures', 'checking.lgr'),
              '-a', 'Assets:Savings:Foo'], config)
-        foo.download.assert_has_calls([call(7)])
+        foo.download.assert_has_calls([call(days=7)])
         bar.download.assert_not_called()
 
 
