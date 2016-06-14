@@ -61,6 +61,9 @@ class Synchronizer(object):
                     days, acct.description, max_days))
             raw = acct.download(days=days)
 
+            if raw.read() == 'Server error occured.  Received HttpStatusCode of 400':
+                raise Exception("Error connecting to account %s"%(acct.description))
+            raw.seek(0)
             ofx = OfxParser.parse(raw)
             if not(hasattr(ofx, 'account')):
                 # some banks return this for no txns
