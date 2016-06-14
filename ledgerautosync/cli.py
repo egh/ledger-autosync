@@ -21,8 +21,9 @@
 from __future__ import absolute_import
 from ofxclient.config import OfxConfig
 import argparse
+import csv
 from ledgerautosync import EmptyInstitutionException
-from ledgerautosync.formatter import OfxFormatter, AUTOSYNC_INITIAL, \
+from ledgerautosync.formatter import OfxFormatter, CsvFormatter, AUTOSYNC_INITIAL, \
     ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger, LedgerPython
@@ -64,7 +65,6 @@ def print_results(formatter, ofx, ledger, txns, args):
         for pos in ofx.account.statement.positions:
             print formatter.format_position(pos)
 
-
 def sync(ledger, accounts, args):
     sync = Synchronizer(ledger)
     for acct in accounts:
@@ -101,6 +101,25 @@ empty and no accountname supplied!")
                              ledger=ledger, indent=args.indent, fid=args.fid,
                              unknownaccount=args.unknownaccount)
     print_results(formatter, ofx, ledger, txns, args)
+
+
+def import_csv(ledger, args):
+    sync = Synchronizer(ledger)
+    accountname = args.account
+    if accountname is None:
+        raise EmptyInstitutionException("No accountname supplied!")
+    with open(args.PATH, 'rb') as f:
+            dialect = csv.Sniffer().sniff(f.read(1024))
+            f.seek(0)
+            dialect.skipinitialspace = True
+            reader = csv.DictReader(f, dialect=dialect)
+            formatter = CsvFormatter(name=accountname,
+                                     csv=reader,
+                                     ledger=ledger,
+                                     indent=args.indent,
+                                     unknownaccount=args.unknownaccount)
+            for row in reader:
+                print formatter.format_txn(row)
 
 
 def run(args=None, config=None):
@@ -188,7 +207,11 @@ transactions')
                         if acct.description == args.account]
         sync(ledger, accounts, args)
     else:
-        import_ofx(ledger, args)
+        _, file_extension = os.path.splitext(args.PATH)
+        if file_extension == '.csv':
+            import_csv(ledger, args)
+        else:
+            import_ofx(ledger, args)
 
 if __name__ == '__main__':
     run()

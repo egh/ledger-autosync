@@ -38,6 +38,10 @@ class CliTest():
         acct.download.assert_has_calls([call(days=7), call(days=14)])
         self.assertEqual(config.accounts.call_count, 1)
 
+    def test_run_csv_file(self):
+        config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
+        run(['-a', 'Paypal', '-l', os.path.join('fixtures', 'empty.lgr'), os.path.join('fixtures', 'paypal.csv')], config)
+
     def test_filter_account(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         foo = next(acct for acct in config.accounts()
