@@ -76,7 +76,7 @@ class TestCsvFormatter(LedgerTestCase):
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
     ; csvid: paypal.XYZ1
     Foo                                   -20.00 USD
-    Transfer:Paypal                        20.00 USD
+    Expenses:Misc                          20.00 USD
 """)
             self.assertEqual(
                 formatter.format_txn(reader.next()),

@@ -270,6 +270,7 @@ class CsvFormatter(Formatter):
                 self.name,
                 self.format_amount(Decimal(row['Gross']), currency=currency))
             retval += self.format_txn_line(
-                "Transfer:Paypal",
+                # TODO Our payees are breaking the payee search in mk_dynamic_account
+                "Expenses:Misc", #self.mk_dynamic_account(payee, exclude=self.name),
                 self.format_amount(Decimal(row['Gross']), currency=currency, reverse=True))
         return retval
