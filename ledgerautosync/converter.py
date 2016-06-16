@@ -27,6 +27,36 @@ AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
 
 
+class Amount(object):
+    def __init__(self, number, currency, reverse=False, unlimited=False):
+        self.number = number
+        self.reverse = reverse
+        self.unlimited = unlimited
+        self.currency = currency
+
+    def format(self):
+        # Commodities must be quoted in ledger if they have
+        # whitespace or numerals.
+        if re.search(r'[\s0-9]', self.currency):
+            currency = "\"%s\"" % (self.currency)
+        else:
+            currency = self.currency
+        if self.unlimited:
+            number = str(abs(self.number))
+        else:
+            number = "%0.2f" % (abs(self.number))
+        if self.number.is_signed() != self.reverse:
+            prefix = "-"
+        else:
+            prefix = ""
+        if len(currency) == 1:
+            # $ comes before
+            return "%s%s%s" % (prefix, currency, number)
+        else:
+            # USD comes after
+            return "%s%s %s" % (prefix, number, currency)
+
+
 class Converter(object):
     @staticmethod
     def clean_id(id):
@@ -49,29 +79,6 @@ class Converter(object):
             space_count = 2
         return "%s%s%s%s%s\n" % (
             " " * self.indent, acct, " "*space_count, amt, suffix)
-
-    def format_amount(self, amount, reverse=False, unlimited=False,
-                      currency=None):
-        if currency is None:
-            currency = self.currency
-        # Commodities must be quoted in ledger if they have
-        # whitespace or numerals.
-        if re.search(r'[\s0-9]', currency):
-            currency = "\"%s\"" % (currency)
-        if unlimited:
-            amt = str(abs(amount))
-        else:
-            amt = "%0.2f" % (abs(amount))
-        if amount.is_signed() != reverse:
-            prefix = "-"
-        else:
-            prefix = ""
-        if len(currency) == 1:
-            # $ comes before
-            return "%s%s%s" % (prefix, currency, amt)
-        else:
-            # USD comes after
-            return "%s%s %s" % (prefix, amt, currency)
 
     def format_date(self, date):
         return date.strftime("%Y/%m/%d")
@@ -141,8 +148,8 @@ class OfxConverter(Converter):
                       (self.format_date(date))
             retval += self.format_txn_line(
                 self.name,
-                self.format_amount(Decimal("0")),
-                " = %s" % (self.format_amount(statement.balance)))
+                Amount(Decimal("0"), currency=self.currency).format(),
+                " = %s" % (Amount(statement.balance, currency=self.currency).format()))
         return retval
 
     def format_initial_balance(self, statement):
@@ -156,10 +163,10 @@ class OfxConverter(Converter):
             retval += "%s; ofxid: %s\n" % (" " * self.indent,
                                            self.mk_ofxid(AUTOSYNC_INITIAL))
             retval += self.format_txn_line(self.name,
-                                           self.format_amount(initbal))
+                                           Amount(initbal, currency=self.currency).format())
             retval += self.format_txn_line(
                 "Assets:Equity",
-                self.format_amount(initbal, reverse=True))
+                Amount(initbal, currency=self.currency, reverse=True).format())
         return retval
 
     def format_txn(self, txn):
@@ -170,10 +177,10 @@ class OfxConverter(Converter):
                 self.format_date(txn.date), self.format_payee(txn))
             retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
             retval += self.format_txn_line(
-                self.name, self.format_amount(txn.amount))
+                self.name, Amount(txn.amount, self.currency).format())
             retval += self.format_txn_line(
                 self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
-                self.format_amount(txn.amount, reverse=True))
+                Amount(txn.amount, self.currency, reverse=True).format())
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
@@ -215,11 +222,11 @@ class OfxConverter(Converter):
             retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
             retval += self.format_txn_line(
                 acct=acct1,
-                amt=self.format_amount(txn.units, currency=txn.security, unlimited=True),
-                suffix=" @ %s" % (self.format_amount(txn.unit_price, unlimited=True)))
+                amt=Amount(txn.units, txn.security, unlimited=True).format(),
+                suffix=" @ %s" % (Amount(txn.unit_price, self.currency, unlimited=True).format()))
             retval += self.format_txn_line(
                 acct=acct2,
-                amt=self.format_amount(txn.units * txn.unit_price, reverse=True))
+                amt=Amount(txn.units * txn.unit_price, self.currency, reverse=True).format())
         return retval
 
     def format_position(self, pos):
@@ -261,16 +268,16 @@ class CsvConverter(Converter):
         if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
             retval += self.format_txn_line(
                 self.name,
-                self.format_amount(Decimal(row['Net']), currency=currency))
+                Amount(Decimal(row['Net']), currency).format())
             retval += self.format_txn_line(
                 "Transfer:Paypal",
-                self.format_amount(Decimal(row['Net']), currency=currency, reverse=True))
+                Amount(Decimal(row['Net']), currency, reverse=True).format())
         else:
             retval += self.format_txn_line(
                 self.name,
-                self.format_amount(Decimal(row['Gross']), currency=currency))
+                Amount(Decimal(row['Gross']), currency).format())
             retval += self.format_txn_line(
                 # TODO Our payees are breaking the payee search in mk_dynamic_account
                 "Expenses:Misc", #self.mk_dynamic_account(payee, exclude=self.name),
-                self.format_amount(Decimal(row['Gross']), currency=currency, reverse=True))
+                Amount(Decimal(row['Gross']), currency, reverse=True).format())
         return retval

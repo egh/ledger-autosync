@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.converter import Converter, CsvConverter
+from ledgerautosync.converter import Converter, CsvConverter, Amount
 from decimal import Decimal
 import csv
 
@@ -27,43 +27,45 @@ from tests import LedgerTestCase
 
 @attr('generic')
 class TestConverter(LedgerTestCase):
-    def test_format_amount(self):
-        converter = Converter()
-        self.assertEqual("$10.00",
-                         converter.format_amount(Decimal("10.001")),
-                         "Formats to 2 points precision, $ by default")
-        self.assertEqual("10.00 USD",
-                         converter.format_amount(Decimal(10), currency="USD"),
-                         "Longer commodity names come after")
-        self.assertEqual("-$10.00",
-                         converter.format_amount(Decimal(10), reverse=True),
-                         "Reverse flag works.")
-        self.assertEqual("10.00 \"ABC123\"",
-                         converter.format_amount(Decimal(10),
-                                                 currency="ABC123"),
-                         "Currencies with numbers are quoted")
-        self.assertEqual("10.00 \"A BC\"",
-                         converter.format_amount(Decimal(10), currency="A BC"),
-                         "Currencies with whitespace are quoted")
-        self.assertEqual("$10.001",
-                         converter.format_amount(Decimal("10.001"),
-                                                 unlimited=True))
-        eur_converter = Converter(currency="EUR")
-        self.assertEqual("10.00 EUR",
-                         eur_converter.format_amount(Decimal("10.00")),
-                         "Uses default currency")
-
+    def test_format_txn_line(self):
         indent_converter = Converter(indent=2)
         self.assertRegexpMatches(
             indent_converter.format_txn_line(
                 "Foo",
-                indent_converter.format_amount(Decimal("10.00"))),
+                Amount(Decimal("10.00"), "$").format()),
             r'^  Foo.*$')
 
 
 @attr('generic')
+class TestAmount(LedgerTestCase):
+    def test_amount(self):
+        self.assertEqual(
+            "$10.00",
+            Amount(Decimal("10.001"), "$").format(),
+            "Formats to 2 points precision by default")
+        self.assertEqual(
+            "10.00 USD",
+            Amount(Decimal(10), "USD").format(),
+            "Longer commodity names come after")
+        self.assertEqual(
+            "-$10.00",
+            Amount(Decimal(10), "$", reverse=True).format(),
+            "Reverse flag works.")
+        self.assertEqual(
+            "10.00 \"ABC123\"",
+            Amount(Decimal(10), "ABC123").format(),
+            "Currencies with numbers are quoted")
+        self.assertEqual(
+            "10.00 \"A BC\"",
+            Amount(Decimal(10), "A BC").format(),
+            "Currencies with whitespace are quoted")
+        self.assertEqual(
+            "$10.001",
+            Amount(Decimal("10.001"), "$", unlimited=True).format())
+
+@attr('generic')
 class TestCsvConverter(LedgerTestCase):
-    def test_format_amount(self):
+    def test_format(self):
         with open('fixtures/paypal.csv', 'rb') as f:
             dialect = csv.Sniffer().sniff(f.read(1024))
             f.seek(0)
