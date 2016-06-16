@@ -23,7 +23,7 @@ from ofxclient.config import OfxConfig
 import argparse
 import csv
 from ledgerautosync import EmptyInstitutionException
-from ledgerautosync.formatter import OfxFormatter, CsvFormatter, AUTOSYNC_INITIAL, \
+from ledgerautosync.converter import OfxConverter, CsvConverter, AUTOSYNC_INITIAL, \
     ALL_AUTOSYNC_INITIAL
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger, LedgerPython
@@ -51,19 +51,19 @@ found."""
 .ledgerrc file found, and -l argument no supplied.")
 
 
-def print_results(formatter, ofx, ledger, txns, args):
+def print_results(converter, ofx, ledger, txns, args):
     if args.initial:
         if (not(ledger.check_transaction_by_id
-                ("ofxid", formatter.mk_ofxid(AUTOSYNC_INITIAL))) and
+                ("ofxid", converter.mk_ofxid(AUTOSYNC_INITIAL))) and
                 not(ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL))):
-            print formatter.format_initial_balance(ofx.account.statement)
+            print converter.format_initial_balance(ofx.account.statement)
     for txn in txns:
-        print formatter.format_txn(txn)
+        print converter.format_txn(txn)
     if args.assertions:
-        print formatter.format_balance(ofx.account.statement)
+        print converter.format_balance(ofx.account.statement)
     if hasattr(ofx.account.statement, 'positions'):
         for pos in ofx.account.statement.positions:
-            print formatter.format_position(pos)
+            print converter.format_position(pos)
 
 def sync(ledger, accounts, args):
     sync = Synchronizer(ledger)
@@ -72,12 +72,12 @@ def sync(ledger, accounts, args):
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
                                             max_days=args.max)
             if ofx is not None:
-                formatter = OfxFormatter(account=ofx.account,
+                converter = OfxConverter(account=ofx.account,
                                          name=acct.description,
                                          ledger=ledger,
                                          indent=args.indent,
                                          unknownaccount=args.unknownaccount)
-                print_results(formatter, ofx, ledger, txns, args)
+                print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
         except:
@@ -97,10 +97,10 @@ def import_ofx(ledger, args):
         else:
             raise EmptyInstitutionException("Institution provided by OFX is \
 empty and no accountname supplied!")
-    formatter = OfxFormatter(account=ofx.account, name=accountname,
+    converter = OfxConverter(account=ofx.account, name=accountname,
                              ledger=ledger, indent=args.indent, fid=args.fid,
                              unknownaccount=args.unknownaccount)
-    print_results(formatter, ofx, ledger, txns, args)
+    print_results(converter, ofx, ledger, txns, args)
 
 
 def import_csv(ledger, args):
@@ -113,13 +113,13 @@ def import_csv(ledger, args):
             f.seek(0)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
-            formatter = CsvFormatter(name=accountname,
+            converter = CsvConverter(name=accountname,
                                      csv=reader,
                                      ledger=ledger,
                                      indent=args.indent,
                                      unknownaccount=args.unknownaccount)
             for row in reader:
-                print formatter.format_txn(row)
+                print converter.format_txn(row)
 
 
 def run(args=None, config=None):

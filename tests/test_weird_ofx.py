@@ -18,7 +18,7 @@
 
 from __future__ import absolute_import
 from ledgerautosync.cli import run
-from ledgerautosync.formatter import OfxFormatter
+from ledgerautosync.converter import OfxConverter
 from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
 from ledgerautosync.sync import Synchronizer
 from ledgerautosync import EmptyInstitutionException
@@ -46,7 +46,7 @@ class WeirdOfxTest(object):
     def test_no_institution_no_accountname(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
         (ofx, txns) = Synchronizer(self.lgr).parse_file(ofxpath)
-        OfxFormatter(ofx.account, name=None)
+        OfxConverter(ofx.account, name=None)
 
     def test_apostrophe(self):
         ofxpath = os.path.join('fixtures', 'apostrophe.ofx')

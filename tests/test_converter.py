@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.formatter import Formatter, CsvFormatter
+from ledgerautosync.converter import Converter, CsvConverter
 from decimal import Decimal
 import csv
 
@@ -26,60 +26,60 @@ from tests import LedgerTestCase
 
 
 @attr('generic')
-class TestFormatter(LedgerTestCase):
+class TestConverter(LedgerTestCase):
     def test_format_amount(self):
-        formatter = Formatter()
+        converter = Converter()
         self.assertEqual("$10.00",
-                         formatter.format_amount(Decimal("10.001")),
+                         converter.format_amount(Decimal("10.001")),
                          "Formats to 2 points precision, $ by default")
         self.assertEqual("10.00 USD",
-                         formatter.format_amount(Decimal(10), currency="USD"),
+                         converter.format_amount(Decimal(10), currency="USD"),
                          "Longer commodity names come after")
         self.assertEqual("-$10.00",
-                         formatter.format_amount(Decimal(10), reverse=True),
+                         converter.format_amount(Decimal(10), reverse=True),
                          "Reverse flag works.")
         self.assertEqual("10.00 \"ABC123\"",
-                         formatter.format_amount(Decimal(10),
+                         converter.format_amount(Decimal(10),
                                                  currency="ABC123"),
                          "Currencies with numbers are quoted")
         self.assertEqual("10.00 \"A BC\"",
-                         formatter.format_amount(Decimal(10), currency="A BC"),
+                         converter.format_amount(Decimal(10), currency="A BC"),
                          "Currencies with whitespace are quoted")
         self.assertEqual("$10.001",
-                         formatter.format_amount(Decimal("10.001"),
+                         converter.format_amount(Decimal("10.001"),
                                                  unlimited=True))
-        eur_formatter = Formatter(currency="EUR")
+        eur_converter = Converter(currency="EUR")
         self.assertEqual("10.00 EUR",
-                         eur_formatter.format_amount(Decimal("10.00")),
+                         eur_converter.format_amount(Decimal("10.00")),
                          "Uses default currency")
 
-        indent_formatter = Formatter(indent=2)
+        indent_converter = Converter(indent=2)
         self.assertRegexpMatches(
-            indent_formatter.format_txn_line(
+            indent_converter.format_txn_line(
                 "Foo",
-                indent_formatter.format_amount(Decimal("10.00"))),
+                indent_converter.format_amount(Decimal("10.00"))),
             r'^  Foo.*$')
 
 
 @attr('generic')
-class TestCsvFormatter(LedgerTestCase):
+class TestCsvConverter(LedgerTestCase):
     def test_format_amount(self):
         with open('fixtures/paypal.csv', 'rb') as f:
             dialect = csv.Sniffer().sniff(f.read(1024))
             f.seek(0)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
-            formatter = CsvFormatter(name='Foo', csv=reader)
-            self.assertEqual(formatter.csv_type, 'paypal')
+            converter = CsvConverter(name='Foo', csv=reader)
+            self.assertEqual(converter.csv_type, 'paypal')
             self.assertEqual(
-                formatter.format_txn(reader.next()),
+                converter.format_txn(reader.next()),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
     ; csvid: paypal.XYZ1
     Foo                                   -20.00 USD
     Expenses:Misc                          20.00 USD
 """)
             self.assertEqual(
-                formatter.format_txn(reader.next()),
+                converter.format_txn(reader.next()),
                 """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
     ; csvid: paypal.XYZ2
     Foo                                    20.00 USD
