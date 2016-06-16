@@ -27,6 +27,26 @@ AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
 
 
+class Posting(object):
+    def __init__(self, account, amount, indent=4, asserted=None, unit_price=None):
+        self.account = account
+        self.amount = amount
+        self.indent = indent
+        self.asserted = asserted
+        self.unit_price = unit_price
+
+    def format(self, indent=4):
+        space_count = 52 - indent - len(self.account) - len(self.amount.format())
+        if space_count < 2:
+            space_count = 2
+        retval = "%s%s%s%s" % (
+            " " * indent, self.account, " "*space_count, self.amount.format())
+        if self.asserted is not None:
+            retval = "%s = %s"%(retval, self.asserted.format())
+        if self.unit_price is not None:
+            retval = "%s @ %s"%(retval, self.unit_price.format())
+        return "%s\n"%(retval)
+
 class Amount(object):
     def __init__(self, number, currency, reverse=False, unlimited=False):
         self.number = number
@@ -72,13 +92,6 @@ class Converter(object):
         self.currency = currency.upper()
         if self.currency == "USD":
             self.currency = "$"
-
-    def format_txn_line(self, acct, amt, suffix=""):
-        space_count = 52 - self.indent - len(acct) - len(amt)
-        if space_count < 2:
-            space_count = 2
-        return "%s%s%s%s%s\n" % (
-            " " * self.indent, acct, " "*space_count, amt, suffix)
 
     def format_date(self, date):
         return date.strftime("%Y/%m/%d")
@@ -146,10 +159,11 @@ class OfxConverter(Converter):
         if (hasattr(statement, 'balance')):
             retval += "%s * --Autosync Balance Assertion\n" % \
                       (self.format_date(date))
-            retval += self.format_txn_line(
+            retval += Posting(
                 self.name,
-                Amount(Decimal("0"), currency=self.currency).format(),
-                " = %s" % (Amount(statement.balance, currency=self.currency).format()))
+                Amount(Decimal("0"), currency=self.currency),
+                asserted=Amount(statement.balance, self.currency)
+            ).format(self.indent)
         return retval
 
     def format_initial_balance(self, statement):
@@ -162,11 +176,11 @@ class OfxConverter(Converter):
                 self.format_date(statement.start_date))
             retval += "%s; ofxid: %s\n" % (" " * self.indent,
                                            self.mk_ofxid(AUTOSYNC_INITIAL))
-            retval += self.format_txn_line(self.name,
-                                           Amount(initbal, currency=self.currency).format())
-            retval += self.format_txn_line(
+            retval += Posting(self.name,
+                              Amount(initbal, currency=self.currency)).format(self.indent)
+            retval += Posting(
                 "Assets:Equity",
-                Amount(initbal, currency=self.currency, reverse=True).format())
+                Amount(initbal, currency=self.currency, reverse=True)).format(self.indent)
         return retval
 
     def format_txn(self, txn):
@@ -176,11 +190,14 @@ class OfxConverter(Converter):
             retval += "%s %s\n" % (
                 self.format_date(txn.date), self.format_payee(txn))
             retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
-            retval += self.format_txn_line(
-                self.name, Amount(txn.amount, self.currency).format())
-            retval += self.format_txn_line(
+            retval += Posting(
+                self.name,
+                Amount(txn.amount, self.currency)
+            ).format(self.indent)
+            retval += Posting(
                 self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
-                Amount(txn.amount, self.currency, reverse=True).format())
+                Amount(txn.amount, self.currency, reverse=True)
+            ).format(self.indent)
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
@@ -220,13 +237,15 @@ class OfxConverter(Converter):
                     txn.tradeDate.strftime("%Y/%m/%d"),
                     self.format_payee(txn))
             retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
-            retval += self.format_txn_line(
-                acct=acct1,
-                amt=Amount(txn.units, txn.security, unlimited=True).format(),
-                suffix=" @ %s" % (Amount(txn.unit_price, self.currency, unlimited=True).format()))
-            retval += self.format_txn_line(
-                acct=acct2,
-                amt=Amount(txn.units * txn.unit_price, self.currency, reverse=True).format())
+            retval += Posting(
+                acct1,
+                Amount(txn.units, txn.security, unlimited=True),
+                unit_price=Amount(txn.unit_price, self.currency, unlimited=True)
+            ).format(self.indent)
+            retval += Posting(
+                acct2,
+                Amount(txn.units * txn.unit_price, self.currency, reverse=True)
+            ).format(self.indent)
         return retval
 
     def format_position(self, pos):
@@ -266,18 +285,22 @@ class CsvConverter(Converter):
             return ""
         retval += self.mk_csv_id_line(row['Transaction ID'])
         if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
-            retval += self.format_txn_line(
+            retval += Posting(
                 self.name,
-                Amount(Decimal(row['Net']), currency).format())
-            retval += self.format_txn_line(
+                Amount(Decimal(row['Net']), currency)
+            ).format(self.indent)
+            retval += Posting(
                 "Transfer:Paypal",
-                Amount(Decimal(row['Net']), currency, reverse=True).format())
+                Amount(Decimal(row['Net']), currency, reverse=True)
+            ).format(self.indent)
         else:
-            retval += self.format_txn_line(
+            retval += Posting(
                 self.name,
-                Amount(Decimal(row['Gross']), currency).format())
-            retval += self.format_txn_line(
+                Amount(Decimal(row['Gross']), currency)
+            ).format(self.indent)
+            retval += Posting(
                 # TODO Our payees are breaking the payee search in mk_dynamic_account
                 "Expenses:Misc", #self.mk_dynamic_account(payee, exclude=self.name),
-                Amount(Decimal(row['Gross']), currency, reverse=True).format())
+                Amount(Decimal(row['Gross']), currency, reverse=True)
+            ).format(self.indent)
         return retval

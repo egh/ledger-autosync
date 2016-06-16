@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.converter import Converter, CsvConverter, Amount
+from ledgerautosync.converter import Converter, CsvConverter, Amount, Posting
 from decimal import Decimal
 import csv
 
@@ -26,13 +26,13 @@ from tests import LedgerTestCase
 
 
 @attr('generic')
-class TestConverter(LedgerTestCase):
-    def test_format_txn_line(self):
-        indent_converter = Converter(indent=2)
+class TestPosting(LedgerTestCase):
+    def test_format(self):
         self.assertRegexpMatches(
-            indent_converter.format_txn_line(
+            Posting(
                 "Foo",
-                Amount(Decimal("10.00"), "$").format()),
+                Amount(Decimal("10.00"), "$")
+            ).format(indent=2),
             r'^  Foo.*$')
 
 
