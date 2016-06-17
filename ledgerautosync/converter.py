@@ -19,7 +19,7 @@
 from __future__ import absolute_import
 from decimal import Decimal
 import re
-from ofxparse.ofxparse import Transaction, InvestmentTransaction
+from ofxparse.ofxparse import Transaction as OfxTransaction, InvestmentTransaction
 from ledgerautosync import EmptyInstitutionException
 import datetime
 
@@ -27,11 +27,34 @@ AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
 
 
+class Transaction(object):
+    def __init__(self, date, payee, postings, cleared=False, metadata={}, aux_date=None):
+        self.date = date
+        self.aux_date = aux_date
+        self.payee = payee
+        self.postings = postings
+        self.metadata = metadata
+        self.cleared = cleared
+
+    def format(self, indent=4):
+        retval = ""
+        cleared_str = " "
+        if self.cleared:
+            cleared_str = " * "
+        aux_date_str = ""
+        if self.aux_date is not None:
+            aux_date_str = "=%s"%(self.aux_date.strftime("%Y/%m/%d"))
+        retval += "%s%s%s%s\n"%(self.date.strftime("%Y/%m/%d"), aux_date_str, cleared_str, self.payee)
+        for k,v in self.metadata.iteritems():
+            retval += "%s; %s: %s\n" % (" "*indent, k, v)
+        for posting in self.postings:
+            retval += posting.format(indent)
+        return retval
+
 class Posting(object):
-    def __init__(self, account, amount, indent=4, asserted=None, unit_price=None):
+    def __init__(self, account, amount, asserted=None, unit_price=None):
         self.account = account
         self.amount = amount
-        self.indent = indent
         self.asserted = asserted
         self.unit_price = unit_price
 
@@ -93,9 +116,6 @@ class Converter(object):
         if self.currency == "USD":
             self.currency = "$"
 
-    def format_date(self, date):
-        return date.strftime("%Y/%m/%d")
-
     def mk_dynamic_account(self, payee, exclude):
         if self.lgr is None:
             return self.unknownaccount or 'Expenses:Misc'
@@ -146,7 +166,6 @@ class OfxConverter(Converter):
             return "%s %s" % (payee, memo)
 
     def format_balance(self, statement):
-        retval = ""
         # Get date. Ensure the date is a date-like object.
         if (hasattr(statement, 'balance_date') and
             hasattr(statement.balance_date, 'strftime')):
@@ -155,48 +174,59 @@ class OfxConverter(Converter):
               hasattr(statement.end_date, 'strftime')):
             date = statement.end_date
         else:
-            return retval
+            return ""
         if (hasattr(statement, 'balance')):
-            retval += "%s * --Autosync Balance Assertion\n" % \
-                      (self.format_date(date))
-            retval += Posting(
-                self.name,
-                Amount(Decimal("0"), currency=self.currency),
-                asserted=Amount(statement.balance, self.currency)
-            ).format(self.indent)
-        return retval
+            return Transaction(
+                date=date,
+                cleared=True,
+                payee="--Autosync Balance Assertion",
+                postings=[
+                    Posting(
+                        self.name,
+                        Amount(Decimal("0"), currency=self.currency),
+                        asserted=Amount(statement.balance, self.currency))
+                ]).format(self.indent)
+        else:
+            return ""
 
     def format_initial_balance(self, statement):
-        retval = ""
         if (hasattr(statement, 'balance')):
             initbal = statement.balance
             for txn in statement.transactions:
                 initbal -= txn.amount
-            retval += "%s * --Autosync Initial Balance\n" % (
-                self.format_date(statement.start_date))
-            retval += "%s; ofxid: %s\n" % (" " * self.indent,
-                                           self.mk_ofxid(AUTOSYNC_INITIAL))
-            retval += Posting(self.name,
-                              Amount(initbal, currency=self.currency)).format(self.indent)
-            retval += Posting(
-                "Assets:Equity",
-                Amount(initbal, currency=self.currency, reverse=True)).format(self.indent)
-        return retval
+            return Transaction(
+                date=statement.start_date,
+                payee="--Autosync Initial Balance",
+                cleared=True,
+                postings=[
+                    Posting(
+                        self.name,
+                        Amount(initbal, currency=self.currency)).format(self.indent),
+                    Posting(
+                        "Assets:Equity",
+                        Amount(initbal, currency=self.currency, reverse=True)).format(self.indent)
+                    ],
+                metadata={ "ofxid": self.mk_ofxid(AUTOSYNC_INITIAL) }
+            ).format(self.indent)
+        else:
+            return ""
 
     def format_txn(self, txn):
-        retval = ""
         ofxid = self.mk_ofxid(txn.id)
-        if isinstance(txn, Transaction):
-            retval += "%s %s\n" % (
-                self.format_date(txn.date), self.format_payee(txn))
-            retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
-            retval += Posting(
-                self.name,
-                Amount(txn.amount, self.currency)
-            ).format(self.indent)
-            retval += Posting(
-                self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
-                Amount(txn.amount, self.currency, reverse=True)
+        if isinstance(txn, OfxTransaction):
+            return Transaction(
+                date=txn.date,
+                payee=self.format_payee(txn),
+                metadata={"ofxid": ofxid},
+                postings=[
+                    Posting(
+                        self.name,
+                        Amount(txn.amount, self.currency)
+                    ),
+                    Posting(
+                        self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
+                        Amount(txn.amount, self.currency, reverse=True)
+                    )]
             ).format(self.indent)
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
@@ -226,27 +256,25 @@ class OfxConverter(Converter):
                 else:
                     # ???
                     pass
+            aux_date = None
             if txn.settleDate is not None and \
                txn.settleDate != txn.tradeDate:
-                retval = "%s=%s %s\n" % (
-                    txn.tradeDate.strftime("%Y/%m/%d"),
-                    txn.settleDate.strftime("%Y/%m/%d"),
-                    self.format_payee(txn))
-            else:
-                retval = "%s %s\n" % (
-                    txn.tradeDate.strftime("%Y/%m/%d"),
-                    self.format_payee(txn))
-            retval += "%s; ofxid: %s\n" % (" "*self.indent, ofxid)
-            retval += Posting(
-                acct1,
-                Amount(txn.units, txn.security, unlimited=True),
-                unit_price=Amount(txn.unit_price, self.currency, unlimited=True)
+                aux_date = txn.settleDate
+            return Transaction(
+                date=txn.tradeDate,
+                aux_date=txn.settleDate,
+                payee=self.format_payee(txn),
+                metadata={"ofxid": ofxid},
+                postings=[
+                    Posting(
+                        acct1,
+                        Amount(txn.units, txn.security, unlimited=True),
+                        unit_price=Amount(txn.unit_price, self.currency, unlimited=True)),
+                    Posting(
+                        acct2,
+                        Amount(txn.units * txn.unit_price, self.currency, reverse=True)
+                    )]
             ).format(self.indent)
-            retval += Posting(
-                acct2,
-                Amount(txn.units * txn.unit_price, self.currency, reverse=True)
-            ).format(self.indent)
-        return retval
 
     def format_position(self, pos):
         if hasattr(pos, 'date') and hasattr(pos, 'security') and \
@@ -270,37 +298,38 @@ class CsvConverter(Converter):
         else:
             raise Exception('Cannot determine CSV type')
 
-    def mk_csv_id_line(self, txn_id):
-        return "%s; csvid: %s.%s\n" % (" " * self.indent,
-                                       self.csv_type,
-                                       Converter.clean_id(txn_id))
-
     def format_txn(self, row):
-        retval = ""
-        d = datetime.datetime.strptime(row['Date'], "%m/%d/%Y")
-        payee = "%s %s %s ID: %s, %s"%(row['Name'], row['To Email Address'], row['Item Title'], row['Transaction ID'], row['Type'])
-        retval += "%s %s\n"%(self.format_date(d), re.sub(r"\s+", " ", payee))
-        currency = row['Currency']
         if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
             return ""
-        retval += self.mk_csv_id_line(row['Transaction ID'])
-        if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
-            retval += Posting(
-                self.name,
-                Amount(Decimal(row['Net']), currency)
-            ).format(self.indent)
-            retval += Posting(
-                "Transfer:Paypal",
-                Amount(Decimal(row['Net']), currency, reverse=True)
-            ).format(self.indent)
         else:
-            retval += Posting(
-                self.name,
-                Amount(Decimal(row['Gross']), currency)
-            ).format(self.indent)
-            retval += Posting(
-                # TODO Our payees are breaking the payee search in mk_dynamic_account
-                "Expenses:Misc", #self.mk_dynamic_account(payee, exclude=self.name),
-                Amount(Decimal(row['Gross']), currency, reverse=True)
-            ).format(self.indent)
-        return retval
+            currency = row['Currency']
+            if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
+                postings=[
+                    Posting(
+                        self.name,
+                        Amount(Decimal(row['Net']), currency)
+                    ),
+                    Posting(
+                        "Transfer:Paypal",
+                        Amount(Decimal(row['Net']), currency, reverse=True)
+                    )]
+            else:
+                postings=[
+                    Posting(
+                        self.name,
+                        Amount(Decimal(row['Gross']), currency)
+                    ),
+                    Posting(
+                        # TODO Our payees are breaking the payee search in mk_dynamic_account
+                        "Expenses:Misc", #self.mk_dynamic_account(payee, exclude=self.name),
+                        Amount(Decimal(row['Gross']), currency, reverse=True)
+                    )]
+            return Transaction(
+                date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
+                payee=re.sub(
+                    r"\s+", " ",
+                    "%s %s %s ID: %s, %s"%(row['Name'], row['To Email Address'], row['Item Title'], row['Transaction ID'], row['Type'])),
+                metadata={"csvid":
+                          "%s.%s" % (self.csv_type,
+                                     Converter.clean_id(row['Transaction ID']))},
+                postings=postings).format(self.indent)
