@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.converter import Converter, CsvConverter, PaypalConverter, Amount, Posting
+from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, PaypalConverter, Amount, Posting
 from decimal import Decimal
 import csv
 
@@ -64,7 +64,7 @@ class TestAmount(LedgerTestCase):
             Amount(Decimal("10.001"), "$", unlimited=True).format())
 
 @attr('generic')
-class TestCsvConverter(LedgerTestCase):
+class TestPaypalConverter(LedgerTestCase):
     def test_format(self):
         with open('fixtures/paypal.csv', 'rb') as f:
             dialect = csv.Sniffer().sniff(f.read(1024))
@@ -86,4 +86,23 @@ class TestCsvConverter(LedgerTestCase):
     ; csvid: paypal.XYZ2
     Foo                                    20.00 USD
     Transfer:Paypal                       -20.00 USD
+""")
+
+@attr('generic')
+class TestAmazonConverter(LedgerTestCase):
+    def test_format(self):
+        with open('fixtures/amazon.csv', 'rb') as f:
+            dialect = csv.Sniffer().sniff(f.read(1024))
+            f.seek(0)
+            dialect.skipinitialspace = True
+            reader = csv.DictReader(f, dialect=dialect)
+            converter = CsvConverter.make_converter(name='Foo', csv=reader)
+            self.assertEqual(type(converter), AmazonConverter)
+            self.assertEqual(
+                converter.format_txn(reader.next()),
+                """2016/01/29 Best Soap Ever
+    ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
+    ; csvid: amazon.123-4567890-1234567
+    Foo                                       $21.90
+    Expenses:Misc                            -$21.90
 """)

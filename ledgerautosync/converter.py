@@ -343,3 +343,28 @@ class PaypalConverter(CsvConverter):
                           "%s.%s" % ('paypal',
                                      Converter.clean_id(row['Transaction ID']))},
                 postings=postings).format(self.indent)
+
+
+class AmazonConverter(CsvConverter):
+    FIELDSET = set(['Currency', 'Title', 'Order Date', 'Order ID'])
+
+    def __init__(self, *args, **kwargs):
+        super(AmazonConverter, self).__init__(*args, **kwargs)
+
+    def mk_amount(self, row, reverse=False):
+        currency = row['Currency']
+        if currency == "USD": currency = "$"
+        return Amount(Decimal(re.sub(r"\$", "", row['Item Total'])), currency, reverse=reverse)
+
+    def format_txn(self, row):
+        return Transaction(
+            date=datetime.datetime.strptime(row['Order Date'], "%m/%d/%y"),
+            payee=row['Title'],
+            metadata={
+                "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s"%(row['Order ID']),
+                "csvid": "%s.%s" % ('amazon',
+                                    Converter.clean_id(row['Order ID']))},
+            postings=[
+                Posting(self.name, self.mk_amount(row)),
+                Posting("Expenses:Misc", self.mk_amount(row, reverse=True))
+            ]).format(self.indent)
