@@ -113,11 +113,12 @@ def import_csv(ledger, args):
             f.seek(0)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter(name=accountname,
-                                     csv=reader,
-                                     ledger=ledger,
-                                     indent=args.indent,
-                                     unknownaccount=args.unknownaccount)
+            converter = CsvConverter.make_converter(
+                name=accountname,
+                csv=reader,
+                ledger=ledger,
+                indent=args.indent,
+                unknownaccount=args.unknownaccount)
             for row in reader:
                 print converter.format_txn(row)
 

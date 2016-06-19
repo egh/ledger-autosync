@@ -284,7 +284,13 @@ class OfxConverter(Converter):
 
 
 class CsvConverter(Converter):
-    PAYPAL_FIELDS = ["Date", "Time", "Time Zone", "Name", "Type", "Status", "Currency", "Gross", "Fee", "Net", "From Email Address", "To Email Address", "Transaction ID", "Counterparty Status", "Shipping Address", "Address Status", "Item Title", "Item ID", "Shipping and Handling Amount", "Insurance Amount", "Sales Tax", "Option 1 Name", "Option 1 Value", "Option 2 Name", "Option 2 Value", "Auction Site", "Buyer ID", "Item URL", "Closing Date", "Escrow Id", "Invoice Id", "Reference Txn ID", "Invoice Number", "Custom Number", "Receipt ID", "Balance", "Contact Phone Number", ""]
+    @staticmethod
+    def make_converter(name, csv, **kwargs):
+        for klass in CsvConverter.__subclasses__():
+            if sorted(csv.fieldnames) == sorted(klass.FIELDS):
+                return klass(name, csv, **kwargs)
+        # Found no class, bail
+        raise Exception('Cannot determine CSV type')
 
     def __init__(self, name, csv, indent=4, ledger=None, unknownaccount=None):
         super(CsvConverter, self).__init__(
@@ -293,10 +299,13 @@ class CsvConverter(Converter):
             unknownaccount=unknownaccount)
         self.name = name
         self.csv = csv
-        if sorted(self.csv.fieldnames) == sorted(self.PAYPAL_FIELDS):
-            self.csv_type = "paypal"
-        else:
-            raise Exception('Cannot determine CSV type')
+
+
+class PaypalConverter(CsvConverter):
+    FIELDS = ["Date", "Time", "Time Zone", "Name", "Type", "Status", "Currency", "Gross", "Fee", "Net", "From Email Address", "To Email Address", "Transaction ID", "Counterparty Status", "Shipping Address", "Address Status", "Item Title", "Item ID", "Shipping and Handling Amount", "Insurance Amount", "Sales Tax", "Option 1 Name", "Option 1 Value", "Option 2 Name", "Option 2 Value", "Auction Site", "Buyer ID", "Item URL", "Closing Date", "Escrow Id", "Invoice Id", "Reference Txn ID", "Invoice Number", "Custom Number", "Receipt ID", "Balance", "Contact Phone Number", ""]
+
+    def __init__(self, *args, **kwargs):
+        super(PaypalConverter, self).__init__(*args, **kwargs)
 
     def format_txn(self, row):
         if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
@@ -330,6 +339,6 @@ class CsvConverter(Converter):
                     r"\s+", " ",
                     "%s %s %s ID: %s, %s"%(row['Name'], row['To Email Address'], row['Item Title'], row['Transaction ID'], row['Type'])),
                 metadata={"csvid":
-                          "%s.%s" % (self.csv_type,
+                          "%s.%s" % ('paypal',
                                      Converter.clean_id(row['Transaction ID']))},
                 postings=postings).format(self.indent)

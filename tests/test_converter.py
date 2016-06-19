@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.converter import Converter, CsvConverter, Amount, Posting
+from ledgerautosync.converter import Converter, CsvConverter, PaypalConverter, Amount, Posting
 from decimal import Decimal
 import csv
 
@@ -71,8 +71,8 @@ class TestCsvConverter(LedgerTestCase):
             f.seek(0)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter(name='Foo', csv=reader)
-            self.assertEqual(converter.csv_type, 'paypal')
+            converter = CsvConverter.make_converter(name='Foo', csv=reader)
+            self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
                 converter.format_txn(reader.next()),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
