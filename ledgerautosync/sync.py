@@ -26,6 +26,10 @@ class Synchronizer(object):
     def __init__(self, lgr):
         self.lgr = lgr
 
+class OfxSynchronizer(Synchronizer):
+    def __init__(self, lgr):
+        super(OfxSynchronizer, self).__init__(lgr)
+
     def parse_file(self, path, accountname=None):
         ofx = OfxParser.parse(file(path))
         return (ofx, self.filter(ofx))

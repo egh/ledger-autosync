@@ -20,7 +20,7 @@ from __future__ import absolute_import
 from ledgerautosync.cli import run
 from ledgerautosync.converter import OfxConverter
 from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
-from ledgerautosync.sync import Synchronizer
+from ledgerautosync.sync import OfxSynchronizer
 from ledgerautosync import EmptyInstitutionException
 import os.path
 from ofxclient.config import OfxConfig
@@ -40,21 +40,21 @@ class WeirdOfxTest(object):
 
     def test_no_institution(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        Synchronizer(self.lgr).parse_file(ofxpath)
+        OfxSynchronizer(self.lgr).parse_file(ofxpath)
 
     @raises(EmptyInstitutionException)
     def test_no_institution_no_accountname(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        (ofx, txns) = Synchronizer(self.lgr).parse_file(ofxpath)
+        (ofx, txns) = OfxSynchronizer(self.lgr).parse_file(ofxpath)
         OfxConverter(ofx.account, name=None)
 
     def test_apostrophe(self):
         ofxpath = os.path.join('fixtures', 'apostrophe.ofx')
-        Synchronizer(self.lgr).parse_file(ofxpath)
+        OfxSynchronizer(self.lgr).parse_file(ofxpath)
 
     def test_one_settleDate(self):
         ofxpath = os.path.join('fixtures', 'fidelity-one-dtsettle.ofx')
-        Synchronizer(self.lgr).parse_file(ofxpath)
+        OfxSynchronizer(self.lgr).parse_file(ofxpath)
 
 
 @attr('hledger')

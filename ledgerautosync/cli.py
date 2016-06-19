@@ -25,7 +25,7 @@ import csv
 from ledgerautosync import EmptyInstitutionException
 from ledgerautosync.converter import OfxConverter, CsvConverter, AUTOSYNC_INITIAL, \
     ALL_AUTOSYNC_INITIAL
-from ledgerautosync.sync import Synchronizer
+from ledgerautosync.sync import OfxSynchronizer
 from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger, LedgerPython
 import logging
 import re
@@ -66,7 +66,7 @@ def print_results(converter, ofx, ledger, txns, args):
             print converter.format_position(pos)
 
 def sync(ledger, accounts, args):
-    sync = Synchronizer(ledger)
+    sync = OfxSynchronizer(ledger)
     for acct in accounts:
         try:
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
@@ -87,7 +87,7 @@ def sync(ledger, accounts, args):
 
 
 def import_ofx(ledger, args):
-    sync = Synchronizer(ledger)
+    sync = OfxSynchronizer(ledger)
     (ofx, txns) = sync.parse_file(args.PATH)
     accountname = args.account
     if accountname is None:
@@ -104,7 +104,7 @@ empty and no accountname supplied!")
 
 
 def import_csv(ledger, args):
-    sync = Synchronizer(ledger)
+    sync = OfxSynchronizer(ledger)
     accountname = args.account
     if accountname is None:
         raise EmptyInstitutionException("No accountname supplied!")

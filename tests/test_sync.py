@@ -1,5 +1,5 @@
 # Copyright (c) 2013, 2014 Erik Hetzner
-# 
+#
 # This file is part of ledger-autosync
 #
 # ledger-autosync is free software: you can redistribute it and/or
@@ -21,7 +21,7 @@ import os
 import os.path
 from ofxparse import OfxParser
 from ledgerautosync.ledgerwrap import Ledger
-from ledgerautosync.sync import Synchronizer
+from ledgerautosync.sync import OfxSynchronizer
 
 from unittest import TestCase
 from nose.plugins.attrib import attr
@@ -31,7 +31,7 @@ from mock import Mock
 class TestSync(TestCase):
     def test_fresh_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
-        sync = Synchronizer(ledger)
+        sync = OfxSynchronizer(ledger)
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         txns1 = ofx.account.statement.transactions
         txns2 = sync.filter(ofx)
@@ -39,21 +39,21 @@ class TestSync(TestCase):
 
     def test_sync_order(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
-        sync = Synchronizer(ledger)
+        sync = OfxSynchronizer(ledger)
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking_order.ofx')))
         txns = sync.filter(ofx)
-        self.assertTrue(txns[0].date < txns[1].date and 
+        self.assertTrue(txns[0].date < txns[1].date and
                         txns[1].date < txns[2].date)
 
     def test_fully_synced(self):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
-        sync = Synchronizer(ledger)
+        sync = OfxSynchronizer(ledger)
         (ofx, txns) = sync.parse_file(os.path.join('fixtures', 'checking.ofx'))
         self.assertEqual(txns, [])
 
     def test_partial_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'checking-partial.lgr'))
-        sync = Synchronizer(ledger)
+        sync = OfxSynchronizer(ledger)
         (ofx, txns) = sync.parse_file(os.path.join('fixtures', 'checking.ofx'))
         self.assertEqual(len(txns), 1)
 
@@ -61,13 +61,12 @@ class TestSync(TestCase):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         acct = Mock()
         acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
-        sync = Synchronizer(ledger)
+        sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 0)
-        
+
     def test_all_new_txns(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         acct = Mock()
         acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
-        sync = Synchronizer(ledger)
+        sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
-        
