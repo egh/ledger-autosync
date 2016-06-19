@@ -286,8 +286,9 @@ class OfxConverter(Converter):
 class CsvConverter(Converter):
     @staticmethod
     def make_converter(name, csv, **kwargs):
+        fieldset = set(csv.fieldnames)
         for klass in CsvConverter.__subclasses__():
-            if sorted(csv.fieldnames) == sorted(klass.FIELDS):
+            if klass.FIELDSET <= fieldset:
                 return klass(name, csv, **kwargs)
         # Found no class, bail
         raise Exception('Cannot determine CSV type')
@@ -302,7 +303,7 @@ class CsvConverter(Converter):
 
 
 class PaypalConverter(CsvConverter):
-    FIELDS = ["Date", "Time", "Time Zone", "Name", "Type", "Status", "Currency", "Gross", "Fee", "Net", "From Email Address", "To Email Address", "Transaction ID", "Counterparty Status", "Shipping Address", "Address Status", "Item Title", "Item ID", "Shipping and Handling Amount", "Insurance Amount", "Sales Tax", "Option 1 Name", "Option 1 Value", "Option 2 Name", "Option 2 Value", "Auction Site", "Buyer ID", "Item URL", "Closing Date", "Escrow Id", "Invoice Id", "Reference Txn ID", "Invoice Number", "Custom Number", "Receipt ID", "Balance", "Contact Phone Number", ""]
+    FIELDSET = set(['Currency', 'Date', 'Gross', 'Item Title', 'Name', 'Net', 'Status', 'To Email Address', 'Transaction ID', 'Type'])
 
     def __init__(self, *args, **kwargs):
         super(PaypalConverter, self).__init__(*args, **kwargs)
