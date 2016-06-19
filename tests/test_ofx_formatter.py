@@ -33,20 +33,20 @@ class TestOfxConverter(LedgerTestCase):
     def test_checking(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         converter = OfxConverter(account=ofx.account, name="Foo")
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[0]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; ofxid: 1101.1452687~7.0000486
   Foo  $0.01
   Expenses:Misc  -$0.01
 """)
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[1]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
   ; ofxid: 1101.1452687~7.0000487
   Foo  -$34.51
   Expenses:Misc  $34.51
 """)
 
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[2]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
 """2011/04/07 RETURNED CHECK FEE, CHECK # 319 FOR $45.33 ON 04/07/11
   ; ofxid: 1101.1452687~7.0000488
   Foo  -$25.00
@@ -57,7 +57,7 @@ class TestOfxConverter(LedgerTestCase):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         converter = OfxConverter(account=ofx.account, name="Foo", indent=4)
         # testing indent, so do not use the string collapsing version of assert
-        self.assertEqual(converter.format_txn(ofx.account.statement.transactions[0]),
+        self.assertEqual(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
     ; ofxid: 1101.1452687~7.0000486
     Foo                                        $0.01
@@ -67,14 +67,14 @@ class TestOfxConverter(LedgerTestCase):
     def test_investments(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
         converter = OfxConverter(account=ofx.account, name="Foo")
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[0]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
   Foo  100.00000 "458140100" @ $25.635000000
   Assets:Unknown  -$2563.50
 """)
         # test no payee/memo
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[1]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2012/07/27 UNKNOWN
   ; ofxid: 7776.01234567890.0123456789020901120120727
   Foo  128.00000 "G7945E105" @ $39.390900000
@@ -85,7 +85,7 @@ class TestOfxConverter(LedgerTestCase):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         ledger = Ledger(os.path.join('fixtures', 'checking-dynamic-account.lgr'))
         converter = OfxConverter(account=ofx.account, name="Assets:Foo", ledger=ledger)
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[1]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
   ; ofxid: 1101.1452687~7.0000487
   Assets:Foo  -$34.51
@@ -116,7 +116,7 @@ class TestOfxConverter(LedgerTestCase):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         converter = OfxConverter(account=ofx.account, name="Foo",
                                  unknownaccount='Expenses:Unknown')
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[0]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; ofxid: 1101.1452687~7.0000486
   Foo  $0.01
@@ -126,7 +126,7 @@ class TestOfxConverter(LedgerTestCase):
     def test_quote_commodity(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
         converter = OfxConverter(account=ofx.account, name="Foo")
-        self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[0]),
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
   Foo  100.00000 "458140100" @ $25.635000000
@@ -140,7 +140,7 @@ class TestOfxConverter(LedgerTestCase):
                                  unknownaccount='Expenses:Unknown')
         if len(ofx.account.statement.transactions) > 2:
             # older versions of ofxparse would skip these transactions
-            self.assertEqualLedgerPosting(converter.format_txn(ofx.account.statement.transactions[2]),
+            self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
 """2014/06/30 UNKNOWN
     ; ofxid: 1234.12345678.123456-01.3
     Foo  -9.060702 BAZ @ $21.928764

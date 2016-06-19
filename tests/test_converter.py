@@ -74,14 +74,14 @@ class TestPaypalConverter(LedgerTestCase):
             converter = CsvConverter.make_converter(name='Foo', csv=reader)
             self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
-                converter.format_txn(reader.next()),
+                converter.convert(reader.next()).format(),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
     ; csvid: paypal.XYZ1
     Foo                                   -20.00 USD
     Expenses:Misc                          20.00 USD
 """)
             self.assertEqual(
-                converter.format_txn(reader.next()),
+                converter.convert(reader.next()).format(),
                 """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
     ; csvid: paypal.XYZ2
     Foo                                    20.00 USD
@@ -99,7 +99,7 @@ class TestAmazonConverter(LedgerTestCase):
             converter = CsvConverter.make_converter(name='Foo', csv=reader)
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
-                converter.format_txn(reader.next()),
+                converter.convert(reader.next()).format(),
                 """2016/01/29 Best Soap Ever
     ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
     ; csvid: amazon.123-4567890-1234567

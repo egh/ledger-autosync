@@ -211,7 +211,7 @@ class OfxConverter(Converter):
         else:
             return ""
 
-    def format_txn(self, txn):
+    def convert(self, txn):
         ofxid = self.mk_ofxid(txn.id)
         if isinstance(txn, OfxTransaction):
             return Transaction(
@@ -227,7 +227,7 @@ class OfxConverter(Converter):
                         self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
                         Amount(txn.amount, self.currency, reverse=True)
                     )]
-            ).format(self.indent)
+            )
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
@@ -274,7 +274,7 @@ class OfxConverter(Converter):
                         acct2,
                         Amount(txn.units * txn.unit_price, self.currency, reverse=True)
                     )]
-            ).format(self.indent)
+            )
 
     def format_position(self, pos):
         if hasattr(pos, 'date') and hasattr(pos, 'security') and \
@@ -308,7 +308,7 @@ class PaypalConverter(CsvConverter):
     def __init__(self, *args, **kwargs):
         super(PaypalConverter, self).__init__(*args, **kwargs)
 
-    def format_txn(self, row):
+    def convert(self, row):
         if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
             return ""
         else:
@@ -356,7 +356,7 @@ class AmazonConverter(CsvConverter):
         if currency == "USD": currency = "$"
         return Amount(Decimal(re.sub(r"\$", "", row['Item Total'])), currency, reverse=reverse)
 
-    def format_txn(self, row):
+    def convert(self, row):
         return Transaction(
             date=datetime.datetime.strptime(row['Order Date'], "%m/%d/%y"),
             payee=row['Title'],
@@ -367,4 +367,4 @@ class AmazonConverter(CsvConverter):
             postings=[
                 Posting(self.name, self.mk_amount(row)),
                 Posting("Expenses:Misc", self.mk_amount(row, reverse=True))
-            ]).format(self.indent)
+            ])

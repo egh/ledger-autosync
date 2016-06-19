@@ -58,7 +58,7 @@ def print_results(converter, ofx, ledger, txns, args):
                 not(ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL))):
             print converter.format_initial_balance(ofx.account.statement)
     for txn in txns:
-        print converter.format_txn(txn)
+        print converter.convert(txn).format(args.indent)
     if args.assertions:
         print converter.format_balance(ofx.account.statement)
     if hasattr(ofx.account.statement, 'positions'):
@@ -120,7 +120,7 @@ def import_csv(ledger, args):
                 indent=args.indent,
                 unknownaccount=args.unknownaccount)
             for row in reader:
-                print converter.format_txn(row)
+                print converter.convert(row).format()
 
 
 def run(args=None, config=None):
