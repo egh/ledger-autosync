@@ -18,9 +18,10 @@
 
 from __future__ import absolute_import
 from ofxparse import OfxParser
+from ledgerautosync.converter import CsvConverter
 from ofxparse.ofxparse import InvestmentTransaction
 import logging
-
+import csv
 
 class Synchronizer(object):
     def __init__(self, lgr):
@@ -108,3 +109,24 @@ class OfxSynchronizer(Synchronizer):
                         days = max_days
                     logging.debug("Increasing days ago to %d." % (days))
                     last_txns_len = len(txns)
+
+
+class CsvSynchronizer(Synchronizer):
+    def __init__(self, lgr):
+        super(CsvSynchronizer, self).__init__(lgr)
+
+    def parse_file(self, path, accountname=None, unknownaccount=None):
+        with open(path, 'rb') as f:
+            dialect = csv.Sniffer().sniff(f.read(1024))
+            f.seek(0)
+            dialect.skipinitialspace = True
+            reader = csv.DictReader(f, dialect=dialect)
+            converter = CsvConverter.make_converter(
+                name=accountname,
+                csv=reader,
+                ledger=self.lgr,
+                unknownaccount=unknownaccount)
+            return [converter.convert(row)
+                    for row in reader
+                    if not(self.lgr.check_transaction_by_id(
+                            "csvid", converter.get_csv_id(row)))]

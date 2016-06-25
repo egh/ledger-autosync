@@ -25,7 +25,7 @@ import csv
 from ledgerautosync import EmptyInstitutionException
 from ledgerautosync.converter import OfxConverter, CsvConverter, AUTOSYNC_INITIAL, \
     ALL_AUTOSYNC_INITIAL
-from ledgerautosync.sync import OfxSynchronizer
+from ledgerautosync.sync import OfxSynchronizer, CsvSynchronizer
 from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger, LedgerPython
 import logging
 import re
@@ -104,24 +104,12 @@ empty and no accountname supplied!")
 
 
 def import_csv(ledger, args):
-    sync = OfxSynchronizer(ledger)
+    sync = CsvSynchronizer(ledger)
     accountname = args.account
     if accountname is None:
         raise EmptyInstitutionException("No accountname supplied!")
-    with open(args.PATH, 'rb') as f:
-            dialect = csv.Sniffer().sniff(f.read(1024))
-            f.seek(0)
-            dialect.skipinitialspace = True
-            reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter.make_converter(
-                name=accountname,
-                csv=reader,
-                ledger=ledger,
-                indent=args.indent,
-                unknownaccount=args.unknownaccount)
-            for row in reader:
-                print converter.convert(row).format()
-
+    for txn in sync.parse_file(args.PATH, accountname=args.account):
+        print txn.format(args.indent)
 
 def run(args=None, config=None):
     if args is None:

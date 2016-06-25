@@ -21,14 +21,14 @@ import os
 import os.path
 from ofxparse import OfxParser
 from ledgerautosync.ledgerwrap import Ledger
-from ledgerautosync.sync import OfxSynchronizer
+from ledgerautosync.sync import OfxSynchronizer, CsvSynchronizer
 
 from unittest import TestCase
 from nose.plugins.attrib import attr
 from mock import Mock
 
 @attr('generic')
-class TestSync(TestCase):
+class TestOfxSync(TestCase):
     def test_fresh_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
@@ -70,3 +70,20 @@ class TestSync(TestCase):
         acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
+
+
+@attr('generic')
+class TestCsvSync(TestCase):
+    def test_fresh_sync(self):
+        ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
+        sync = CsvSynchronizer(ledger)
+        self.assertEqual(
+            2, len(sync.parse_file(
+                os.path.join('fixtures', 'paypal.csv'))))
+
+    def test_partial_sync(self):
+        ledger = Ledger(os.path.join('fixtures', 'paypal.lgr'))
+        sync = CsvSynchronizer(ledger)
+        self.assertEqual(
+            1, len(sync.parse_file(
+                os.path.join('fixtures', 'paypal.csv'))))

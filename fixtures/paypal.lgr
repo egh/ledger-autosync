@@ -1,0 +1,4 @@
+2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
+    ; csvid: paypal.XYZ1
+    Paypal                                -20.00 USD
+    Expenses:Misc                          20.00 USD

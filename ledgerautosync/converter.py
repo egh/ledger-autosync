@@ -308,6 +308,9 @@ class PaypalConverter(CsvConverter):
     def __init__(self, *args, **kwargs):
         super(PaypalConverter, self).__init__(*args, **kwargs)
 
+    def get_csv_id(self, row):
+        return "paypal.%s"%(Converter.clean_id(row['Transaction ID']))
+
     def convert(self, row):
         if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
             return ""
@@ -339,10 +342,8 @@ class PaypalConverter(CsvConverter):
                 payee=re.sub(
                     r"\s+", " ",
                     "%s %s %s ID: %s, %s"%(row['Name'], row['To Email Address'], row['Item Title'], row['Transaction ID'], row['Type'])),
-                metadata={"csvid":
-                          "%s.%s" % ('paypal',
-                                     Converter.clean_id(row['Transaction ID']))},
-                postings=postings).format(self.indent)
+                metadata={"csvid": self.get_csv_id(row)},
+                postings=postings)
 
 
 class AmazonConverter(CsvConverter):
@@ -356,14 +357,16 @@ class AmazonConverter(CsvConverter):
         if currency == "USD": currency = "$"
         return Amount(Decimal(re.sub(r"\$", "", row['Item Total'])), currency, reverse=reverse)
 
+    def get_csv_id(self, row):
+        return "amazon.%s"%(Converter.clean_id(row['Order ID']))
+
     def convert(self, row):
         return Transaction(
             date=datetime.datetime.strptime(row['Order Date'], "%m/%d/%y"),
             payee=row['Title'],
             metadata={
                 "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s"%(row['Order ID']),
-                "csvid": "%s.%s" % ('amazon',
-                                    Converter.clean_id(row['Order ID']))},
+                "csvid": self.get_csv_id(row)},
             postings=[
                 Posting(self.name, self.mk_amount(row)),
                 Posting("Expenses:Misc", self.mk_amount(row, reverse=True))
