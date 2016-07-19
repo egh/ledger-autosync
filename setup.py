@@ -4,7 +4,7 @@ with open('README.rst') as file:
     long_description = file.read()
 
 setup(name='ledger-autosync',
-      version="0.2.4",
+      version="0.2.5",
       description="Automatically sync your bank's data with ledger",
       long_description=long_description,
       classifiers=[
