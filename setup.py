@@ -13,7 +13,7 @@ setup(name='ledger-autosync',
       ],
       author='Erik Hetzner',
       author_email='egh@e6h.org',
-      url='https://bitbucket.org/egh/ledger-autosync',
+      url='https://gitlab.com/egh/ledger-autosync',
       packages=find_packages(exclude=[
           'tests']),
       entry_points={
