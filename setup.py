@@ -4,7 +4,7 @@ with open('README.rst') as file:
     long_description = file.read()
 
 setup(name='ledger-autosync',
-      version="0.2.4",
+      version="0.2.5",
       description="Automatically sync your bank's data with ledger",
       long_description=long_description,
       classifiers=[
@@ -13,7 +13,7 @@ setup(name='ledger-autosync',
       ],
       author='Erik Hetzner',
       author_email='egh@e6h.org',
-      url='https://bitbucket.org/egh/ledger-autosync',
+      url='https://gitlab.com/egh/ledger-autosync',
       packages=find_packages(exclude=[
           'tests']),
       entry_points={
@@ -24,7 +24,7 @@ setup(name='ledger-autosync',
       },
       install_requires=[
           "ofxclient",
-          "ofxparse>=0.14",
+          "ofxparse>=0.15",
           "BeautifulSoup4"
       ],
       setup_requires=['nose>=1.0',
