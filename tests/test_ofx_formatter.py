@@ -75,7 +75,7 @@ class TestOfxConverter(LedgerTestCase):
 """)
         # test no payee/memo
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
-"""2012/07/27 UNKNOWN
+"""2012/07/27 Foo: buystock
   ; ofxid: 7776.01234567890.0123456789020901120120727
   Foo  128.00000 "G7945E105" @ $39.390900000
   Assets:Unknown  -$5042.04
@@ -140,12 +140,22 @@ class TestOfxConverter(LedgerTestCase):
                                  unknownaccount='Expenses:Unknown')
         if len(ofx.account.statement.transactions) > 2:
             # older versions of ofxparse would skip these transactions
-            self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
-"""2014/06/30 UNKNOWN
+            if hasattr(ofx.account.statement.transactions[2], 'tferaction'):
+                # unmerged pull request
+                self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
+"""2014/06/30 Foo: transfer: out
     ; ofxid: 1234.12345678.123456-01.3
     Foo  -9.060702 BAZ @ $21.928764
-    Foo  $198.69
+    Transfer  $198.69
 """)
+            else:
+                            self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
+"""2014/06/30 Foo: transfer
+    ; ofxid: 1234.12345678.123456-01.3
+    Foo  -9.060702 BAZ @ $21.928764
+    Transfer  $198.69
+""")
+
 
     def test_position(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))

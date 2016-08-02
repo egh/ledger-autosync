@@ -157,7 +157,10 @@ class OfxConverter(Converter):
             memo = txn.memo
 
         if (payee is None or payee == '') and (memo is None or memo == ''):
-            return "UNKNOWN"
+            retval = "%s: %s"%(self.name, txn.type)
+            if txn.type == 'transfer' and hasattr(txn, 'tferaction'):
+                retval += ": %s"%(txn.tferaction)
+            return retval
         if (payee is None or payee == '') or txn.memo.startswith(payee):
             return memo
         elif (memo is None or memo == '') or payee.startswith(memo):
@@ -235,9 +238,8 @@ class OfxConverter(Converter):
                 # recent versions of ofxparse
                 if re.match('^(buy|sell)', txn.type):
                     acct2 = self.unknownaccount or 'Assets:Unknown'
-                elif txn.type == 'transfer' or txn.type == 'jrnlsec':
-                    # both sides are the same, internal transfer
-                    pass
+                elif txn.type == 'transfer':
+                    acct2 = 'Transfer'
                 elif txn.type == 'reinvest':
                     # reinvestment of income
                     # TODO: make this configurable
