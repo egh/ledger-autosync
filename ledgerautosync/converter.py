@@ -287,15 +287,15 @@ class OfxConverter(Converter):
 
 class CsvConverter(Converter):
     @staticmethod
-    def make_converter(name, csv, **kwargs):
+    def make_converter(csv, name=None, **kwargs):
         fieldset = set(csv.fieldnames)
         for klass in CsvConverter.__subclasses__():
             if klass.FIELDSET <= fieldset:
-                return klass(name, csv, **kwargs)
+                return klass(csv, name=name, **kwargs)
         # Found no class, bail
         raise Exception('Cannot determine CSV type')
 
-    def __init__(self, name, csv, indent=4, ledger=None, unknownaccount=None):
+    def __init__(self, csv, name=None, indent=4, ledger=None, unknownaccount=None):
         super(CsvConverter, self).__init__(
             ledger=ledger,
             indent=indent,

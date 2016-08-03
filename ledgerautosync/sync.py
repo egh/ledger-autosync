@@ -122,8 +122,8 @@ class CsvSynchronizer(Synchronizer):
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
             converter = CsvConverter.make_converter(
+                reader,
                 name=accountname,
-                csv=reader,
                 ledger=self.lgr,
                 unknownaccount=unknownaccount)
             return [converter.convert(row)

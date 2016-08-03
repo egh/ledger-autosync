@@ -71,7 +71,7 @@ class TestPaypalConverter(LedgerTestCase):
             f.seek(0)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter.make_converter(name='Foo', csv=reader)
+            converter = CsvConverter.make_converter(reader, name='Foo')
             self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
@@ -96,7 +96,7 @@ class TestAmazonConverter(LedgerTestCase):
             f.seek(0)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter.make_converter(name='Foo', csv=reader)
+            converter = CsvConverter.make_converter(reader, name='Foo')
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
