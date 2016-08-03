@@ -18,8 +18,14 @@ Features
 -   interactive banking setup via
     [ofxclient](https://github.com/captin411/ofxclient)
 -   multiple banks and accounts
+-   support for non-US currencies
+-   support for 401k and investment accounts
+    -   tracks investments by share, not dollar value
+    -   support for complex transaction types, including transfers, buys, sells,
+        etc.
 -   import of downloaded OFX files, for banks not supporting automatic
     download
+-   import of downloaded CSV files from Paypal, Amazon and Mint
 
 Platforms
 ---------
