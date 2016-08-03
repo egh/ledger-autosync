@@ -31,11 +31,16 @@ because it will not need to start a command to check every transaction.
 Quickstart
 ----------
 
-Install from pip:
+If you are on Debian or Ubuntu, an (older) version of ledger-autosync should be
+available for installation. Try:
+
+    $ sudo apt-get install ledger-autosync
+
+If you use pip, you can install the latest released version:
 
     $ pip install ledger-autosync
 
-Or install from source:
+You can also install from source, if you have downloaded the source:
 
     $ python setup.py install
 
