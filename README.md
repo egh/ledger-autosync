@@ -102,6 +102,25 @@ This will print unknown transactions in the file to stdout in the same
 way as ordinary sync. If the transaction is already in your ledger, it
 will be ignored.
 
+Syncing a CSV file
+------------------
+
+If you have a CSV file, you may also be able to import it using a recent
+(installed via source) version of ledger-autosync. ledger-autosync can currently
+process CSV files as provided by Paypal, Amazon, or Mint. You can process the
+CSV file as follows:
+
+    ledger-autosync /path/to/file.csv -a Assets:Paypal
+
+With Amazon and Paypal CSV files, each row includes a unique identifier, so
+ledger-autosync will be able to deduplicate against any previously imported
+entries in your ledger files. With Mint, this will not be the case, and all
+entries will be printed.
+
+If you are a developer, you should fine it easy enough to add a new CSV format
+to ledger-autosync. See, for example, the `MintConverter` class in the
+`ledgerautosync/converter.py` file in this repository.
+
 How it works
 ------------
 
