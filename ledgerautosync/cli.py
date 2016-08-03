@@ -106,8 +106,6 @@ empty and no accountname supplied!")
 def import_csv(ledger, args):
     sync = CsvSynchronizer(ledger)
     accountname = args.account
-    if accountname is None:
-        raise EmptyInstitutionException("No accountname supplied!")
     for txn in sync.parse_file(args.PATH, accountname=args.account):
         print txn.format(args.indent)
 

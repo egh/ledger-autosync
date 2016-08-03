@@ -22,6 +22,7 @@ import re
 from ofxparse.ofxparse import Transaction as OfxTransaction, InvestmentTransaction
 from ledgerautosync import EmptyInstitutionException
 import datetime
+import uuid
 
 AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
@@ -373,3 +374,34 @@ class AmazonConverter(CsvConverter):
                 Posting(self.name, self.mk_amount(row)),
                 Posting("Expenses:Misc", self.mk_amount(row, reverse=True))
             ])
+
+class MintConverter(CsvConverter):
+    FIELDSET = set(['Date', 'Amount', 'Description', 'Account Name', 'Category', 'Transaction Type'])
+
+    def __init__(self, *args, **kwargs):
+        super(MintConverter, self).__init__(*args, **kwargs)
+
+    def mk_amount(self, row, reverse=False):
+        return Amount(Decimal(row['Amount']), '$', reverse=reverse)
+
+    def get_csv_id(self, row):
+        # We should probably do this better, but now just return a random ID
+        # because Mint does not provide a unique id.
+        return str(uuid.uuid1())
+
+    def convert(self, row):
+        account = self.name
+        if account is None:
+            account = row['Account Name']
+        postings = []
+        if (row['Transaction Type'] == 'credit'):
+            postings = [Posting(account, self.mk_amount(row, reverse=True)),
+                        Posting(row['Category'], self.mk_amount(row))]
+        else:
+            postings = [Posting(account, self.mk_amount(row)),
+                        Posting("Expenses:%s"%(row['Category']), self.mk_amount(row, reverse=True))]
+
+        return Transaction(
+            date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
+            payee=row['Description'],
+            postings=postings)

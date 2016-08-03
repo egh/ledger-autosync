@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, PaypalConverter, Amount, Posting
+from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, MintConverter, PaypalConverter, Amount, Posting
 from decimal import Decimal
 import csv
 
@@ -105,4 +105,27 @@ class TestAmazonConverter(LedgerTestCase):
     ; csvid: amazon.123-4567890-1234567
     Foo                                       $21.90
     Expenses:Misc                            -$21.90
+""")
+
+@attr('generic')
+class TestMintConverter(LedgerTestCase):
+    def test_format(self):
+        with open('fixtures/mint.csv', 'rb') as f:
+            dialect = csv.Sniffer().sniff(f.read(1024))
+            f.seek(0)
+            dialect.skipinitialspace = True
+            reader = csv.DictReader(f, dialect=dialect)
+            converter = CsvConverter.make_converter(reader)
+            self.assertEqual(type(converter), MintConverter)
+            self.assertEqual(
+                converter.convert(reader.next()).format(),
+                """2016/08/02 Amazon
+    1234                                      $29.99
+    Expenses:Shopping                        -$29.99
+""")
+            self.assertEqual(
+                converter.convert(reader.next()).format(),
+                """2016/06/02 Autopay Rautopay Auto
+    1234                                    -$123.45
+    Credit Card Payment                      $123.45
 """)
