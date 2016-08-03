@@ -22,7 +22,7 @@ import re
 from ofxparse.ofxparse import Transaction as OfxTransaction, InvestmentTransaction
 from ledgerautosync import EmptyInstitutionException
 import datetime
-import uuid
+import hashlib
 
 AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
@@ -296,6 +296,14 @@ class CsvConverter(Converter):
         # Found no class, bail
         raise Exception('Cannot determine CSV type')
 
+    # By default, return an MD5 of the key-value pairs in the row.
+    # If a better ID is available, should be overridden.
+    def get_csv_id(self, row):
+        h = hashlib.md5()
+        for key in sorted(row.keys()):
+            h.update("%s=%s\n"%(key, row[key]))
+        return h.hexdigest()
+
     def __init__(self, csv, name=None, indent=4, ledger=None, unknownaccount=None):
         super(CsvConverter, self).__init__(
             ledger=ledger,
@@ -384,11 +392,6 @@ class MintConverter(CsvConverter):
     def mk_amount(self, row, reverse=False):
         return Amount(Decimal(row['Amount']), '$', reverse=reverse)
 
-    def get_csv_id(self, row):
-        # We should probably do this better, but now just return a random ID
-        # because Mint does not provide a unique id.
-        return str(uuid.uuid1())
-
     def convert(self, row):
         account = self.name
         if account is None:
@@ -403,5 +406,6 @@ class MintConverter(CsvConverter):
 
         return Transaction(
             date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
+            metadata={"csvid": "mint.%s"%(self.get_csv_id(row))},
             payee=row['Description'],
             postings=postings)

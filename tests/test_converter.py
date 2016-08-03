@@ -19,6 +19,7 @@
 from __future__ import absolute_import
 from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, MintConverter, PaypalConverter, Amount, Posting
 from decimal import Decimal
+import hashlib
 import csv
 
 from nose.plugins.attrib import attr
@@ -62,6 +63,16 @@ class TestAmount(LedgerTestCase):
         self.assertEqual(
             "$10.001",
             Amount(Decimal("10.001"), "$", unlimited=True).format())
+
+
+@attr('generic')
+class TestCsvConverter(LedgerTestCase):
+    def test_get_csv_id(self):
+        converter = CsvConverter(None)
+        h = {'foo': 'bar', 'bar': 'foo'}
+        self.assertEqual(converter.get_csv_id(h),
+                         hashlib.md5("bar=foo\nfoo=bar\n").hexdigest())
+
 
 @attr('generic')
 class TestPaypalConverter(LedgerTestCase):
@@ -120,12 +131,14 @@ class TestMintConverter(LedgerTestCase):
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/08/02 Amazon
+    ; csvid: mint.a7c028a73d76956453dab634e8e5bdc1
     1234                                      $29.99
     Expenses:Shopping                        -$29.99
 """)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/06/02 Autopay Rautopay Auto
+    ; csvid: mint.a404e70594502dd62bfc6f15d80b7cd7
     1234                                    -$123.45
     Credit Card Payment                      $123.45
 """)

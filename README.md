@@ -114,8 +114,15 @@ CSV file as follows:
 
 With Amazon and Paypal CSV files, each row includes a unique identifier, so
 ledger-autosync will be able to deduplicate against any previously imported
-entries in your ledger files. With Mint, this will not be the case, and all
-entries will be printed.
+entries in your ledger files.
+
+With Mint, a unique identifier based on the data in the row is generated and
+stored. If future downloads contain identical rows, they will be deduplicated.
+This method is probably not as robust as a method based on unique ids, but Mint
+does not provide a unique id, and it should be better than nothing. It is likely
+to generate false negatives: transactions that seem new, but are in fact old. It
+will not generate false negatives: transactions that are not generated because
+they seem old.
 
 If you are a developer, you should fine it easy enough to add a new CSV format
 to ledger-autosync. See, for example, the `MintConverter` class in the
