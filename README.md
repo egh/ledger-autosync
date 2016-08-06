@@ -34,6 +34,8 @@ because it will not need to start a command to check every transaction.
 
 ## Quickstart
 
+### Installation
+
 If you are on Debian or Ubuntu, an (older) version of ledger-autosync should be
 available for installation. Try:
 
@@ -47,7 +49,24 @@ You can also install from source, if you have downloaded the source:
 
     $ python setup.py install
 
-Run ofxclient to set up banking:
+### Running
+
+Once you have ledger-autosync installed, you can download an OFX file from your
+bank and run ledger-autosync against it:
+
+    $ ledger-autosync download.ofx
+
+This should print a number of transactions to stdout. If you add these
+transactions to your default ledger file (whatever is read when you run `ledger`
+without arguments), you should find that if you run ledger-autosync again, it
+should print no transactions. This is because of the deduplicating feature: only
+new transactions should be printed for insertion into your ledger files.
+
+### Using the ofx protocol for automatic download
+
+ledger-autosync also supports using the OFX protocol to automatically connect to
+banks and download data. You can use the ofxclient program (which should have
+been installed with ledger-autosync) to set up banking:
 
     $ ofxclient
 
