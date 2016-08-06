@@ -1,5 +1,4 @@
-ledger-autosync
-===============
+# ledger-autosync
 
 ledger-autosync is a program to pull down transactions from your bank and create
 [ledger](http://ledger-cli.org/) transactions for them. It is designed to only
@@ -9,8 +8,7 @@ automated synchronization features available in products like GnuCash, Mint,
 etc. In fact, ledger-autosync performs OFX import and synchronization better
 than all the alternatives I have seen.
 
-Features
---------
+## Features
 
 -   supports [ledger](http://ledger-cli.org/) 3 and
     [hledger](http://hledger.org/)
@@ -27,16 +25,14 @@ Features
     download
 -   import of downloaded CSV files from Paypal, Amazon and Mint
 
-Platforms
----------
+## Platforms
 
 ledger-autosync is developed on Linux with ledger 3; it has been tested
 on Windows (although it will run slower) and should run on OS X. It
 requires ledger 3 or hledger, but it should run faster with ledger,
 because it will not need to start a command to check every transaction.
 
-Quickstart
-----------
+## Quickstart
 
 If you are on Debian or Ubuntu, an (older) version of ledger-autosync should be
 available for installation. Try:
@@ -78,8 +74,7 @@ this output to your ledger file. When that is done, you can call:
 again, and it should print nothing to stdout, because you already have
 those transactions in your ledger.
 
-Syncing a file
---------------
+## Syncing a file
 
 Some banks allow users to download OFX files, but do not support
 fetching via the OFX protocol. If you have an OFX file, you can convert
@@ -91,8 +86,7 @@ This will print unknown transactions in the file to stdout in the same
 way as ordinary sync. If the transaction is already in your ledger, it
 will be ignored.
 
-How it works
-------------
+## How it works
 
 ledger-autosync stores a unique identifier, (for OFX files, this is a unique ID
 provided by your institution for each transaction), as metadata in each
@@ -100,8 +94,7 @@ transaction. When syncing with your bank, it will check if the transaction
 exists by running the ledger or hledger command. If the transaction exists, it
 does nothing. If it does not exist, the transaction is printed to stdout.
 
-Syncing a CSV file
-------------------
+## Syncing a CSV file
 
 If you have a CSV file, you may also be able to import it using a recent
 (installed via source) version of ledger-autosync. ledger-autosync can currently
@@ -126,8 +119,7 @@ If you are a developer, you should fine it easy enough to add a new CSV format
 to ledger-autosync. See, for example, the `MintConverter` class in the
 `ledgerautosync/converter.py` file in this repository.
 
-Assertions
-----------
+## Assertions
 
 If you supply the `--assertions` flag, ledger-autosync will also print
 out valid ledger assertions based on your bank balances at the time of
@@ -135,8 +127,7 @@ the sync. These otherwise empty transactions tell ledger that your
 balance *should* be something at a given time, and if not, ledger will
 fail with an error.
 
-resync
-------
+## resync
 
 By default, ledger-autosync will process transactions backwards, and
 stop when it sees a transaction that is already in ledger. To force it
@@ -147,8 +138,7 @@ synchronized 90 days and now want to get 180 days of transactions,
 ledger-autosync would stop before going back to 180 days without the
 `--resync` option.
 
-Testing
--------
+## Testing
 
 ledger-autosync uses nose for tests. To test, run nosetests in the
 project directory. This will test the ledger, hledger and ledger-python
