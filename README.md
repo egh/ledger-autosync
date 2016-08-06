@@ -78,17 +78,6 @@ this output to your ledger file. When that is done, you can call:
 again, and it should print nothing to stdout, because you already have
 those transactions in your ledger.
 
-### resync
-
-By default, ledger-autosync will process transactions backwards, and
-stop when it sees a transaction that is already in ledger. To force it
-to process all transactions up to the `--max` days back in time
-(default: 90), use the `--resync` option. This can be useful when
-increasing the `--max` option. For instance, if you previously
-synchronized 90 days and now want to get 180 days of transactions,
-ledger-autosync would stop before going back to 180 days without the
-`--resync` option.
-
 Syncing a file
 --------------
 
@@ -101,6 +90,15 @@ to ledger:
 This will print unknown transactions in the file to stdout in the same
 way as ordinary sync. If the transaction is already in your ledger, it
 will be ignored.
+
+How it works
+------------
+
+ledger-autosync stores a unique identifier, (for OFX files, this is a unique ID
+provided by your institution for each transaction), as metadata in each
+transaction. When syncing with your bank, it will check if the transaction
+exists by running the ledger or hledger command. If the transaction exists, it
+does nothing. If it does not exist, the transaction is printed to stdout.
 
 Syncing a CSV file
 ------------------
@@ -128,15 +126,6 @@ If you are a developer, you should fine it easy enough to add a new CSV format
 to ledger-autosync. See, for example, the `MintConverter` class in the
 `ledgerautosync/converter.py` file in this repository.
 
-How it works
-------------
-
-ledger-autosync stores a unique identifier, provided by your institution
-for each transaction, as metadata in each transaction. When syncing with
-your bank, it will check if the transaction exists by running the ledger
-or hledger command. If the transaction exists, it does nothing. If it
-does not exist, the transaction is printed to stdout.
-
 Assertions
 ----------
 
@@ -145,6 +134,18 @@ out valid ledger assertions based on your bank balances at the time of
 the sync. These otherwise empty transactions tell ledger that your
 balance *should* be something at a given time, and if not, ledger will
 fail with an error.
+
+resync
+------
+
+By default, ledger-autosync will process transactions backwards, and
+stop when it sees a transaction that is already in ledger. To force it
+to process all transactions up to the `--max` days back in time
+(default: 90), use the `--resync` option. This can be useful when
+increasing the `--max` option. For instance, if you previously
+synchronized 90 days and now want to get 180 days of transactions,
+ledger-autosync would stop before going back to 180 days without the
+`--resync` option.
 
 Testing
 -------
