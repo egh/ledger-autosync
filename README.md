@@ -146,6 +146,57 @@ the sync. These otherwise empty transactions tell ledger that your
 balance *should* be something at a given time, and if not, ledger will
 fail with an error.
 
+## 401k and investment accounts
+
+If you have a 401k account, ledger-autosync can help you to track the state of
+it. You will need OFX files (or an OFX protocol connection as set up by
+ofxclient) provided by your 401k.
+
+In general, your 401k account will consist of buy transactions, transfers and
+reinvestments. The type will be printed in the payee line after a colon (`:`)
+
+The buy transactions are your contributions to the 401k. These will be printed
+as follows:
+
+```
+2016/01/29 401k: buymf
+  ; ofxid: 1234
+  Assets:Retirement:401k                                 1.12345 FOOBAR @ $123.123456
+  Income:Salary                                            -$138.32
+```
+
+This means that you bought (contributed) $138.32 worth of FOOBAR (your
+investment fund) at the price of $123.123456. The money to buy the investment
+came from your income. In ledger-autosync, the `Assets:Retirement:401k` account
+is the one specified using the `--account` command line, or configured in your
+`ofxclient.ini`. The `Income:Salary` is specified by the `--unknown-account`
+option.
+
+If the transaction is a “transfer” transaction, this usually means either a fee
+or a change in your investment option:
+
+```
+2014/06/30 401k: transfer: out
+  ; ofxid: 1234
+  Assets:Retirement:401k                               -9.060702 FOOBAR @ $123.123456
+  Transfer                                                  $198.69
+```
+
+You will need to examine your statements to determine if this was a fee or a
+real transfer.
+
+Another type of transaction is a “reinvest” transaction:
+
+```
+2014/06/30 401k: reinvest
+  ; ofxid: 1234
+  Assets:Retirement:401k                               -0.060702 FOOBAR @ $123.123456
+  Income:Interest                                             $7.47
+```
+
+This probably indicates a reinvestment of dividends. ledger-autosync will print
+`Income:Interest` as the other account.
+
 ## resync
 
 By default, ledger-autosync will process transactions backwards, and
