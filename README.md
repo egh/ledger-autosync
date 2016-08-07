@@ -178,20 +178,20 @@ or a change in your investment option:
 ```
 2014/06/30 401k: transfer: out
   ; ofxid: 1234
-  Assets:Retirement:401k                               -9.060702 FOOBAR @ $123.123456
+  Assets:Retirement:401k                                -1.61374 FOOBAR @ $123.123456
   Transfer                                                  $198.69
 ```
 
 You will need to examine your statements to determine if this was a fee or a
-real transfer.
+real transfer back into your 401k.
 
 Another type of transaction is a “reinvest” transaction:
 
 ```
 2014/06/30 401k: reinvest
   ; ofxid: 1234
-  Assets:Retirement:401k                               -0.060702 FOOBAR @ $123.123456
-  Income:Interest                                             $7.47
+  Assets:Retirement:401k                                0.060702 FOOBAR @ $123.123456
+  Income:Interest                                            -$7.47
 ```
 
 This probably indicates a reinvestment of dividends. ledger-autosync will print
