@@ -26,7 +26,7 @@ from threading import Thread
 from Queue import Queue, Empty
 from ledgerautosync.converter import Converter
 import logging
-
+from fuzzywuzzy import process
 
 def hledger_clean(a):
     def clean_str(s):
@@ -193,14 +193,23 @@ class LedgerPython(object):
                     open(ledger_file).read())
             else:
                 self.journal = ledger.read_journal(ledger_file)
+    
+        self.load_payees()
 
+    def load_payees(self):
+        self.payees = []
+        for xact in self.journal:
+            self.payees.append(xact.payee)
+        
     def check_transaction_by_id(self, key, value):
         q = self.journal.query("-E meta %s=\"%s\"" %
                                (key, Converter.clean_id(value)))
         return len(q) > 0
 
     def get_account_by_payee(self, payee, exclude):
-        q = self.journal.query("--real payee '%s'" % (clean_payee(payee)))
+        fuzzed_payee = process.extractOne(payee, self.payees)[0]
+
+        q = self.journal.query("--real payee '%s'" % (clean_payee(fuzzed_payee)))
         accts = [p.account for p in q]
         accts_filtered = [a for a in accts if a.fullname() != exclude]
         if accts_filtered:
