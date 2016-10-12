@@ -20,6 +20,7 @@ from __future__ import absolute_import
 import xml.etree.ElementTree as ET
 import os
 import re
+import distutils
 import subprocess
 from subprocess import Popen, PIPE
 from threading import Thread
@@ -97,6 +98,8 @@ def mk_ledger(ledger_file):
 
 class Ledger(object):
     def __init__(self, ledger_file=None, no_pipe=True):
+        if distutils.spawn.find_executable('ledger') is None:
+            raise Exception("ledger was not found in $PATH")
         self._item = ""
 
         def enqueue_output(out, queue):
@@ -211,6 +214,8 @@ class LedgerPython(object):
 
 class HLedger(object):
     def __init__(self, ledger_file=None):
+        if distutils.spawn.find_executable('hledger') is None:
+            raise Exception("hledger was not found in $PATH")
         self.args = ["hledger"]
         if ledger_file is not None:
             self.args += ["-f", ledger_file]
