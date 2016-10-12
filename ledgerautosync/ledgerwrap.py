@@ -82,19 +82,14 @@ def mk_ledger(ledger_file):
         import ledger
         return LedgerPython(ledger_file, string_read=False)
     except ImportError:
-        if os.name == 'posix':
-            if ((subprocess.call("which ledger > /dev/null", shell=True) == 0)
-                and (Popen(["ledger", "--version"], stdout=PIPE).
-                     communicate()[0]).startswith("Ledger 3")):
+        if ((distutils.spawn.find_executable('ledger') is not None) and
+            (Popen(["ledger", "--version"], stdout=PIPE).
+             communicate()[0]).startswith("Ledger 3")):
                 return Ledger(ledger_file)
-            elif subprocess.call("which hledger > /dev/null", shell=True) == 0:
-                return HLedger(ledger_file)
-            else:
-                raise Exception("Neither ledger 3 nor hledger found!")
+        elif distutils.spawn.find_executable('hledger') is not None:
+            return HLedger(ledger_file)
         else:
-            # windows, I guess ... just assume ledger
-            return Ledger(ledger_file)
-
+            raise Exception("Neither ledger 3 nor hledger found!")
 
 class Ledger(object):
     def __init__(self, ledger_file=None, no_pipe=True):
