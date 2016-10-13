@@ -216,7 +216,12 @@ class OfxConverter(Converter):
             return ""
 
     def convert(self, txn):
+        """
+        Convert an OFX Transaction to a posting
+        """
+        
         ofxid = self.mk_ofxid(txn.id)
+        
         if isinstance(txn, OfxTransaction):
             return Transaction(
                 date=txn.date,
@@ -235,6 +240,12 @@ class OfxConverter(Converter):
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
+
+            posting1 = None
+            posting2 = None
+
+            metadata = {"ofxid": ofxid}
+
             if isinstance(txn.type, str):
                 # recent versions of ofxparse
                 if re.match('^(buy|sell)', txn.type):
@@ -245,6 +256,16 @@ class OfxConverter(Converter):
                     # reinvestment of income
                     # TODO: make this configurable
                     acct2 = 'Income:Interest'
+                elif txn.type == 'income' and txn.income_type == 'DIV':
+                    # Fidelity lists non-reinvested dividend income as
+                    # type: income, income_type: DIV
+                    # TODO: determine how dividend income is listed from other institutions
+                    metadata['dividend_from'] = txn.security
+                    acct2 = 'Income:Dividends'
+                    posting1 = Posting( acct1,
+                                        Amount(txn.total, self.currency))
+                    posting2 = Posting( acct2,
+                                        Amount(txn.total, self.currency, reverse=True ))
                 else:
                     # ???
                     pass
@@ -259,24 +280,30 @@ class OfxConverter(Converter):
                 else:
                     # ???
                     pass
+            
             aux_date = None
             if txn.settleDate is not None and \
                txn.settleDate != txn.tradeDate:
                 aux_date = txn.settleDate
+            
+            # income/DIV transactions do not involve buying or selling a security
+            # so their postings need special handling compared to others handled here
+            if posting1 is None and posting2 is None:
+                posting1 = Posting(acct1,
+                                Amount(txn.units, txn.security, unlimited=True),
+                                unit_price=Amount(txn.unit_price, self.currency, unlimited=True))
+                posting2 = Posting(acct2,
+                                Amount(txn.units * txn.unit_price, self.currency, reverse=True))
+            else:
+                # Previously defined if type:income income_type/DIV
+                pass
+
             return Transaction(
                 date=txn.tradeDate,
                 aux_date=txn.settleDate,
                 payee=self.format_payee(txn),
-                metadata={"ofxid": ofxid},
-                postings=[
-                    Posting(
-                        acct1,
-                        Amount(txn.units, txn.security, unlimited=True),
-                        unit_price=Amount(txn.unit_price, self.currency, unlimited=True)),
-                    Posting(
-                        acct2,
-                        Amount(txn.units * txn.unit_price, self.currency, reverse=True)
-                    )]
+                metadata=metadata,
+                postings=[ posting1, posting2 ]
             )
 
     def format_position(self, pos):
