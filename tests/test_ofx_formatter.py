@@ -164,3 +164,14 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqual(converter.format_position(ofx.account.statement.positions[0]),
                          """P 2014/06/30 06:00:00 FOO 22.517211
 """)
+
+    def test_dividend(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'income.ofx')))
+        converter = OfxConverter(account=ofx.account, name="Foo")
+        self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
+"""2016/10/12 DIVIDEND RECEIVED
+    ; dividend_from: cusip_redacted
+    ; ofxid: 1234.12345678.123456-01.redacted
+    Foo                                     $1234.56
+    Income:Dividends                       -$1234.56
+""")

@@ -1,0 +1,69 @@
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+        <MESSAGE>SUCCESS</MESSAGE>
+      </STATUS>
+      <DTSERVER>20150909084609.717[-6:MDT]</DTSERVER>
+      <LANGUAGE>ENG</LANGUAGE>
+      <FI>
+        <ORG>EXAMPLE</ORG>
+        <FID>1234</FID>
+      </FI>
+      <INTU.BID>1234</INTU.BID>
+    </SONRS>
+  </SIGNONMSGSRSV1>
+  <INVSTMTMSGSRSV1>
+    <INVSTMTTRNRS>
+      <TRNUID>0</TRNUID>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+        <MESSAGE>SUCCESS</MESSAGE>
+      </STATUS>
+      <INVSTMTRS>
+        <DTASOF>20140630000000.000[-6:MDT]</DTASOF>
+        <CURDEF>USD</CURDEF>
+        <INVACCTFROM>
+          <BROKERID>example.org</BROKERID>
+          <ACCTID>12345678.123456-01</ACCTID>
+        </INVACCTFROM>
+        <INVTRANLIST>
+          <DTSTART>20160908000000.000[-4:EDT]
+          <DTEND>20161008121253.321[-4:EDT]
+          <INCOME>
+            <INVTRAN>
+              <FITID>redacted
+              <DTTRADE>20161012000000.000[-4:EDT]
+              <MEMO>DIVIDEND RECEIVED
+            </INVTRAN>
+            <SECID>
+              <UNIQUEID>cusip_redacted
+              <UNIQUEIDTYPE>CUSIP
+            </SECID>
+            <INCOMETYPE>DIV
+            <TOTAL>+00000000001234.5600
+            <SUBACCTSEC>CASH
+            <SUBACCTFUND>CASH
+            <CURRENCY>
+              <CURRATE>1.00
+              <CURSYM>USD
+            </CURRENCY>
+          </INCOME>
+        </INVTRANLIST>
+      </INVSTMTRS>
+    </INVSTMTTRNRS>
+  </INVSTMTMSGSRSV1>
+</OFX>
