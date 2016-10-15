@@ -25,7 +25,8 @@ setup(name='ledger-autosync',
       install_requires=[
           "ofxclient",
           "ofxparse>=0.15",
-          "BeautifulSoup4"
+          "BeautifulSoup4",
+          "fuzzywuzzy"
       ],
       setup_requires=['nose>=1.0',
                       'mock'],
