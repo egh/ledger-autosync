@@ -1,0 +1,135 @@
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:d0a0380757f14baba37a454823980c7c
+
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+    <STATUS>
+      <CODE>0
+      <SEVERITY>INFO
+      <MESSAGE>SUCCESS
+    </STATUS>
+    <DTSERVER>20161008122549.359[-4:EDT]
+    <LANGUAGE>ENG
+    <FI>
+      <ORG>fidelity.com
+      <FID>7776
+    </FI>
+    </SONRS>
+  </SIGNONMSGSRSV1>
+  <INVSTMTMSGSRSV1>
+    <INVSTMTTRNRS>
+      <TRNUID>4335f294b6fb406ba99d3bf473b89e8a
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+        <MESSAGE>SUCCESS
+      </STATUS>
+      <INVSTMTRS>
+        <DTASOF>20161008033008.000[-4:EDT]
+        <CURDEF>USD
+        <INVACCTFROM>
+          <BROKERID>fidelity.com
+          <ACCTID>123456789
+        </INVACCTFROM>
+        <INVTRANLIST>
+          <DTSTART>20160908000000.000[-4:EDT]
+          <DTEND>20161008122549.439[-4:EDT]
+          <BUYMF>
+            <INVBUY>
+              <INVTRAN>
+                <FITID>123456789000987654321
+                <DTTRADE>20161005000000.000[-4:EDT]
+                <MEMO>YOU BOUGHT           PROSPECTUS 
+              </INVTRAN>
+              <SECID>
+                <UNIQUEID>957904675
+                <UNIQUEIDTYPE>CUSIP
+              </SECID>
+              <UNITS>+0000000001000.00000
+              <UNITPRICE>000000047.860000000
+              <COMMISSION>+00000000000000.0000
+              <FEES>+00000000000000.0000
+              <TOTAL>-00000000047860.0000
+              <CURRENCY>
+                <CURRATE>1.00
+                <CURSYM>USD
+              </CURRENCY>
+              <SUBACCTSEC>CASH
+              <SUBACCTFUND>CASH
+            </INVBUY>
+            <BUYTYPE>BUY    
+          </BUYMF>
+          <INCOME>    
+            <INVTRAN>
+              <FITID>123456789000987654322
+              <DTTRADE>20160929000000.000[-4:EDT]
+              <MEMO>DIVIDEND RECEIVED
+            </INVTRAN>
+            <SECID>
+              <UNIQUEID>957904675
+              <UNIQUEIDTYPE>CUSIP
+            </SECID>
+            <INCOMETYPE>DIV
+            <TOTAL>+00000000000005.2300
+            <SUBACCTSEC>CASH
+            <SUBACCTFUND>CASH
+            <CURRENCY>
+              <CURRATE>1.00
+              <CURSYM>USD
+            </CURRENCY>    
+          </INCOME>
+        </INVTRANLIST>
+        <INVPOSLIST>
+          <POSMF>
+            <INVPOS>
+              <SECID>
+                <UNIQUEID>957904675
+                <UNIQUEIDTYPE>CUSIP
+              </SECID>
+              <HELDINACCT>CASH
+              <POSTYPE>LONG
+              <UNITS>2000.00000
+              <UNITPRICE>47.8600000
+              <MKTVAL>+00000095720.00
+              <DTPRICEASOF>20161008033008.000[-4:EDT]
+              <CURRENCY>
+                <CURRATE>1.0
+                <CURSYM>USD
+              </CURRENCY>
+            </INVPOS>
+          </POSMF>
+        </INVPOSLIST>
+      </INVSTMTRS>
+    </INVSTMTTRNRS>
+  </INVSTMTMSGSRSV1>
+  <SECLISTMSGSRSV1>
+  <SECLIST>
+    <MFINFO>
+      <SECINFO>
+        <SECID>
+          <UNIQUEID>957904675
+          <UNIQUEIDTYPE>CUSIP
+        </SECID>
+        <SECNAME>BLACKROCK HEALTH SCIENCES OPP PRT A
+        <TICKER>SHSAX
+        <UNITPRICE>47.8600000
+        <DTASOF>20161008033008.000[-4:EDT]
+        <CURRENCY>
+          <CURRATE>1.000
+          <CURSYM>USD  
+        </CURRENCY>
+      </SECINFO>
+      <MFTYPE>OTHER
+      <DTYIELDASOF>20161008033008.000[-4:EDT]
+    </MFINFO>
+    </SECLIST>
+  </SECLISTMSGSRSV1>
+</OFX>

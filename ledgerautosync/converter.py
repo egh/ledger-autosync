@@ -1,4 +1,5 @@
 # Copyright (c) 2013, 2014 Erik Hetzner
+# Portions Copyright (c) 2016 James S Blachly, MD
 #
 # This file is part of ledger-autosync
 #
@@ -26,6 +27,61 @@ import hashlib
 
 AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
+
+class SecurityList(object):
+    """
+    The SecurityList represents the OFX <SECLIST>...</SECLIST>
+    and holds securities present in the OFX records
+    
+    <SECINFO>...</SECINFO> as implemented by OFXparse only includes:
+    {memo, name, ticker, uniqueid}
+    Unfortunately does not provide uniqueid_type or currency
+    
+    It is iterable, and also provides lookup table (LUT) functionality
+    provides __next__() for Py3
+    """
+    def __init__(self, securities):
+        self.cusip_lut = dict()
+        self.ticker_lut = dict()
+        
+        self._iter = iter(securities)
+        self.securities = securities
+        if len(securities) == 0: return
+        
+        # index
+        for sec in securities:
+            # unfortunately OFXparse does not currently implement
+            # security.uniqueid_type so I am presuming here
+            if sec.uniqueid: self.cusip_lut[sec.uniqueid] = sec
+            if sec.ticker:   self.ticker_lut[sec.ticker]  = sec
+            # This indexing strategy (whereby I index the object instead of
+            # the inverse value (e.g. ticker symbol) directly has a flaw
+            # in that an OFX file could define a security list section and
+            # list CUSIPs without ticker property, or the converse
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):         # Py3 iterable
+        return next(self._iter)
+
+    def next(self):             # Python 2
+        return next(self._iter)
+    
+    def __len__(self):
+        return len(self.securities)
+
+    # one possibility is to just implement __getitem__(),
+    # however since OFXparse does not implement securitylist.security.uniqueid_type
+    # I'll have no idea if what I am seeing is a CUSISP
+    # unless I look it up specifically as a CUSIP (and it exists)
+    def find_cusip(self, cusip):
+        if cusip in self.cusip_lut: return self.cusip_lut[cusip]
+        else: return None
+
+    def find_ticker(self, ticker):
+        if ticker in self.ticker_lut: return self.ticker_lut[ticker]
+        else: return None
 
 
 class Transaction(object):
@@ -221,7 +277,7 @@ class OfxConverter(Converter):
         """
         
         ofxid = self.mk_ofxid(txn.id)
-        
+
         if isinstance(txn, OfxTransaction):
             return Transaction(
                 date=txn.date,
@@ -260,6 +316,8 @@ class OfxConverter(Converter):
                     # Fidelity lists non-reinvested dividend income as
                     # type: income, income_type: DIV
                     # TODO: determine how dividend income is listed from other institutions
+                    # income/DIV transactions do not involve buying or selling a security
+                    # so their postings need special handling compared to others
                     metadata['dividend_from'] = txn.security
                     acct2 = 'Income:Dividends'
                     posting1 = Posting( acct1,
@@ -286,8 +344,8 @@ class OfxConverter(Converter):
                txn.settleDate != txn.tradeDate:
                 aux_date = txn.settleDate
             
-            # income/DIV transactions do not involve buying or selling a security
-            # so their postings need special handling compared to others handled here
+            # income/DIV already defined above;
+            # this block defines all other posting types
             if posting1 is None and posting2 is None:
                 posting1 = Posting(acct1,
                                 Amount(txn.units, txn.security, unlimited=True),
