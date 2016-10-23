@@ -56,7 +56,7 @@ found."""
 def print_results(converter, ofx, ledger, txns, args):
     """
     This function is the final common pathway of program:
-   
+
     Print initial balance if requested;
     Print transactions surviving de-duplication filter;
     Print balance assertions if requested;
@@ -102,7 +102,7 @@ def sync(ledger, accounts, args):
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
                                             max_days=args.max)
             if ofx is not None:
-                converter = OfxConverter(account=ofx.account,
+                converter = OfxConverter(ofx=ofx,
                                          name=acct.description,
                                          ledger=ledger,
                                          indent=args.indent,
@@ -128,8 +128,11 @@ def import_ofx(ledger, args):
             raise EmptyInstitutionException("Institution provided by OFX is \
 empty and no accountname supplied!")
 
-    converter = OfxConverter(account=ofx.account, name=accountname,
-                             ledger=ledger, indent=args.indent, fid=args.fid,
+    converter = OfxConverter(ofx=ofx,
+                             name=accountname,
+                             ledger=ledger,
+                             indent=args.indent,
+                             fid=args.fid,
                              unknownaccount=args.unknownaccount)
 
     print_results(converter, ofx, ledger, txns, args)

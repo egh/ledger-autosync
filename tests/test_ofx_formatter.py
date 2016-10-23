@@ -32,7 +32,7 @@ from tests import LedgerTestCase
 class TestOfxConverter(LedgerTestCase):
     def test_checking(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo")
+        converter = OfxConverter(ofx=ofx, name="Foo")
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
   ; ofxid: 1101.1452687~7.0000486
@@ -55,7 +55,7 @@ class TestOfxConverter(LedgerTestCase):
 
     def test_indent(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo", indent=4)
+        converter = OfxConverter(ofx=ofx, name="Foo", indent=4)
         # testing indent, so do not use the string collapsing version of assert
         self.assertEqual(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
@@ -66,7 +66,7 @@ class TestOfxConverter(LedgerTestCase):
 
     def test_investments(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo")
+        converter = OfxConverter(ofx=ofx, name="Foo")
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
@@ -84,7 +84,7 @@ class TestOfxConverter(LedgerTestCase):
     def test_dynamic_account(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         ledger = Ledger(os.path.join('fixtures', 'checking-dynamic-account.lgr'))
-        converter = OfxConverter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        converter = OfxConverter(ofx=ofx, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
   ; ofxid: 1101.1452687~7.0000487
@@ -95,7 +95,7 @@ class TestOfxConverter(LedgerTestCase):
     def test_balance_assertion(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
-        converter = OfxConverter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        converter = OfxConverter(ofx=ofx, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(converter.format_balance(ofx.account.statement),
 """2013/05/25 * --Autosync Balance Assertion
   Assets:Foo  $0.00 = $100.99
@@ -104,7 +104,7 @@ class TestOfxConverter(LedgerTestCase):
     def test_initial_balance(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
-        converter = OfxConverter(account=ofx.account, name="Assets:Foo", ledger=ledger)
+        converter = OfxConverter(ofx=ofx, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(converter.format_initial_balance(ofx.account.statement),
 """2000/01/01 * --Autosync Initial Balance
   ; ofxid: 1101.1452687~7.autosync_initial
@@ -114,7 +114,7 @@ class TestOfxConverter(LedgerTestCase):
 
     def test_unknownaccount(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo",
+        converter = OfxConverter(ofx=ofx, name="Foo",
                                  unknownaccount='Expenses:Unknown')
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
@@ -125,7 +125,7 @@ class TestOfxConverter(LedgerTestCase):
 
     def test_quote_commodity(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo")
+        converter = OfxConverter(ofx=ofx, name="Foo")
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
@@ -136,7 +136,7 @@ class TestOfxConverter(LedgerTestCase):
     # Check that <TRANSFER> txns are parsed.
     def test_transfer_txn(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo",
+        converter = OfxConverter(ofx=ofx, name="Foo",
                                  unknownaccount='Expenses:Unknown')
         if len(ofx.account.statement.transactions) > 2:
             # older versions of ofxparse would skip these transactions
@@ -159,7 +159,7 @@ class TestOfxConverter(LedgerTestCase):
 
     def test_position(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo", indent=4,
+        converter = OfxConverter(ofx=ofx, name="Foo", indent=4,
                                  unknownaccount='Expenses:Unknown')
         self.assertEqual(converter.format_position(ofx.account.statement.positions[0]),
                          """P 2014/06/30 06:00:00 FOO 22.517211
@@ -167,7 +167,7 @@ class TestOfxConverter(LedgerTestCase):
 
     def test_dividend(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'income.ofx')))
-        converter = OfxConverter(account=ofx.account, name="Foo")
+        converter = OfxConverter(ofx=ofx, name="Foo")
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2016/10/12 DIVIDEND RECEIVED
     ; dividend_from: cusip_redacted

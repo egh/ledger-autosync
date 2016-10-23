@@ -32,22 +32,22 @@ class SecurityList(object):
     """
     The SecurityList represents the OFX <SECLIST>...</SECLIST>
     and holds securities present in the OFX records
-    
+
     <SECINFO>...</SECINFO> as implemented by OFXparse only includes:
     {memo, name, ticker, uniqueid}
     Unfortunately does not provide uniqueid_type or currency
-    
+
     It is iterable, and also provides lookup table (LUT) functionality
     provides __next__() for Py3
     """
     def __init__(self, securities):
         self.cusip_lut = dict()
         self.ticker_lut = dict()
-        
+
         self._iter = iter(securities)
         self.securities = securities
         if len(securities) == 0: return
-        
+
         # index
         for sec in securities:
             # unfortunately OFXparse does not currently implement
@@ -58,16 +58,16 @@ class SecurityList(object):
             # the inverse value (e.g. ticker symbol) directly has a flaw
             # in that an OFX file could define a security list section and
             # list CUSIPs without ticker property, or the converse
-    
+
     def __iter__(self):
         return self
-    
+
     def __next__(self):         # Py3 iterable
         return next(self._iter)
 
     def next(self):             # Python 2
         return next(self._iter)
-    
+
     def __len__(self):
         return len(self.securities)
 
@@ -185,21 +185,21 @@ class Converter(object):
 
 
 class OfxConverter(Converter):
-    def __init__(self, account, name, indent=4, ledger=None, fid=None,
+    def __init__(self, ofx, name, indent=4, ledger=None, fid=None,
                  unknownaccount=None):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
-                                           currency=account.statement.currency)
-        self.acctid = account.account_id
+                                           currency=ofx.account.statement.currency)
+        self.acctid = ofx.account.account_id
         if fid is not None:
             self.fid = fid
         else:
-            if account.institution is None:
+            if ofx.account.institution is None:
                 raise EmptyInstitutionException(
                     "Institution provided by OFX is empty and no fid supplied!")
             else:
-                self.fid = account.institution.fid
+                self.fid = ofx.account.institution.fid
         self.name = name
 
     def mk_ofxid(self, txnid):
@@ -275,7 +275,7 @@ class OfxConverter(Converter):
         """
         Convert an OFX Transaction to a posting
         """
-        
+
         ofxid = self.mk_ofxid(txn.id)
 
         if isinstance(txn, OfxTransaction):
@@ -338,12 +338,12 @@ class OfxConverter(Converter):
                 else:
                     # ???
                     pass
-            
+
             aux_date = None
             if txn.settleDate is not None and \
                txn.settleDate != txn.tradeDate:
                 aux_date = txn.settleDate
-            
+
             # income/DIV already defined above;
             # this block defines all other posting types
             if posting1 is None and posting2 is None:
