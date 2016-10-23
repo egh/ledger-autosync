@@ -70,14 +70,14 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
-  Foo  100.00000 "458140100" @ $25.635000000
+  Foo  100.00000 INTC @ $25.635000000
   Assets:Unknown  -$2563.50
 """)
         # test no payee/memo
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2012/07/27 Foo: buystock
   ; ofxid: 7776.01234567890.0123456789020901120120727
-  Foo  128.00000 "G7945E105" @ $39.390900000
+  Foo  128.00000 SDRL @ $39.390900000
   Assets:Unknown  -$5042.04
 """)
 
@@ -129,7 +129,7 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
-  Foo  100.00000 "458140100" @ $25.635000000
+  Foo  100.00000 INTC @ $25.635000000
   Assets:Unknown  -$2563.50
 """)
 

@@ -192,6 +192,13 @@ class OfxConverter(Converter):
                                            unknownaccount=unknownaccount,
                                            currency=ofx.account.statement.currency)
         self.acctid = ofx.account.account_id
+        # build SecurityList (including indexing by CUSIP and ticker symbol)
+        if hasattr(ofx, 'security_list') and ofx.security_list is not None:
+            self.security_list = SecurityList(ofx.security_list)
+        else:
+            self.security_list = SecurityList([])
+
+            self.acctid = ofx.account.account_id
         if fid is not None:
             self.fid = fid
         else:
@@ -302,6 +309,11 @@ class OfxConverter(Converter):
 
             metadata = {"ofxid": ofxid}
 
+            security = txn.security
+            new_security = self.security_list.find_cusip(txn.security)
+            if new_security is not None:
+                security = new_security.ticker
+
             if isinstance(txn.type, str):
                 # recent versions of ofxparse
                 if re.match('^(buy|sell)', txn.type):
@@ -318,7 +330,7 @@ class OfxConverter(Converter):
                     # TODO: determine how dividend income is listed from other institutions
                     # income/DIV transactions do not involve buying or selling a security
                     # so their postings need special handling compared to others
-                    metadata['dividend_from'] = txn.security
+                    metadata['dividend_from'] = security
                     acct2 = 'Income:Dividends'
                     posting1 = Posting( acct1,
                                         Amount(txn.total, self.currency))
@@ -348,7 +360,7 @@ class OfxConverter(Converter):
             # this block defines all other posting types
             if posting1 is None and posting2 is None:
                 posting1 = Posting(acct1,
-                                Amount(txn.units, txn.security, unlimited=True),
+                                Amount(txn.units, security, unlimited=True),
                                 unit_price=Amount(txn.unit_price, self.currency, unlimited=True))
                 posting2 = Posting(acct2,
                                 Amount(txn.units * txn.unit_price, self.currency, reverse=True))
