@@ -158,11 +158,11 @@ class TestOfxConverter(LedgerTestCase):
 
 
     def test_position(self):
-        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'cusip.ofx')))
         converter = OfxConverter(ofx=ofx, name="Foo", indent=4,
                                  unknownaccount='Expenses:Unknown')
         self.assertEqual(converter.format_position(ofx.account.statement.positions[0]),
-                         """P 2014/06/30 06:00:00 FOO 22.517211
+                         """P 2016/10/08 07:30:08 SHSAX 47.8600000
 """)
 
     def test_dividend(self):

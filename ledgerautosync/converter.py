@@ -385,7 +385,7 @@ class OfxConverter(Converter):
         if hasattr(pos, 'date') and hasattr(pos, 'security') and \
            hasattr(pos, 'unit_price'):
             dateStr = pos.date.strftime("%Y/%m/%d %H:%M:%S")
-            return "P %s %s %s\n" % (dateStr, pos.security, pos.unit_price)
+            return "P %s %s %s\n" % (dateStr, self.maybe_get_ticker(pos.security), pos.unit_price)
 
 
 class CsvConverter(Converter):
