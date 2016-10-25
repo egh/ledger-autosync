@@ -198,7 +198,6 @@ class OfxConverter(Converter):
         else:
             self.security_list = SecurityList([])
 
-            self.acctid = ofx.account.account_id
         if fid is not None:
             self.fid = fid
         else:
