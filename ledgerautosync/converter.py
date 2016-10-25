@@ -277,6 +277,15 @@ class OfxConverter(Converter):
         else:
             return ""
 
+    # Return the ticker symbol of the security with CUSIP, if it exists in the
+    # security_list mapping. Otherwise, simply return the CUSIP.
+    def maybe_get_ticker(self, cusip):
+        security = self.security_list.find_cusip(cusip)
+        if security is not None:
+            return security.ticker
+        else:
+            return cusip
+
     def convert(self, txn):
         """
         Convert an OFX Transaction to a posting
@@ -308,10 +317,7 @@ class OfxConverter(Converter):
 
             metadata = {"ofxid": ofxid}
 
-            security = txn.security
-            new_security = self.security_list.find_cusip(txn.security)
-            if new_security is not None:
-                security = new_security.ticker
+            security = self.maybe_get_ticker(txn.security)
 
             if isinstance(txn.type, str):
                 # recent versions of ofxparse
