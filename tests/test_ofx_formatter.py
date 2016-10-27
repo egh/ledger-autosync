@@ -70,14 +70,14 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
-  Foo  100.00000 "458140100" @ $25.635000000
+  Foo  100.00000 INTC @ $25.635000000
   Assets:Unknown  -$2563.50
 """)
         # test no payee/memo
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2012/07/27 Foo: buystock
   ; ofxid: 7776.01234567890.0123456789020901120120727
-  Foo  128.00000 "G7945E105" @ $39.390900000
+  Foo  128.00000 SDRL @ $39.390900000
   Assets:Unknown  -$5042.04
 """)
 
@@ -129,7 +129,7 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
   ; ofxid: 7776.01234567890.0123456789020201120120720
-  Foo  100.00000 "458140100" @ $25.635000000
+  Foo  100.00000 INTC @ $25.635000000
   Assets:Unknown  -$2563.50
 """)
 
@@ -158,11 +158,11 @@ class TestOfxConverter(LedgerTestCase):
 
 
     def test_position(self):
-        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'cusip.ofx')))
         converter = OfxConverter(ofx=ofx, name="Foo", indent=4,
                                  unknownaccount='Expenses:Unknown')
         self.assertEqual(converter.format_position(ofx.account.statement.positions[0]),
-                         """P 2014/06/30 06:00:00 FOO 22.517211
+                         """P 2016/10/08 07:30:08 SHSAX 47.8600000
 """)
 
     def test_dividend(self):

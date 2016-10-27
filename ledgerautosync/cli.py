@@ -63,20 +63,6 @@ def print_results(converter, ofx, ledger, txns, args):
     Print commodity prices obtained from position statements
     """
 
-    # build SecurityList (including indexing by CUSIP and ticker symbol)
-    if hasattr(ofx, 'security_list') and len(ofx.security_list) > 0:
-        seclist = SecurityList(ofx.security_list)
-    else:
-        seclist = SecurityList([])  # empty list
-
-    # Remap CUSIP->Ticker symbol if requested
-    # (alternative is to do at point-of-use)
-    if args.cusip:
-        # Note that txns is also affected by this (desired)
-        # because it is a list of references to a subset of
-        # ofx.account.statement.transactions
-        ofx = remap_cusip(ofx, seclist)
-
     if args.initial:
         if (not(ledger.check_transaction_by_id
                 ("ofxid", converter.mk_ofxid(AUTOSYNC_INITIAL))) and
@@ -144,32 +130,6 @@ def import_csv(ledger, args):
     for txn in sync.parse_file(args.PATH, accountname=args.account):
         print txn.format(args.indent)
 
-def remap_cusip(ofx, seclist):
-    """
-    Take OFX object, locate CUSIP references in position or transactions
-    Look them up in CUSIP->Ticker LUT and remap them.
-    Return original mutated object.
-    """
-
-    # Additional locations in parsed OFX files can be included in the search paths below
-    search_paths = ['ofx.account.statement.positions', 'ofx.account.statement.transactions']
-    for path in search_paths:
-        elements = path.split('.')
-        # If future search paths do not share common 'ofx.account.statement'
-        # below should be refactored with __getattribute__ calls
-        if hasattr(ofx, elements[1]) and hasattr(ofx.account, elements[2]) and hasattr(ofx.account.statement, elements[3]):
-            for i, obj in enumerate(ofx.account.statement.__getattribute__(elements[3])):
-                # obj is position or transaction [ofx] object
-                if hasattr(obj, 'security'):
-                    if seclist.find_cusip(obj.security) is not None:
-                        security = seclist.find_cusip(obj.security)
-                        if hasattr(security, 'ticker'):
-                            ticker = seclist.find_cusip(obj.security).ticker
-                            ofx.account.statement.__getattribute__(elements[3])[i].security = ticker
-                        else:
-                            pass
-    return ofx
-
 def run(args=None, config=None):
     if args is None:
         args = sys.argv[1:]
@@ -199,8 +159,6 @@ supply it')
 found by payee')
     parser.add_argument('--assertions', action='store_true', default=False,
                         help='create balance assertion entries')
-    parser.add_argument('--cusip', action='store_true', default=False,
-                        help='attempt conversion CUSIP->Ticker symbol')
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='enable debug logging')
     parser.add_argument('--hledger', action='store_true', default=False,

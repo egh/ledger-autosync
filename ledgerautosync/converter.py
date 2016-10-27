@@ -192,6 +192,12 @@ class OfxConverter(Converter):
                                            unknownaccount=unknownaccount,
                                            currency=ofx.account.statement.currency)
         self.acctid = ofx.account.account_id
+        # build SecurityList (including indexing by CUSIP and ticker symbol)
+        if hasattr(ofx, 'security_list') and ofx.security_list is not None:
+            self.security_list = SecurityList(ofx.security_list)
+        else:
+            self.security_list = SecurityList([])
+
         if fid is not None:
             self.fid = fid
         else:
@@ -271,6 +277,15 @@ class OfxConverter(Converter):
         else:
             return ""
 
+    # Return the ticker symbol of the security with CUSIP, if it exists in the
+    # security_list mapping. Otherwise, simply return the CUSIP.
+    def maybe_get_ticker(self, cusip):
+        security = self.security_list.find_cusip(cusip)
+        if security is not None:
+            return security.ticker
+        else:
+            return cusip
+
     def convert(self, txn):
         """
         Convert an OFX Transaction to a posting
@@ -302,6 +317,8 @@ class OfxConverter(Converter):
 
             metadata = {"ofxid": ofxid}
 
+            security = self.maybe_get_ticker(txn.security)
+
             if isinstance(txn.type, str):
                 # recent versions of ofxparse
                 if re.match('^(buy|sell)', txn.type):
@@ -318,7 +335,7 @@ class OfxConverter(Converter):
                     # TODO: determine how dividend income is listed from other institutions
                     # income/DIV transactions do not involve buying or selling a security
                     # so their postings need special handling compared to others
-                    metadata['dividend_from'] = txn.security
+                    metadata['dividend_from'] = security
                     acct2 = 'Income:Dividends'
                     posting1 = Posting( acct1,
                                         Amount(txn.total, self.currency))
@@ -348,7 +365,7 @@ class OfxConverter(Converter):
             # this block defines all other posting types
             if posting1 is None and posting2 is None:
                 posting1 = Posting(acct1,
-                                Amount(txn.units, txn.security, unlimited=True),
+                                Amount(txn.units, security, unlimited=True),
                                 unit_price=Amount(txn.unit_price, self.currency, unlimited=True))
                 posting2 = Posting(acct2,
                                 Amount(txn.units * txn.unit_price, self.currency, reverse=True))
@@ -368,7 +385,7 @@ class OfxConverter(Converter):
         if hasattr(pos, 'date') and hasattr(pos, 'security') and \
            hasattr(pos, 'unit_price'):
             dateStr = pos.date.strftime("%Y/%m/%d %H:%M:%S")
-            return "P %s %s %s\n" % (dateStr, pos.security, pos.unit_price)
+            return "P %s %s %s\n" % (dateStr, self.maybe_get_ticker(pos.security), pos.unit_price)
 
 
 class CsvConverter(Converter):
