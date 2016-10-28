@@ -4,7 +4,7 @@ with open('README.md') as file:
     long_description = file.read()
 
 setup(name='ledger-autosync',
-      version="0.2.5",
+      version="0.3.0",
       description="Automatically sync your bank's data with ledger",
       long_description=long_description,
       classifiers=[

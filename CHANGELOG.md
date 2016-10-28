@@ -1,5 +1,9 @@
-## Unreleased
-- Support CSV files
+## Version 0.3.0
+- Support CSV files (Mint, Paypal and Amazon flavors)
+- Uses ticker symbol by for currencies, not CUSIP (You will need to change
+  previous transactions which used the CUSIP so they work with new transactions)
+- Dividends will now be formatted correctly
+- Fuzzy payee matching
 
 ## Version 0.2.5
 - Support advanced investment transactions
