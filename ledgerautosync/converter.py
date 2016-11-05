@@ -163,7 +163,10 @@ class Converter(object):
         return id.replace('/', '_').\
             replace('$', '_').\
             replace(' ', '_').\
-            replace('@', '_')
+            replace('@', '_').\
+            replace('*', '_').\
+            replace('[', '_').\
+            replace(']', '_')
 
     def __init__(self, ledger=None, unknownaccount=None, currency='$', indent=4):
         self.lgr = ledger
