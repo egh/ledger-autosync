@@ -20,7 +20,7 @@ from __future__ import absolute_import
 import xml.etree.ElementTree as ET
 import os
 import re
-import distutils
+import distutils.spawn
 import subprocess
 from subprocess import Popen, PIPE
 from threading import Thread
