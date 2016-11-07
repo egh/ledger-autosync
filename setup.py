@@ -5,7 +5,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name='ledger-autosync',
-      version="0.3.2",
+      version="0.3.3",
       description="Automatically sync your bank's data with ledger",
       long_description=read('README.md'),
       classifiers=[
