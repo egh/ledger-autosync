@@ -49,6 +49,10 @@ You can also install from source, if you have downloaded the source:
 
     $ python setup.py install
 
+You may need to install the following libraries (on debian/ubuntu):
+
+    $ sudo apt-get install libffi-dev libpython-dev libssl-dev libxml2-dev python-pip libxslt-dev
+
 ### Running
 
 Once you have ledger-autosync installed, you can download an OFX file from your
