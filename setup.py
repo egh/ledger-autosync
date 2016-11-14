@@ -12,7 +12,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='ledger-autosync',
-    version="0.3.3",
+    version="0.3.4",
     description="Automatically sync your bank's data with ledger",
     long_description=long_description,
     author='Erik Hetzner',
