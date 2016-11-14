@@ -1,5 +1,0 @@
-include LICENSE
-include README.md
-include fixtures/*
-include tests/*.py
-exclude tests/*.pyc
