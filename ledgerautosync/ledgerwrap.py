@@ -31,18 +31,15 @@ from fuzzywuzzy import process
 
 
 def mk_ledger(ledger_file):
-    try:
-        import ledger
+    if LedgerPython.available():
         return LedgerPython(ledger_file, string_read=False)
-    except ImportError:
-        if ((distutils.spawn.find_executable('ledger') is not None) and
-            (Popen(["ledger", "--version"], stdout=PIPE).
-             communicate()[0]).startswith("Ledger 3")):
-                return Ledger(ledger_file)
-        elif distutils.spawn.find_executable('hledger') is not None:
-            return HLedger(ledger_file)
-        else:
-            raise Exception("Neither ledger 3 nor hledger found!")
+    elif Ledger.available():
+        return Ledger(ledger_file)
+    elif HLedger.available():
+        return HLedger(ledger_file)
+    else:
+        raise Exception("Neither ledger 3 nor hledger found!")
+
 
 class MetaLedger(object):
     @staticmethod
@@ -61,8 +58,17 @@ class MetaLedger(object):
         s = s.replace("'", "")
         return s
 
+    # Return True if this ledgerlike interface is available
+    @staticmethod
+    def available():
+        return False
 
 class Ledger(MetaLedger):
+    @staticmethod
+    def available():
+        return ((distutils.spawn.find_executable('ledger') is not None) and
+                (Popen(["ledger", "--version"], stdout=PIPE).
+                 communicate()[0]).startswith("Ledger 3"))
     def __init__(self, ledger_file=None, no_pipe=True):
         if distutils.spawn.find_executable('ledger') is None:
             raise Exception("ledger was not found in $PATH")
@@ -152,6 +158,14 @@ class Ledger(MetaLedger):
 
 
 class LedgerPython(MetaLedger):
+    @staticmethod
+    def available():
+        try:
+            import ledger
+            return True
+        except ImportError:
+            return False
+
     def __init__(self, ledger_file=None, string_read=True):
         # sanity check for ledger python interface
         try:
@@ -194,6 +208,10 @@ class LedgerPython(MetaLedger):
 
 
 class HLedger(MetaLedger):
+    @staticmethod
+    def available():
+        return (distutils.spawn.find_executable('hledger') is not None)
+
     @staticmethod
     def quote(a):
         def quote_str(s):
