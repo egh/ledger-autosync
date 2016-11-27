@@ -30,16 +30,6 @@ import logging
 from fuzzywuzzy import process
 
 
-def pipe_clean(a):
-    def clean_str(s):
-        s = s.replace('/', '\\\\/')
-        s = s.replace('%', '')
-        if not(re.match(r"^\w+$", s)):
-            s = "\"%s\"" % (s)
-        return s
-    return [clean_str(s) for s in a]
-
-
 def windows_clean(a):
     def clean_str(s):
         s = s.replace('%', '')
@@ -119,12 +109,22 @@ class Ledger(object):
                 logging.error("Received: %s" % (self._item))
                 exit(1)
 
+    @staticmethod
+    def pipe_quote(a):
+        def quote(s):
+            s = s.replace('/', '\\\\/')
+            s = s.replace('%', '')
+            if not(re.match(r"^\w+$", s)):
+                s = "\"%s\"" % (s)
+            return s
+        return [quote(s) for s in a]
+
     def run(self, cmd):
         if self.use_pipe:
             self.p.stdin.write("xml ")
-            self.p.stdin.write(" ".join(pipe_clean(cmd)))
+            self.p.stdin.write(" ".join(Ledger.pipe_quote(cmd)))
             self.p.stdin.write("\n")
-            logging.debug(" ".join(pipe_clean(cmd)))
+            logging.debug(" ".join(Ledger.pipe_quote(cmd)))
             try:
                 return ET.fromstring(self.q.get(True, 5))
             except Empty:
