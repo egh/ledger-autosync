@@ -30,13 +30,6 @@ import logging
 from fuzzywuzzy import process
 
 
-def clean_payee(s):
-    s = s.replace('%', '')
-    s = s.replace('/', '\/')
-    s = s.replace("'", "")
-    return s
-
-
 def mk_ledger(ledger_file):
     try:
         import ledger
@@ -60,6 +53,14 @@ class MetaLedger(object):
             s = s.replace('/', '\/')
             return s
         return [clean_str(s) for s in a]
+
+    @staticmethod
+    def clean_payee(s):
+        s = s.replace('%', '')
+        s = s.replace('/', '\/')
+        s = s.replace("'", "")
+        return s
+
 
 class Ledger(MetaLedger):
     def __init__(self, ledger_file=None, no_pipe=True):
@@ -133,7 +134,7 @@ class Ledger(MetaLedger):
             return False
 
     def get_account_by_payee(self, payee, exclude):
-        payee_regex = clean_payee(payee).replace("*", "\\\\*")
+        payee_regex = MetaLedger.clean_payee(payee).replace("*", "\\\\*")
         try:
             rows = [ t for t in self.run(["--real", "payee", payee_regex])]
             if len(rows) == 0:
@@ -183,7 +184,7 @@ class LedgerPython(MetaLedger):
     def get_account_by_payee(self, payee, exclude):
         fuzzed_payee = process.extractOne(payee, self.payees)[0]
 
-        q = self.journal.query("--real payee '%s'" % (clean_payee(fuzzed_payee)))
+        q = self.journal.query("--real payee '%s'" % (MetaLedger.clean_payee(fuzzed_payee)))
         accts = [p.account for p in q]
         accts_filtered = [a for a in accts if a.fullname() != exclude]
         if accts_filtered:
