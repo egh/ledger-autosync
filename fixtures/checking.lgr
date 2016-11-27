@@ -31,7 +31,11 @@
   Assets:Foo                                   $0.00
   Income:Bar                                  -$0.00
 
-2011/03/31 PAYEE TEST,SLASH
+2011/03/31 PAYEE TEST,COMMA
+  Assets:Foo                                   $0.00
+  Income:Bar                                  -$0.00
+
+2011/03/31 PAYEE TEST.PERIOD
   Assets:Foo                                   $0.00
   Income:Bar                                  -$0.00
 
