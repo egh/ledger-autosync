@@ -30,15 +30,6 @@ import logging
 from fuzzywuzzy import process
 
 
-def windows_clean(a):
-    def clean_str(s):
-        s = s.replace('%', '')
-        s = s.replace(' ', '\ ')
-        s = s.replace('/', '\/')
-        return s
-    return [clean_str(s) for s in a]
-
-
 def clean_payee(s):
     s = s.replace('%', '')
     s = s.replace('/', '\/')
@@ -61,7 +52,14 @@ def mk_ledger(ledger_file):
             raise Exception("Neither ledger 3 nor hledger found!")
 
 class MetaLedger(object):
-    pass
+    @staticmethod
+    def windows_clean(a):
+        def clean_str(s):
+            s = s.replace('%', '')
+            s = s.replace(' ', '\ ')
+            s = s.replace('/', '\/')
+            return s
+        return [clean_str(s) for s in a]
 
 class Ledger(MetaLedger):
     def __init__(self, ledger_file=None, no_pipe=True):
@@ -122,7 +120,7 @@ class Ledger(MetaLedger):
         else:
             cmd = self.args + ["csv"] + cmd
             if os.name == 'nt':
-                cmd = windows_clean(cmd)
+                cmd = MetaLedger.windows_clean(cmd)
             return csv.reader(subprocess.check_output(cmd).splitlines())
 
 
@@ -213,7 +211,7 @@ class HLedger(MetaLedger):
     def run(self, cmd):
         cmd = HLedger.quote(self.args + cmd)
         if os.name == 'nt':
-            cmd = windows_clean(cmd)
+            cmd = MetaLedger.windows_clean(cmd)
         logging.debug(" ".join(cmd))
         return subprocess.check_output(cmd)
 
