@@ -31,6 +31,10 @@
   Assets:Foo                                   $0.00
   Income:Bar                                  -$0.00
 
+2011/03/31 PAYEE TEST,SLASH
+  Assets:Foo                                   $0.00
+  Income:Bar                                  -$0.00
+
 
 2011/03/31 XXX XXXX XX 000000 XXXXXXXXXX:XXXXXXXX, XXX. XXXXXXXXX XXXXXX XX\/000000000000 XXXXXX XXXXXXX, XXXX XXX 0 XXX XXXX XXXXX, XXXXX 00 XXX XXXX XX 000000000 XXXXXXXX, X.X. XXX:000000000 XXXXXXXXXXX:XXXXXXXX XXXXXX XX\/0000000000 000 XXXXX XXX XX X XXXXXXXXXX XX 000000000
   Assets:Foo                                   $0.01
