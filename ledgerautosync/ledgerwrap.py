@@ -74,7 +74,10 @@ def mk_ledger(ledger_file):
         else:
             raise Exception("Neither ledger 3 nor hledger found!")
 
-class Ledger(object):
+class MetaLedger(object):
+    pass
+
+class Ledger(MetaLedger):
     def __init__(self, ledger_file=None, no_pipe=True):
         if distutils.spawn.find_executable('ledger') is None:
             raise Exception("ledger was not found in $PATH")
@@ -163,7 +166,7 @@ class Ledger(object):
                           (payee_regex))
 
 
-class LedgerPython(object):
+class LedgerPython(MetaLedger):
     def __init__(self, ledger_file=None, string_read=True):
         # sanity check for ledger python interface
         try:
@@ -205,7 +208,7 @@ class LedgerPython(object):
             return None
 
 
-class HLedger(object):
+class HLedger(MetaLedger):
     @staticmethod
     def quote(a):
         def quote_str(s):
