@@ -29,13 +29,6 @@ from ledgerautosync.converter import Converter
 import logging
 from fuzzywuzzy import process
 
-def hledger_clean(a):
-    def clean_str(s):
-        s = s.replace('(', '\(')
-        s = s.replace(')', '\)')
-        return s
-    return [clean_str(s) for s in a]
-
 
 def pipe_clean(a):
     def clean_str(s):
@@ -191,14 +184,14 @@ class LedgerPython(object):
                     open(ledger_file).read())
             else:
                 self.journal = ledger.read_journal(ledger_file)
-    
+
         self.load_payees()
 
     def load_payees(self):
         self.payees = []
         for xact in self.journal:
             self.payees.append(xact.payee)
-        
+
     def check_transaction_by_id(self, key, value):
         q = self.journal.query("-E meta %s=\"%s\"" %
                                (key, Converter.clean_id(value)))
@@ -217,6 +210,14 @@ class LedgerPython(object):
 
 
 class HLedger(object):
+    @staticmethod
+    def quote(a):
+        def quote_str(s):
+            s = s.replace('(', '\(')
+            s = s.replace(')', '\)')
+            return s
+        return [quote_str(s) for s in a]
+
     def __init__(self, ledger_file=None):
         if distutils.spawn.find_executable('hledger') is None:
             raise Exception("hledger was not found in $PATH")
@@ -225,7 +226,7 @@ class HLedger(object):
             self.args += ["-f", ledger_file]
 
     def run(self, cmd):
-        cmd = hledger_clean(self.args + cmd)
+        cmd = HLedger.quote(self.args + cmd)
         if os.name == 'nt':
             cmd = windows_clean(cmd)
         logging.debug(" ".join(cmd))
