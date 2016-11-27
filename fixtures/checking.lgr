@@ -23,11 +23,11 @@
   Assets:Foo                                   $0.01
   Income:Bar                                  -$0.01
 
-2011/03/31 TEST:COLON
+2011/03/31 PAYEE TEST:COLON
   Assets:Foo                                   $0.00
   Income:Bar                                  -$0.00
 
-2011/03/31 TEST/SLASH
+2011/03/31 PAYEE TEST/SLASH
   Assets:Foo                                   $0.00
   Income:Bar                                  -$0.00
 
