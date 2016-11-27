@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-import xml.etree.ElementTree as ET
+import csv
 import os
 import re
 import distutils.spawn
@@ -121,42 +121,38 @@ class Ledger(object):
 
     def run(self, cmd):
         if self.use_pipe:
-            self.p.stdin.write("xml ")
+            self.p.stdin.write("csv ")
             self.p.stdin.write(" ".join(Ledger.pipe_quote(cmd)))
             self.p.stdin.write("\n")
             logging.debug(" ".join(Ledger.pipe_quote(cmd)))
             try:
-                return ET.fromstring(self.q.get(True, 5))
+                return csv.reader(self.q.get(True, 5))
             except Empty:
                 logging.error("Could not get prompt from ledger!")
                 exit(1)
         else:
-            cmd = self.args + ["xml"] + cmd
+            cmd = self.args + ["csv"] + cmd
             if os.name == 'nt':
                 cmd = windows_clean(cmd)
-            return ET.fromstring(subprocess.check_output(cmd))
+            return csv.reader(subprocess.check_output(cmd).splitlines())
 
-    def get_transaction(self, q):
-        d = self.run(q).findall('.//transactions/transaction')
-        if len(d) == 0:
-            return None
-        else:
-            return d[0]
 
     def check_transaction_by_id(self, key, value):
-        return (self.get_transaction(
-            ["-E", "meta", "%s=%s" % (key, Converter.clean_id(value))])
-            is not None)
+        q = ["-E", "meta", "%s=%s" % (key, Converter.clean_id(value))]
+        try:
+            self.run(q).next()
+            return True
+        except StopIteration:
+            return False
 
     def get_account_by_payee(self, payee, exclude):
         payee_regex = clean_payee(payee).replace("*", "\\\\*")
         try:
-            txn = self.run(["--real", "payee", payee_regex])
-            if txn is None:
+            rows = [ t for t in self.run(["--real", "payee", payee_regex])]
+            if len(rows) == 0:
                 return None
             else:
-                accts = [node.text for node in
-                         txn.findall('.//transactions/transaction/postings/posting/account/name')]
+                accts = [l[3] for l in rows]
                 accts_filtered = [a for a in accts if a != exclude]
                 if accts_filtered:
                     return accts_filtered[-1]
