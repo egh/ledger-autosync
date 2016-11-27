@@ -46,20 +46,6 @@ def clean_payee(s):
     return s
 
 
-def all_or_none(seq):
-    """Returns the first value of seq if all values of seq are equal, or \
-returns None."""
-    if len(seq) == 0:
-        return None
-
-    def f(x, y):
-        if (x == y):
-            return x
-        else:
-            return None
-    return reduce(f, seq, seq[0])
-
-
 def mk_ledger(ledger_file):
     try:
         import ledger
