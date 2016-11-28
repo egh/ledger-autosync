@@ -63,12 +63,21 @@ class MetaLedger(object):
     def available():
         return False
 
+    def add_payee(self, payee, account):
+        if payee not in self.payees:
+            self.payees[payee] = []
+        self.payees[payee].append(account)
+
+    def __init__(self):
+        self.payees = None
+
 class Ledger(MetaLedger):
     @staticmethod
     def available():
         return ((distutils.spawn.find_executable('ledger') is not None) and
                 (Popen(["ledger", "--version"], stdout=PIPE).
                  communicate()[0]).startswith("Ledger 3"))
+
     def __init__(self, ledger_file=None, no_pipe=True):
         if distutils.spawn.find_executable('ledger') is None:
             raise Exception("ledger was not found in $PATH")
@@ -102,6 +111,7 @@ class Ledger(MetaLedger):
                 logging.error("Could not get prompt (]) from ledger!")
                 logging.error("Received: %s" % (self._item))
                 exit(1)
+        super(Ledger, self).__init__()
 
     @staticmethod
     def pipe_quote(a):
@@ -156,6 +166,13 @@ class Ledger(MetaLedger):
             logging.error("Error checking --real payee for %s" %
                           (payee_regex))
 
+    def load_payees(self):
+        if self.payees is None:
+            self.payees = {}
+            r = self.run(["show"])
+            for line in r:
+                self.add_payee(line[2], line[3])
+
 
 class LedgerPython(MetaLedger):
     @staticmethod
@@ -183,12 +200,13 @@ class LedgerPython(MetaLedger):
             else:
                 self.journal = ledger.read_journal(ledger_file)
 
-        self.load_payees()
+        super(LedgerPython, self).__init__()
 
     def load_payees(self):
-        self.payees = []
-        for xact in self.journal:
-            self.payees.append(xact.payee)
+        if self.payees is None:
+            self.payees = {}
+            for xact in self.journal:
+                self.add_payee(xact.payee, xact.account)
 
     def check_transaction_by_id(self, key, value):
         q = self.journal.query("-E meta %s=\"%s\"" %
@@ -196,6 +214,7 @@ class LedgerPython(MetaLedger):
         return len(q) > 0
 
     def get_account_by_payee(self, payee, exclude):
+        self.load_payees()
         fuzzed_payee = process.extractOne(payee, self.payees)[0]
 
         q = self.journal.query("--real payee '%s'" % (MetaLedger.clean_payee(fuzzed_payee)))
@@ -226,6 +245,7 @@ class HLedger(MetaLedger):
         self.args = ["hledger"]
         if ledger_file is not None:
             self.args += ["-f", ledger_file]
+        super(HLedger, self).__init__()
 
     def run(self, cmd):
         cmd = HLedger.quote(self.args + cmd)
@@ -247,3 +267,12 @@ class HLedger(MetaLedger):
             return accts_filtered[-1]
         else:
             return None
+
+    def load_payees(self):
+        if self.payees is None:
+            self.payees = {}
+            cmd = ["reg", "-O", "csv"]
+            r =  csv.reader(self.run(cmd).splitlines())
+            headers = r.next()
+            for line in r:
+                self.add_payee(line[1], line[2])

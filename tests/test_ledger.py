@@ -50,13 +50,15 @@ class LedgerTest(object):
         self.assertEqual(self.lgr.check_transaction_by_id("ofxid", "1/2"), True,
                          msg="Did not find 1/2 in %s" % (self.lgr))
 
+    def test_load_payees(self):
+        self.lgr.load_payees()
+        self.assertEqual(self.lgr.payees['PAYEE TEST:COLON'], ['Assets:Foo', 'Income:Bar'])
 
 @attr('hledger')
 class TestHledger(TestCase, LedgerTest):
     def setUp(self):
         self.lgr = HLedger(self.ledger_path)
         self.dynamic_lgr = HLedger(self.dynamic_ledger_path)
-
 
 @attr('ledger')
 class TestLedger(LedgerTest, TestCase):
