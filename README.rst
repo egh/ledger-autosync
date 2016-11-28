@@ -33,10 +33,10 @@ Features
 Platforms
 ---------
 
-ledger-autosync is developed on Linux with ledger 3; it has been tested
-on Windows (although it will run slower) and should run on OS X. It
-requires ledger 3 or hledger, but it should run faster with ledger,
-because it will not need to start a command to check every transaction.
+ledger-autosync is developed on Linux with ledger 3 and python 2.7; it has been
+tested on Windows (although it will run slower) and should run on OS X. It
+requires ledger 3 or hledger, but it should run faster with ledger, because it
+will not need to start a command to check every transaction.
 
 Quickstart
 ----------
