@@ -68,6 +68,22 @@ class MetaLedger(object):
             self.payees[payee] = []
         self.payees[payee].append(account)
 
+    def filter_accounts(self, accts, exclude):
+        accts_filtered = [a for a in accts if a != exclude]
+        if accts_filtered:
+            return accts_filtered[-1]
+        else:
+            return None
+
+    def get_account_by_payee(self, payee, exclude):
+        self.load_payees()
+        return self.filter_accounts(self.payees[payee], exclude)
+
+    def get_fuzzy_account_by_payee(self, payee, exclude):
+        self.load_payees()
+        fuzzed_payee = process.extractOne(payee, self.payees)[0]
+        return self.filter_accounts([fuzzed_payee], exclude)
+
     def __init__(self):
         self.payees = None
 
@@ -149,23 +165,6 @@ class Ledger(MetaLedger):
         except StopIteration:
             return False
 
-    def get_account_by_payee(self, payee, exclude):
-        payee_regex = MetaLedger.clean_payee(payee).replace("*", "\\\\*")
-        try:
-            rows = [ t for t in self.run(["--real", "payee", payee_regex])]
-            if len(rows) == 0:
-                return None
-            else:
-                accts = [l[3] for l in rows]
-                accts_filtered = [a for a in accts if a != exclude]
-                if accts_filtered:
-                    return accts_filtered[-1]
-                else:
-                    return None
-        except:
-            logging.error("Error checking --real payee for %s" %
-                          (payee_regex))
-
     def load_payees(self):
         if self.payees is None:
             self.payees = {}
@@ -213,18 +212,6 @@ class LedgerPython(MetaLedger):
                                (key, Converter.clean_id(value)))
         return len(q) > 0
 
-    def get_account_by_payee(self, payee, exclude):
-        self.load_payees()
-        fuzzed_payee = process.extractOne(payee, self.payees)[0]
-
-        q = self.journal.query("--real payee '%s'" % (MetaLedger.clean_payee(fuzzed_payee)))
-        accts = [p.account for p in q]
-        accts_filtered = [a for a in accts if a.fullname() != exclude]
-        if accts_filtered:
-            return str(accts_filtered[-1])
-        else:
-            return None
-
 
 class HLedger(MetaLedger):
     @staticmethod
@@ -257,16 +244,6 @@ class HLedger(MetaLedger):
     def check_transaction_by_id(self, key, value):
         cmd = ["reg", "tag:%s=%s" % (key, Converter.clean_id(value))]
         return self.run(cmd) != ''
-
-    def get_account_by_payee(self, payee, exclude):
-        cmd = ["reg", "-w200", "desc:%s" % (payee)]
-        lines = self.run(cmd).splitlines()
-        accts = [l[92:172].strip() for l in lines]
-        accts_filtered = [a for a in accts if a != exclude]
-        if accts_filtered:
-            return accts_filtered[-1]
-        else:
-            return None
 
     def load_payees(self):
         if self.payees is None:

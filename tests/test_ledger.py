@@ -46,7 +46,16 @@ class LedgerTest(object):
         # shoud use the latest
         self.assertEqual(account, "Expenses:Bar")
 
-    def test_ofx_quoting(self):
+    def test_ofx_payee_quoting(self):
+        payees = ['PAYEE TEST/SLASH',
+                  'PAYEE TEST,COMMA',
+                  'PAYEE TEST:COLON',
+                  'PAYEE TEST.PERIOD']
+        for payee in payees:
+            self.assertNotEqual(self.lgr.get_account_by_payee(payee, ['Assets:Foo']), None,
+                             msg="Did not find %s in %s" % (payee, self.lgr))
+
+    def test_ofx_id_quoting(self):
         self.assertEqual(self.lgr.check_transaction_by_id("ofxid", "1/2"), True,
                          msg="Did not find 1/2 in %s" % (self.lgr))
 
