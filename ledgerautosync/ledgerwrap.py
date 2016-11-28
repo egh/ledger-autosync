@@ -77,7 +77,7 @@ class MetaLedger(object):
 
     def get_account_by_payee(self, payee, exclude):
         self.load_payees()
-        return self.filter_accounts(self.payees[payee], exclude)
+        return self.filter_accounts(self.payees.get(payee, []), exclude)
 
     def get_fuzzy_account_by_payee(self, payee, exclude):
         self.load_payees()
