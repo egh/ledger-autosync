@@ -43,6 +43,6 @@
   Assets:Foo                                   $0.01
   Income:Bar                                  -$0.01
 
-2011/03/31 PAYEE TEST*HASH
+2011/03/31 PAYEE TEST#HASH
   Assets:Foo                                   $0.01
   Income:Bar                                  -$0.01
