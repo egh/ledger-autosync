@@ -249,7 +249,7 @@ class HLedger(MetaLedger):
         if self.payees is None:
             self.payees = {}
             cmd = ["reg", "-O", "csv"]
-            r =  csv.reader(self.run(cmd).splitlines())
+            r = csv.DictReader(self.run(cmd).splitlines())
             headers = r.next()
             for line in r:
-                self.add_payee(line[1], line[2])
+                self.add_payee(line['description'], line['account'])
