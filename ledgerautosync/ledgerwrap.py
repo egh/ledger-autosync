@@ -30,6 +30,8 @@ import logging
 from fuzzywuzzy import process
 
 
+csv.register_dialect('ledger', delimiter=',', quoting=csv.QUOTE_ALL, escapechar="\\")
+
 def mk_ledger(ledger_file):
     if LedgerPython.available():
         return LedgerPython(ledger_file, string_read=False)
@@ -146,7 +148,7 @@ class Ledger(MetaLedger):
             self.p.stdin.write("\n")
             logging.debug(" ".join(Ledger.pipe_quote(cmd)))
             try:
-                return csv.reader(self.q.get(True, 5))
+                return csv.reader(self.q.get(True, 5), dialect='ledger')
             except Empty:
                 logging.error("Could not get prompt from ledger!")
                 exit(1)
@@ -154,7 +156,7 @@ class Ledger(MetaLedger):
             cmd = self.args + ["csv"] + cmd
             if os.name == 'nt':
                 cmd = MetaLedger.windows_clean(cmd)
-            return csv.reader(subprocess.check_output(cmd).splitlines())
+            return csv.reader(subprocess.check_output(cmd).splitlines(), dialect='ledger')
 
 
     def check_transaction_by_id(self, key, value):

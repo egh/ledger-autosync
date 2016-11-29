@@ -52,6 +52,7 @@ class LedgerTest(object):
                   'PAYEE TEST:COLON',
                   'PAYEE TEST*STAR',
                   'PAYEE TEST#HASH',
+                  'PAYEE TEST"QUOTE',
                   'PAYEE TEST.PERIOD']
         for payee in payees:
             self.assertNotEqual(self.lgr.get_account_by_payee(payee, ['Assets:Foo']), None,
