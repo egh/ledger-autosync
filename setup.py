@@ -36,9 +36,9 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
 
     install_requires=[
-        'setuptools>=28.8',
+        'setuptools>=26',
         'ofxclient',
-        'ofxparse>=0.15',
+        'ofxparse>=0.14',
         'BeautifulSoup4',
         'fuzzywuzzy'
     ],
