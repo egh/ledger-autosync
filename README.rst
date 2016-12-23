@@ -253,6 +253,60 @@ synchronized 90 days and now want to get 180 days of transactions,
 ledger-autosync would stop before going back to 180 days without the
 ``--resync`` option.
 
+Plugin support (Experimental)
+-----------------------------
+
+ledger-autosync has experimental support for plugins. By placing python files a
+directory named ``~/.config/ledger-autosync/plugins/`` it should be possible to
+automatically load python files from there. This allows you to extend the csv
+converters with your own code. For example, given the input CSV file:
+
+::
+
+    "Date","Name","Amount","Balance"
+    "11/30/2016","Dividend","$1.06","$1,000“
+
+The following converter in the file ``~/.config/ledger-autosync/plugins/my.py``:
+
+.. code:: python
+    from ledgerautosync.converter import CsvConverter, Posting, Transaction, Amount
+    import datetime
+    import re
+
+    class SomeConverter(CsvConverter):
+        FIELDSET = set(["Date", "Name", Amount", "Balance"])
+
+        def __init__(self, *args, **kwargs):
+            super(SomeConverter, self).__init__(*args, **kwargs)
+
+        def convert(self, row):
+            md = re.match(r"^(\(?)\$([0-9,\.]+)", row['Amount'])
+            amount = md.group(2).replace(",", "")
+            if md.group(1) == "(":
+                reverse = True
+            else:
+                reverse = False
+            if reverse:
+                account = 'expenses'
+            else:
+                account = 'income'
+            return Transaction(
+                date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
+                payee=row['Name'],
+                postings=[Posting(self.name, Amount(amount, '$', reverse=reverse)),
+                          Posting(account, Amount(amount, '$', reverse=not(reverse)))])
+
+Running ``ledger-autosync file.csv -a assets:bank`` will generate:
+
+::
+
+    2016/11/30 Dividend
+        assets:bank                                $1.06
+        income                                    -$1.06
+
+For more examples, see
+https://gitlab.com/egh/ledger-autosync/blob/master/ledgerautosync/converter.py#L421
+
 Testing
 -------
 

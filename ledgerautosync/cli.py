@@ -35,6 +35,7 @@ import sys
 import traceback
 import os
 import os.path
+import imp
 
 
 def find_ledger_file():
@@ -130,6 +131,15 @@ def import_csv(ledger, args):
     for txn in sync.parse_file(args.PATH, accountname=args.account):
         print txn.format(args.indent)
 
+def load_plugins(config_dir):
+    plugin_dir = os.path.join(config_dir, 'ledger-autosync', 'plugins')
+    for plugin in filter(re.compile('.py$', re.IGNORECASE).search, os.listdir(plugin_dir)):
+        # Quiet loader
+        import ledgerautosync.plugins
+        path = os.path.join(plugin_dir, plugin)
+        imp.load_source('ledgerautosync.plugins.%s'%(os.path.splitext(plugin)[0]), path)
+
+
 def run(args=None, config=None):
     if args is None:
         args = sys.argv[1:]
@@ -199,11 +209,14 @@ transactions')
             sys.stderr.write("ledger.so (python)\n")
         exit()
 
+    config_dir = os.environ.get('XDG_CONFIG_HOME',
+                                os.path.join(os.path.expanduser("~"),
+                                             '.config'))
+
+    load_plugins(config_dir)
+
     if args.PATH is None:
         if config is None:
-            config_dir = os.environ.get('XDG_CONFIG_HOME',
-                                        os.path.join(os.path.expanduser("~"),
-                                                     '.config'))
             config_file = os.path.join(config_dir, 'ofxclient.ini')
             if (os.path.exists(config_file)):
                 config = OfxConfig(file_name=config_file)
