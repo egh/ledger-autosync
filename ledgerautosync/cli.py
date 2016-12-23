@@ -133,12 +133,12 @@ def import_csv(ledger, args):
 
 def load_plugins(config_dir):
     plugin_dir = os.path.join(config_dir, 'ledger-autosync', 'plugins')
-    for plugin in filter(re.compile('.py$', re.IGNORECASE).search, os.listdir(plugin_dir)):
-        # Quiet loader
-        import ledgerautosync.plugins
-        path = os.path.join(plugin_dir, plugin)
-        imp.load_source('ledgerautosync.plugins.%s'%(os.path.splitext(plugin)[0]), path)
-
+    if os.path.isdir(plugin_dir):
+        for plugin in filter(re.compile('.py$', re.IGNORECASE).search, os.listdir(plugin_dir)):
+            # Quiet loader
+            import ledgerautosync.plugins
+            path = os.path.join(plugin_dir, plugin)
+            imp.load_source('ledgerautosync.plugins.%s'%(os.path.splitext(plugin)[0]), path)
 
 def run(args=None, config=None):
     if args is None:
