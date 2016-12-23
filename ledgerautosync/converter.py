@@ -129,7 +129,7 @@ class Posting(object):
 
 class Amount(object):
     def __init__(self, number, currency, reverse=False, unlimited=False):
-        self.number = number
+        self.number = Decimal(number)
         self.reverse = reverse
         self.unlimited = unlimited
         self.currency = currency
