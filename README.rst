@@ -268,7 +268,8 @@ converters with your own code. For example, given the input CSV file:
 
 The following converter in the file ``~/.config/ledger-autosync/plugins/my.py``:
 
-.. code:: python
+::
+
     from ledgerautosync.converter import CsvConverter, Posting, Transaction, Amount
     import datetime
     import re
