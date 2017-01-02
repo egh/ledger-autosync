@@ -39,6 +39,22 @@ class OfxSynchronizer(Synchronizer):
         ofxid = "%s.%s" % (acctid, txn.id)
         return self.lgr.check_transaction_by_id("ofxid", ofxid)
 
+    # Filter out comment transactions. These have an amount of 0 and the same
+    # datetime as the previous transactions.
+    def filter_comment_txns(self, txns):
+        last_txn = None
+        retval = []
+        for txn in txns:
+            if (last_txn is not None) and \
+               hasattr(txn, 'amount') and \
+               (txn.amount == 0) and (last_txn.date == txn.date):
+                # This is a comment transaction
+                pass
+            else:
+                last_txn = txn
+                retval.append(txn)
+        return retval
+
     def filter(self, ofx):
         txns = ofx.account.statement.transactions
         if len(txns) == 0:
@@ -51,8 +67,9 @@ class OfxSynchronizer(Synchronizer):
         else:
             sorted_txns = sorted(txns, key=lambda t: t.date)
         acctid = ofx.account.account_id
-        return [txn for txn in sorted_txns
-                if not(self.is_txn_synced(acctid, txn))]
+        retval = [txn for txn in sorted_txns
+                  if not(self.is_txn_synced(acctid, txn))]
+        return self.filter_comment_txns(retval)
 
     def get_new_txns(self, acct, max_days=999999, resync=False):
         if resync or (max_days < 7):

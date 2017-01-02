@@ -71,6 +71,12 @@ class TestOfxSync(TestCase):
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
 
+    def test_comment_txns(self):
+        ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
+        sync = OfxSynchronizer(ledger)
+        (ofx, txns) = sync.parse_file(os.path.join('fixtures', 'comments.ofx'))
+        self.assertEqual(len(txns), 1)
+
 
 @attr('generic')
 class TestCsvSync(TestCase):
