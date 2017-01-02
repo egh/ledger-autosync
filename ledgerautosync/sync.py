@@ -59,16 +59,19 @@ class OfxSynchronizer(Synchronizer):
         return retval
 
     def filter(self, ofx):
+        def extract_sort_key(txn):
+            if hasattr(txn, 'tradeDate'):
+                return txn.tradeDate
+            elif hasattr(txn, 'date'):
+                return txn.date
+            elif hasattr(txn, 'settleDate'):
+                return txn.settleDate
+            return None
         txns = ofx.account.statement.transactions
         if len(txns) == 0:
             sorted_txns = txns
-        elif all(isinstance(txn, InvestmentTransaction) for txn in txns):
-            if all(txn.settleDate is not None for txn in txns):
-                sorted_txns = sorted(txns, key=lambda t: t.settleDate)
-            else:
-                sorted_txns = sorted(txns, key=lambda t: t.tradeDate)
         else:
-            sorted_txns = sorted(txns, key=lambda t: t.date)
+            sorted_txns = sorted(txns, key=extract_sort_key)
         acctid = ofx.account.account_id
         retval = [txn for txn in sorted_txns
                   if not(self.is_txn_synced(acctid, txn))]
