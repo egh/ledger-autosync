@@ -47,7 +47,10 @@ class OfxSynchronizer(Synchronizer):
         for txn in txns:
             if (last_txn is not None) and \
                hasattr(txn, 'amount') and \
-               (txn.amount == 0) and (last_txn.date == txn.date):
+               (txn.amount == 0) and \
+               hasattr(last_txn, 'date') and \
+               hasattr(txn, 'date') and \
+               (last_txn.date == txn.date):
                 # This is a comment transaction
                 pass
             else:
