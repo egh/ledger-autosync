@@ -322,7 +322,7 @@ class OfxConverter(Converter):
 
             security = self.maybe_get_ticker(txn.security)
 
-            if isinstance(txn.type, str):
+            if isinstance(txn.type, basestring):
                 # recent versions of ofxparse
                 if re.match('^(buy|sell)', txn.type):
                     acct2 = self.unknownaccount or 'Assets:Unknown'
