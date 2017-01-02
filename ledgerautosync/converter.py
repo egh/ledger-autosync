@@ -225,7 +225,7 @@ class OfxConverter(Converter):
         if (payee is None or payee == '') and (memo is None or memo == ''):
             retval = "%s: %s"%(self.name, txn.type)
             if txn.type == 'transfer' and hasattr(txn, 'tferaction'):
-                retval += ": %s"%(txn.tferaction)
+                retval += ": %s"%(txn.tferaction.lower())
             return retval
         if (payee is None or payee == '') or txn.memo.startswith(payee):
             return memo
