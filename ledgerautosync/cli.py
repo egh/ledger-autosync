@@ -174,6 +174,8 @@ found by payee')
     parser.add_argument('--hledger', action='store_true', default=False,
                         help='force use of hledger (on by default if invoked \
 as hledger-autosync)')
+    parser.add_argument('--ledger-cli', action='store_true', default=False,
+                        help='force use of ledger cli interface (rather than python)')
     parser.add_argument('--slow', action='store_true', default=False,
                         help='use slow, but possibly more robust, method of \
 calling ledger (no subprocess)')
@@ -194,6 +196,8 @@ transactions')
         logging.basicConfig(level=logging.DEBUG)
     if args.hledger:
         ledger = HLedger(ledger_file)
+    elif args.ledger_cli:
+        ledger = Ledger(ledger_file=ledger_file)
     elif args.slow:
         ledger = Ledger(ledger_file=ledger_file, no_pipe=True)
     else:
