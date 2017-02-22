@@ -253,6 +253,13 @@ synchronized 90 days and now want to get 180 days of transactions,
 ledger-autosync would stop before going back to 180 days without the
 ``--resync`` option.
 
+python bindings
+---------------
+
+If the ledger python bindings are available, ledger-autosync will use them by
+default. However, these can be buggy. If you experience problems, please try
+using the ``--no-python`` argument to disable use of the python bindings.
+
 Plugin support (Experimental)
 -----------------------------
 
