@@ -34,7 +34,8 @@ csv.register_dialect('ledger', delimiter=',', quoting=csv.QUOTE_ALL, escapechar=
 
 def mk_ledger(ledger_file):
     if LedgerPython.available():
-        return LedgerPython(ledger_file, string_read=False)
+        # string_read=True works around http://bugs.ledger-cli.org/show_bug.cgi?id=973
+        return LedgerPython(ledger_file, string_read=True)
     elif Ledger.available():
         return Ledger(ledger_file)
     elif HLedger.available():
@@ -207,7 +208,8 @@ class LedgerPython(MetaLedger):
         if self.payees is None:
             self.payees = {}
             for xact in self.journal:
-                self.add_payee(xact.payee, xact.account)
+                for post in xact.posts():
+                    self.add_payee(xact.payee, post.reported_account().fullname())
 
     def check_transaction_by_id(self, key, value):
         q = self.journal.query("-E meta %s=\"%s\"" %
