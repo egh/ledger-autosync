@@ -256,9 +256,9 @@ ledger-autosync would stop before going back to 180 days without the
 python bindings
 ---------------
 
-If the ledger python bindings are available, ledger-autosync will use them by
-default. However, these can be buggy. If you experience problems, please try
-using the ``--no-python`` argument to disable use of the python bindings.
+If the ledger python bindings are available, ledger-autosync can use them if you
+pass in the ``--python`` argument.Note, however, they can be buggy, which is why
+they are disabled by default
 
 Plugin support (Experimental)
 -----------------------------

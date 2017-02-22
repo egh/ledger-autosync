@@ -33,13 +33,13 @@ from fuzzywuzzy import process
 csv.register_dialect('ledger', delimiter=',', quoting=csv.QUOTE_ALL, escapechar="\\")
 
 def mk_ledger(ledger_file):
-    if LedgerPython.available():
-        # string_read=True works around http://bugs.ledger-cli.org/show_bug.cgi?id=973
-        return LedgerPython(ledger_file, string_read=True)
-    elif Ledger.available():
+    if Ledger.available():
         return Ledger(ledger_file)
     elif HLedger.available():
         return HLedger(ledger_file)
+    elif LedgerPython.available():
+        # string_read=True works around http://bugs.ledger-cli.org/show_bug.cgi?id=973
+        return LedgerPython(ledger_file, string_read=True)
     else:
         raise Exception("Neither ledger 3 nor hledger found!")
 
