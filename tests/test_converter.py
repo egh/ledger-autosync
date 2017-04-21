@@ -88,15 +88,15 @@ class TestPaypalConverter(LedgerTestCase):
                 converter.convert(reader.next()).format(),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
     ; csvid: paypal.XYZ1
-    Foo                                   -20.00 USD
-    Expenses:Misc                          20.00 USD
+    Foo                                                -20.00 USD
+    Expenses:Misc                                       20.00 USD
 """)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
     ; csvid: paypal.XYZ2
-    Foo                                    20.00 USD
-    Transfer:Paypal                       -20.00 USD
+    Foo                                                 20.00 USD
+    Transfer:Paypal                                    -20.00 USD
 """)
 
 @attr('generic')
@@ -114,8 +114,8 @@ class TestAmazonConverter(LedgerTestCase):
                 """2016/01/29 Best Soap Ever
     ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
     ; csvid: amazon.123-4567890-1234567
-    Foo                                       $21.90
-    Expenses:Misc                            -$21.90
+    Foo                                                    $21.90
+    Expenses:Misc                                         -$21.90
 """)
 
 @attr('generic')
@@ -132,13 +132,13 @@ class TestMintConverter(LedgerTestCase):
                 converter.convert(reader.next()).format(),
                 """2016/08/02 Amazon
     ; csvid: mint.a7c028a73d76956453dab634e8e5bdc1
-    1234                                      $29.99
-    Expenses:Shopping                        -$29.99
+    1234                                                   $29.99
+    Expenses:Shopping                                     -$29.99
 """)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/06/02 Autopay Rautopay Auto
     ; csvid: mint.a404e70594502dd62bfc6f15d80b7cd7
-    1234                                    -$123.45
-    Credit Card Payment                      $123.45
+    1234                                                 -$123.45
+    Credit Card Payment                                   $123.45
 """)

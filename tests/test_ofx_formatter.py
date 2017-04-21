@@ -60,8 +60,8 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqual(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
     ; ofxid: 1101.1452687~7.0000486
-    Foo                                        $0.01
-    Expenses:Misc                             -$0.01
+    Foo                                                     $0.01
+    Expenses:Misc                                          -$0.01
 """)
 
     def test_investments(self):
