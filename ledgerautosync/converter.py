@@ -116,7 +116,7 @@ class Posting(object):
         self.unit_price = unit_price
 
     def format(self, indent=4):
-        space_count = 52 - indent - len(self.account) - len(self.amount.format())
+        space_count = 65 - indent - len(self.account) - len(self.amount.format())
         if space_count < 2:
             space_count = 2
         retval = "%s%s%s%s" % (
