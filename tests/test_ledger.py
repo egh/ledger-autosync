@@ -22,7 +22,7 @@ from nose.plugins.attrib import attr
 from unittest import TestCase
 import os
 import os.path
-
+import tempfile
 
 class LedgerTest(object):
     ledger_path = os.path.join('fixtures', 'checking.lgr')
@@ -78,6 +78,16 @@ class TestLedger(LedgerTest, TestCase):
         self.lgr = Ledger(self.ledger_path, no_pipe=True)
         self.dynamic_lgr = Ledger(self.dynamic_ledger_path, no_pipe=True)
 
+    def test_args_only(self):
+        (f, tmprcpath) = tempfile.mkstemp(".ledgerrc")
+        os.close(f) # Who wants to deal with low-level file descriptors?
+        # Create an init file that will narrow the test data to a period that contains no trasnactions
+        with open(tmprcpath, 'w') as f:
+            f.write("--period 2012")
+        # If the command returns no trasnactions, as we would expect if we
+        # parsed the init file, then this will throw an exception.
+        self.lgr.run([""]).next()
+        os.unlink(tmprcpath)
 
 @attr('ledger-python')
 class TestLedgerPython(TestCase, LedgerTest):

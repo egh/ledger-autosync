@@ -113,7 +113,7 @@ class Ledger(MetaLedger):
                     self._item = ""
             out.close()
         self.use_pipe = (os.name == 'posix') and not(no_pipe)
-        self.args = ["ledger"]
+        self.args = ["ledger", "--args-only"]
         if ledger_file is not None:
             self.args += ["-f", ledger_file]
         if self.use_pipe:
