@@ -47,8 +47,10 @@ found."""
     elif os.path.exists(ledgerrcpath):
         # hacky
         ledgerrc = open(ledgerrcpath).read()
-        return os.path.abspath(os.path.expanduser(
-            re.match(r".*--file\s+([^\s]+).*", ledgerrc).group(1)))
+        for line in ledgerrc.readlines:
+            md = re.match(r"--file\s+([^\s]+).*", ledgerrc)
+            if md:
+                return os.path.abspath(os.path.expanduser(md.group(1)))
     else:
         raise Exception("LEDGER_FILE environment variable not set, and no \
 .ledgerrc file found, and -l argument no supplied.")
