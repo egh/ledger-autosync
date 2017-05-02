@@ -17,10 +17,11 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.cli import run
+from ledgerautosync.cli import run, find_ledger_file
 from ledgerautosync.ledgerwrap import Ledger, LedgerPython, HLedger
 from ofxclient.config import OfxConfig
 import os.path
+import tempfile
 
 from unittest import TestCase
 from mock import Mock, call
@@ -57,6 +58,20 @@ class CliTest():
         foo.download.assert_has_calls([call(days=7)])
         bar.download.assert_not_called()
 
+    def test_find_ledger_path(self):
+        os.environ["LEDGER_FILE"] = "/tmp/foo"
+        self.assertEqual(find_ledger_file(), "/tmp/foo", "Should use LEDGER_FILE to find ledger path.")
+
+        (f, tmprcpath) = tempfile.mkstemp(".ledgerrc")
+        os.close(f) # Who wants to deal with low-level file descriptors?
+        with open(tmprcpath, 'w') as f:
+            f.write("--bar foo\n")
+            f.write("--file /tmp/bar\n")
+            f.write("--foo bar\n")
+        self.assertEqual(find_ledger_file(tmprcpath), "/tmp/foo", "Should prefer LEDGER_FILE to --file arg in ledgerrc")
+        del os.environ["LEDGER_FILE"]
+        self.assertEqual(find_ledger_file(tmprcpath), "/tmp/bar", "Should parse ledgerrc")
+        os.unlink(tmprcpath)
 
 @attr('hledger')
 class TestCliHledger(TestCase, CliTest):
