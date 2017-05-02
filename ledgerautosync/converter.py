@@ -109,11 +109,12 @@ class Transaction(object):
         return retval
 
 class Posting(object):
-    def __init__(self, account, amount, asserted=None, unit_price=None):
+    def __init__(self, account, amount, asserted=None, unit_price=None, metadata={}):
         self.account = account
         self.amount = amount
         self.asserted = asserted
         self.unit_price = unit_price
+        self.metadata = metadata
 
     def format(self, indent=4):
         space_count = 65 - indent - len(self.account) - len(self.amount.format())
@@ -125,7 +126,10 @@ class Posting(object):
             retval = "%s = %s"%(retval, self.asserted.format())
         if self.unit_price is not None:
             retval = "%s @ %s"%(retval, self.unit_price.format())
-        return "%s\n"%(retval)
+        retval += "\n"
+        for k,v in self.metadata.iteritems():
+            retval += "%s; %s: %s\n" % (" "*indent, k, v)
+        return retval
 
 class Amount(object):
     def __init__(self, number, currency, reverse=False, unlimited=False):

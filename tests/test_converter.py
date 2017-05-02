@@ -29,13 +29,13 @@ from tests import LedgerTestCase
 @attr('generic')
 class TestPosting(LedgerTestCase):
     def test_format(self):
-        self.assertRegexpMatches(
+        self.assertEqual(
             Posting(
                 "Foo",
-                Amount(Decimal("10.00"), "$")
+                Amount(Decimal("10.00"), "$"),
+                metadata={'foo': 'bar'}
             ).format(indent=2),
-            r'^  Foo.*$')
-
+            "  Foo                                                      $10.00\n  ; foo: bar\n")
 
 @attr('generic')
 class TestAmount(LedgerTestCase):
