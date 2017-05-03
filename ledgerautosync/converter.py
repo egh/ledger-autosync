@@ -274,12 +274,12 @@ class OfxConverter(Converter):
                 postings=[
                     Posting(
                         self.name,
-                        Amount(initbal, currency=self.currency)).format(self.indent),
+                        Amount(initbal, currency=self.currency),
+                        metadata={"ofxid": self.mk_ofxid(AUTOSYNC_INITIAL)}),
                     Posting(
                         "Assets:Equity",
                         Amount(initbal, currency=self.currency, reverse=True)).format(self.indent)
                     ],
-                metadata={ "ofxid": self.mk_ofxid(AUTOSYNC_INITIAL) }
             ).format(self.indent)
         else:
             return ""
@@ -299,16 +299,18 @@ class OfxConverter(Converter):
         """
 
         ofxid = self.mk_ofxid(txn.id)
+        metadata = {}
+        posting_metadata = {"ofxid": ofxid}
 
         if isinstance(txn, OfxTransaction):
             return Transaction(
                 date=txn.date,
                 payee=self.format_payee(txn),
-                metadata={"ofxid": ofxid},
                 postings=[
                     Posting(
                         self.name,
-                        Amount(txn.amount, self.currency)
+                        Amount(txn.amount, self.currency),
+                        metadata=posting_metadata
                     ),
                     Posting(
                         self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
@@ -321,8 +323,6 @@ class OfxConverter(Converter):
 
             posting1 = None
             posting2 = None
-
-            metadata = {"ofxid": ofxid}
 
             security = self.maybe_get_ticker(txn.security)
 
@@ -344,10 +344,11 @@ class OfxConverter(Converter):
                     # so their postings need special handling compared to others
                     metadata['dividend_from'] = security
                     acct2 = 'Income:Dividends'
-                    posting1 = Posting( acct1,
-                                        Amount(txn.total, self.currency))
-                    posting2 = Posting( acct2,
-                                        Amount(txn.total, self.currency, reverse=True ))
+                    posting1 = Posting(acct1,
+                                       Amount(txn.total, self.currency),
+                                       metadata=posting_metadata)
+                    posting2 = Posting(acct2,
+                                       Amount(txn.total, self.currency, reverse=True))
                 else:
                     # ???
                     pass
@@ -372,10 +373,11 @@ class OfxConverter(Converter):
             # this block defines all other posting types
             if posting1 is None and posting2 is None:
                 posting1 = Posting(acct1,
-                                Amount(txn.units, security, unlimited=True),
-                                unit_price=Amount(txn.unit_price, self.currency, unlimited=True))
+                                   Amount(txn.units, security, unlimited=True),
+                                   unit_price=Amount(txn.unit_price, self.currency, unlimited=True),
+                                   metadata=posting_metadata)
                 posting2 = Posting(acct2,
-                                Amount(txn.units * txn.unit_price, self.currency, reverse=True))
+                                   Amount(txn.units * txn.unit_price, self.currency, reverse=True))
             else:
                 # Previously defined if type:income income_type/DIV
                 pass
@@ -436,11 +438,13 @@ class PaypalConverter(CsvConverter):
             return ""
         else:
             currency = row['Currency']
+            posting_metadata = {"csvid": self.get_csv_id(row)}
             if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
                 postings=[
                     Posting(
                         self.name,
-                        Amount(Decimal(row['Net']), currency)
+                        Amount(Decimal(row['Net']), currency),
+                        metadata=posting_metadata
                     ),
                     Posting(
                         "Transfer:Paypal",
@@ -450,7 +454,8 @@ class PaypalConverter(CsvConverter):
                 postings=[
                     Posting(
                         self.name,
-                        Amount(Decimal(row['Gross']), currency)
+                        Amount(Decimal(row['Gross']), currency),
+                        metadata=posting_metadata
                     ),
                     Posting(
                         # TODO Our payees are breaking the payee search in mk_dynamic_account
@@ -462,7 +467,6 @@ class PaypalConverter(CsvConverter):
                 payee=re.sub(
                     r"\s+", " ",
                     "%s %s %s ID: %s, %s"%(row['Name'], row['To Email Address'], row['Item Title'], row['Transaction ID'], row['Type'])),
-                metadata={"csvid": self.get_csv_id(row)},
                 postings=postings)
 
 
@@ -484,11 +488,12 @@ class AmazonConverter(CsvConverter):
         return Transaction(
             date=datetime.datetime.strptime(row['Order Date'], "%m/%d/%y"),
             payee=row['Title'],
-            metadata={
-                "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s"%(row['Order ID']),
-                "csvid": self.get_csv_id(row)},
             postings=[
-                Posting(self.name, self.mk_amount(row)),
+                Posting(self.name,
+                        self.mk_amount(row),
+                        metadata={
+                            "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s"%(row['Order ID']),
+                            "csvid": self.get_csv_id(row)}),
                 Posting("Expenses:Misc", self.mk_amount(row, reverse=True))
             ])
 
@@ -506,15 +511,17 @@ class MintConverter(CsvConverter):
         if account is None:
             account = row['Account Name']
         postings = []
+        posting_metadata = {"csvid": "mint.%s"%(self.get_csv_id(row))}
         if (row['Transaction Type'] == 'credit'):
-            postings = [Posting(account, self.mk_amount(row, reverse=True)),
+            postings = [Posting(account, self.mk_amount(row, reverse=True),
+                                metadata=posting_metadata),
                         Posting(row['Category'], self.mk_amount(row))]
         else:
-            postings = [Posting(account, self.mk_amount(row)),
+            postings = [Posting(account, self.mk_amount(row),
+                                metadata=posting_metadata),
                         Posting("Expenses:%s"%(row['Category']), self.mk_amount(row, reverse=True))]
 
         return Transaction(
             date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
-            metadata={"csvid": "mint.%s"%(self.get_csv_id(row))},
             payee=row['Description'],
             postings=postings)

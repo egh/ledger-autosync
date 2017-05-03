@@ -29,13 +29,13 @@ from tests import LedgerTestCase
 @attr('generic')
 class TestPosting(LedgerTestCase):
     def test_format(self):
-        self.assertEqual(
+        self.assertEqualLedgerPosting(
             Posting(
                 "Foo",
                 Amount(Decimal("10.00"), "$"),
                 metadata={'foo': 'bar'}
             ).format(indent=2),
-            "  Foo                                                      $10.00\n  ; foo: bar\n")
+            "  Foo  $10.00\n  ; foo: bar\n")
 
 @attr('generic')
 class TestAmount(LedgerTestCase):
@@ -87,15 +87,15 @@ class TestPaypalConverter(LedgerTestCase):
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
-    ; csvid: paypal.XYZ1
     Foo                                                -20.00 USD
+    ; csvid: paypal.XYZ1
     Expenses:Misc                                       20.00 USD
 """)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
-    ; csvid: paypal.XYZ2
     Foo                                                 20.00 USD
+    ; csvid: paypal.XYZ2
     Transfer:Paypal                                    -20.00 USD
 """)
 
@@ -112,9 +112,9 @@ class TestAmazonConverter(LedgerTestCase):
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/01/29 Best Soap Ever
+    Foo                                                    $21.90
     ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
     ; csvid: amazon.123-4567890-1234567
-    Foo                                                    $21.90
     Expenses:Misc                                         -$21.90
 """)
 
@@ -131,14 +131,14 @@ class TestMintConverter(LedgerTestCase):
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/08/02 Amazon
-    ; csvid: mint.a7c028a73d76956453dab634e8e5bdc1
     1234                                                   $29.99
+    ; csvid: mint.a7c028a73d76956453dab634e8e5bdc1
     Expenses:Shopping                                     -$29.99
 """)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/06/02 Autopay Rautopay Auto
-    ; csvid: mint.a404e70594502dd62bfc6f15d80b7cd7
     1234                                                 -$123.45
+    ; csvid: mint.a404e70594502dd62bfc6f15d80b7cd7
     Credit Card Payment                                   $123.45
 """)
