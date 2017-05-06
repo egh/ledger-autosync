@@ -129,6 +129,8 @@ empty and no accountname supplied!")
 
 
 def import_csv(ledger, args):
+    if args.account is None:
+        raise Exception("When importing a CSV file, you must specify an account name.")
     sync = CsvSynchronizer(ledger)
     accountname = args.account
     for txn in sync.parse_file(args.PATH, accountname=args.account):
