@@ -1,14 +1,22 @@
 ledger-autosync
 ===============
 
-ledger-autosync is a program to pull down transactions from your bank
-and create `ledger <http://ledger-cli.org/>`__ transactions for them. It
-is designed to only create transactions that are not already present in
-your ledger files (that is, deduplicate transactions). This should make
-it comparable to some of the automated synchronization features
-available in products like GnuCash, Mint, etc. In fact, ledger-autosync
-performs OFX import and synchronization better than all the alternatives
-I have seen.
+ledger-autosync is a program to pull down transactions from your bank and create
+`ledger <http://ledger-cli.org/>`__ transactions for them. It is designed to
+only create transactions that are not already present in your ledger files (that
+is, it will deduplicate transactions). This should make it comparable to some of
+the automated synchronization features available in products like GnuCash, Mint,
+etc. In fact, ledger-autosync performs OFX import and synchronization better
+than all the alternatives I have seen.
+
+News
+----
+
+6 May 2017
+~~~~~~~~~~
+Versions of ledger-autosync before 0.4 printed the ofxid in a slightly incorrect
+position. This should not effect usage of the program, but if you would like to
+correct the error, see below for more details.
 
 Features
 --------
@@ -37,6 +45,7 @@ ledger-autosync is developed on Linux with ledger 3 and python 2.7; it has been
 tested on Windows (although it will run slower) and should run on OS X. It
 requires ledger 3 or hledger, but it should run faster with ledger, because it
 will not need to start a command to check every transaction.
+
 
 Quickstart
 ----------
@@ -83,7 +92,7 @@ This should print a number of transactions to stdout. If you add these
 transactions to your default ledger file (whatever is read when you run
 ``ledger`` without arguments), you should find that if you run
 ledger-autosync again, it should print no transactions. This is because
-of the deduplicating feature: only new transactions should be printed
+of the deduplicating feature: only new transactions will be printed
 for insertion into your ledger files.
 
 Using the ofx protocol for automatic download
@@ -125,21 +134,6 @@ this output to your ledger file. When that is done, you can call:
 again, and it should print nothing to stdout, because you already have
 those transactions in your ledger.
 
-Syncing a file
---------------
-
-Some banks allow users to download OFX files, but do not support
-fetching via the OFX protocol. If you have an OFX file, you can convert
-to ledger:
-
-::
-
-    ledger-autosync /path/to/file.ofx
-
-This will print unknown transactions in the file to stdout in the same
-way as ordinary sync. If the transaction is already in your ledger, it
-will be ignored.
-
 How it works
 ------------
 
@@ -149,6 +143,25 @@ metadata in each transaction. When syncing with your bank, it will check
 if the transaction exists by running the ledger or hledger command. If
 the transaction exists, it does nothing. If it does not exist, the
 transaction is printed to stdout.
+
+ofxid/csvid metadata tag
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+ledger-autosync stores a metatag with every posting that it outputs to support
+deduplication. This metadata tag is either ``ofxid`` (for OFX imports) or
+``csvid`` for CSV imports.
+
+Pre-0.4.0 versions of ledger-autosync put this metadata tag in a slightly
+incorrect place, associating the metadata tag with the transaction itself, and
+not simply one posting. This should not effect the usage of ledger-autosync, but
+if you would like to correct your ledger files, there is a small python script
+``fix_ofxid.py`` included with ledger-autosync. It can be run as:
+
+::
+
+   python fix_ofxid.py <input file>
+
+and will print a corrected file to stdout.
 
 Syncing a CSV file
 ------------------
@@ -172,7 +185,7 @@ deduplicated. This method is probably not as robust as a method based on
 unique ids, but Mint does not provide a unique id, and it should be
 better than nothing. It is likely to generate false negatives:
 transactions that seem new, but are in fact old. It will not generate
-false negatives: transactions that are not generated because they seem
+false positives: transactions that are not generated because they seem
 old.
 
 If you are a developer, you should fine it easy enough to add a new CSV
@@ -205,8 +218,8 @@ printed as follows:
 ::
 
     2016/01/29 401k: buymf
-      ; ofxid: 1234
       Assets:Retirement:401k                                 1.12345 FOOBAR @ $123.123456
+      ; ofxid: 1234
       Income:Salary                                            -$138.32
 
 This means that you bought (contributed) $138.32 worth of FOOBAR (your
@@ -222,8 +235,8 @@ either a fee or a change in your investment option:
 ::
 
     2014/06/30 401k: transfer: out
-      ; ofxid: 1234
       Assets:Retirement:401k                                -1.61374 FOOBAR @ $123.123456
+      ; ofxid: 1234
       Transfer                                                  $198.69
 
 You will need to examine your statements to determine if this was a fee
@@ -234,8 +247,8 @@ Another type of transaction is a “reinvest” transaction:
 ::
 
     2014/06/30 401k: reinvest
-      ; ofxid: 1234
       Assets:Retirement:401k                                0.060702 FOOBAR @ $123.123456
+      ; ofxid: 1234
       Income:Interest                                            -$7.47
 
 This probably indicates a reinvestment of dividends. ledger-autosync
