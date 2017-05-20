@@ -77,6 +77,11 @@ class TestOfxSync(TestCase):
         (ofx, txns) = sync.parse_file(os.path.join('fixtures', 'comments.ofx'))
         self.assertEqual(len(txns), 1)
 
+    def test_sync_no_ledger(self):
+        acct = Mock()
+        acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
+        sync = OfxSynchronizer(None)
+        self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
 
 @attr('generic')
 class TestCsvSync(TestCase):

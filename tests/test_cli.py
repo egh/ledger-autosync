@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
+from ledgerautosync import LedgerAutosyncException
 from ledgerautosync.cli import run, find_ledger_file
 from ledgerautosync.ledgerwrap import Ledger, LedgerPython, HLedger
 from ofxclient.config import OfxConfig
@@ -26,7 +27,7 @@ import tempfile
 from unittest import TestCase
 from mock import Mock, call
 from nose.plugins.attrib import attr
-
+from nose.tools import raises
 
 class CliTest():
     def test_run(self):
@@ -72,6 +73,12 @@ class CliTest():
         del os.environ["LEDGER_FILE"]
         self.assertEqual(find_ledger_file(tmprcpath), "/tmp/bar", "Should parse ledgerrc")
         os.unlink(tmprcpath)
+
+    @raises(LedgerAutosyncException)
+    def test_no_ledger(self):
+        config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
+        run(['-l', os.path.join('fixtures', 'checking.lgr'),
+             '-L'], config)
 
 @attr('hledger')
 class TestCliHledger(TestCase, CliTest):

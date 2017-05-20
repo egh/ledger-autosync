@@ -36,8 +36,13 @@ class OfxSynchronizer(Synchronizer):
         return (ofx, self.filter(ofx))
 
     def is_txn_synced(self, acctid, txn):
-        ofxid = "%s.%s" % (acctid, txn.id)
-        return self.lgr.check_transaction_by_id("ofxid", ofxid)
+        if self.lgr is None:
+            # User called with --no-ledger
+            # All transactions are considered "synced" in this case.
+            return False
+        else:
+            ofxid = "%s.%s" % (acctid, txn.id)
+            return self.lgr.check_transaction_by_id("ofxid", ofxid)
 
     # Filter out comment transactions. These have an amount of 0 and the same
     # datetime as the previous transactions.

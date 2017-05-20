@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from ofxclient.config import OfxConfig
 import argparse
 import csv
-from ledgerautosync import EmptyInstitutionException
+from ledgerautosync import EmptyInstitutionException, LedgerAutosyncException
 from ledgerautosync.converter import OfxConverter, CsvConverter, AUTOSYNC_INITIAL, \
     ALL_AUTOSYNC_INITIAL
 from ledgerautosync.converter import SecurityList
@@ -161,6 +161,8 @@ file')
 if importing from file, set account name for import')
     parser.add_argument('-l', '--ledger', type=str, default=None,
                         help='specify ledger file to READ for syncing')
+    parser.add_argument('-L', dest='no_ledger', action='store_true', default=False,
+                        help='do not de-duplicate against a ledger file')
     parser.add_argument('-i', '--indent', type=int, default=4,
                         help='number of spaces to use for indentation')
     parser.add_argument('--initial', action='store_true', default=False,
@@ -193,13 +195,20 @@ transactions')
         args.hledger = True
 
     ledger_file = None
-    if args.ledger:
+    if args.ledger and args.no_ledger:
+        raise LedgerAutosyncException('You cannot specify a ledger file and -L')
+    elif args.ledger:
         ledger_file = args.ledger
+    elif args.no_ledger:
+        ledger_file = None
     else:
         ledger_file = find_ledger_file()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
-    if args.hledger:
+
+    if args.no_ledger:
+        ledger = None
+    elif args.hledger:
         ledger = HLedger(ledger_file)
     elif args.python:
         ledger = LedgerPython(ledger_file=ledger_file)
