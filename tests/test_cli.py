@@ -23,9 +23,11 @@ from ledgerautosync.ledgerwrap import Ledger, LedgerPython, HLedger
 from ofxclient.config import OfxConfig
 import os.path
 import tempfile
+import sys
+from StringIO import StringIO
 
 from unittest import TestCase
-from mock import Mock, call
+from mock import Mock, call, patch
 from nose.plugins.attrib import attr
 from nose.tools import raises
 
@@ -75,10 +77,21 @@ class CliTest():
         os.unlink(tmprcpath)
 
     @raises(LedgerAutosyncException)
-    def test_no_ledger(self):
+    def test_no_ledger_arg(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         run(['-l', os.path.join('fixtures', 'checking.lgr'),
              '-L'], config)
+
+    def test_no_ledger(self):
+        config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
+        acct = config.accounts()[0]
+        acct.download = Mock(side_effect=lambda *args, **kwargs:
+                             file(os.path.join('fixtures', 'checking.ofx')))
+        config.accounts = Mock(return_value=[acct])
+        with patch('ledgerautosync.cli.find_ledger_file', return_value=None):
+            with patch('sys.stderr', new_callable=StringIO) as mock_stdout:
+                run([], config)
+                self.assertEquals(mock_stdout.getvalue(), 'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!')
 
 @attr('hledger')
 class TestCliHledger(TestCase, CliTest):

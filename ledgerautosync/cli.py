@@ -53,8 +53,7 @@ found."""
             if md is not None:
                 return os.path.abspath(os.path.expanduser(md.group(1)))
     else:
-        raise Exception("LEDGER_FILE environment variable not set, and no \
-.ledgerrc file found, and -l argument no supplied.")
+        return None
 
 
 def print_results(converter, ofx, ledger, txns, args):
@@ -199,14 +198,17 @@ transactions')
         raise LedgerAutosyncException('You cannot specify a ledger file and -L')
     elif args.ledger:
         ledger_file = args.ledger
-    elif args.no_ledger:
-        ledger_file = None
     else:
         ledger_file = find_ledger_file()
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
-    if args.no_ledger:
+    if ledger_file is None:
+        sys.stderr.write("LEDGER_FILE environment variable not set, and no \
+.ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. \
+All transactions will be printed!")
+        ledger = None
+    elif args.no_ledger:
         ledger = None
     elif args.hledger:
         ledger = HLedger(ledger_file)
