@@ -95,7 +95,8 @@ def sync(ledger, accounts, args):
                                          name=acct.description,
                                          ledger=ledger,
                                          indent=args.indent,
-                                         unknownaccount=args.unknownaccount)
+                                         unknownaccount=args.unknownaccount,
+                                         payee_format=args.payee_format)
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -122,7 +123,8 @@ empty and no accountname supplied!")
                              ledger=ledger,
                              indent=args.indent,
                              fid=args.fid,
-                             unknownaccount=args.unknownaccount)
+                             unknownaccount=args.unknownaccount,
+                             payee_format=args.payee_format)
 
     print_results(converter, ofx, ledger, txns, args)
 
@@ -179,7 +181,10 @@ found by payee')
                         help='enable debug logging')
     parser.add_argument('--hledger', action='store_true', default=False,
                         help='force use of hledger (on by default if invoked \
-as hledger-autosync)')
+                        as hledger-autosync)')
+    parser.add_argument('--payee-format', type=str, default=None, dest='payee_format',
+                        help="""Format string to use for generating the payee line.
+                        Substitutions can be written using {memo}, {payee}, {txntype}, {account} or {tferaction}.""")
     parser.add_argument('--python', action='store_true', default=False,
                         help='use the ledger python interface')
     parser.add_argument('--slow', action='store_true', default=False,

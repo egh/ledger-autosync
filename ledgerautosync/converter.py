@@ -189,12 +189,14 @@ class Converter(object):
 
 class OfxConverter(Converter):
     def __init__(self, ofx, name, indent=4, ledger=None, fid=None,
-                 unknownaccount=None):
+                 unknownaccount=None, payee_format=None):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
                                            currency=ofx.account.statement.currency)
         self.acctid = ofx.account.account_id
+        self.payee_format = payee_format
+
         # build SecurityList (including indexing by CUSIP and ticker symbol)
         if hasattr(ofx, 'security_list') and ofx.security_list is not None:
             self.security_list = SecurityList(ofx.security_list)
@@ -215,24 +217,39 @@ class OfxConverter(Converter):
         return Converter.clean_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
 
     def format_payee(self, txn):
-        payee = None
-        memo = None
-        if (hasattr(txn, 'payee')):
+        payee = ""
+        if (hasattr(txn, 'payee') and txn.payee is not None):
             payee = txn.payee
-        if (hasattr(txn, 'memo')):
+        memo = ""
+        if (hasattr(txn, 'memo') and txn.memo is not None):
             memo = txn.memo
+        txntype = ""
+        if (hasattr(txn, 'type') and txn.type is not None):
+            txntype = txn.type
+        tferaction = ""
+        if (hasattr(txn, 'tferaction') and txn.tferaction is not None):
+            tferaction = txn.tferaction.lower()
 
-        if (payee is None or payee == '') and (memo is None or memo == ''):
-            retval = "%s: %s"%(self.name, txn.type)
-            if txn.type == 'transfer' and hasattr(txn, 'tferaction'):
-                retval += ": %s"%(txn.tferaction.lower())
-            return retval
-        if (payee is None or payee == '') or txn.memo.startswith(payee):
-            return memo
-        elif (memo is None or memo == '') or payee.startswith(memo):
-            return payee
-        else:
-            return "%s %s" % (payee, memo)
+        payee_format = self.payee_format
+
+        if payee_format is None:
+            # Default when not provided
+            payee_format = "{payee} {memo}"
+
+            # Alternate for when payee and memo are blank, sometimes true for
+            # investment accounts.
+            if (payee == "") and (memo == ""):
+                payee_format = "{account}: {txntype}"
+                if tferaction != "":
+                    payee_format += ": {tferaction}"
+
+            # Sometimes memo/payee are simply longer versions of the other.
+            if memo.startswith(payee):
+                payee = ""
+            if payee.startswith(memo):
+                memo = ""
+
+        return payee_format.format(payee=payee, memo=memo, txntype=txntype, account=self.name, tferaction=tferaction).strip()
 
     def format_balance(self, statement):
         # Get date. Ensure the date is a date-like object.

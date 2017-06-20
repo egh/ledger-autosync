@@ -175,3 +175,33 @@ class TestOfxConverter(LedgerTestCase):
     Foo                                     $1234.56
     Income:Dividends                       -$1234.56
 """)
+
+    def test_checking_custom_payee(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        converter = OfxConverter(ofx=ofx, name="Foo", payee_format="{memo}")
+        self.assertEqual(
+            converter.format_payee(ofx.account.statement.transactions[0]),
+            'DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%')
+        converter = OfxConverter(ofx=ofx, name="Foo", payee_format="{payee}")
+        self.assertEqual(
+            converter.format_payee(ofx.account.statement.transactions[0]),
+            'DIVIDEND EARNED FOR PERIOD OF 03')
+        converter = OfxConverter(ofx=ofx, name="Foo", payee_format="{account}")
+        self.assertEqual(
+            converter.format_payee(ofx.account.statement.transactions[0]),
+            'Foo')
+        converter = OfxConverter(ofx=ofx, name="Foo", payee_format=" {account} ")
+        self.assertEqual(
+            converter.format_payee(ofx.account.statement.transactions[0]),
+            'Foo')
+
+    def test_investments_custom_payee(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'investment_401k.ofx')))
+        converter = OfxConverter(ofx=ofx, name="Foo", payee_format="{txntype}")
+        self.assertEqual(
+            converter.format_payee(ofx.account.statement.transactions[1]),
+            'transfer')
+        converter = OfxConverter(ofx=ofx, name="Foo", payee_format="{tferaction}")
+        self.assertEqual(
+            converter.format_payee(ofx.account.statement.transactions[1]),
+            'in')
