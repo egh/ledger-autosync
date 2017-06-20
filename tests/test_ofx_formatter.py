@@ -35,21 +35,21 @@ class TestOfxConverter(LedgerTestCase):
         converter = OfxConverter(ofx=ofx, name="Foo")
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
-  ; ofxid: 1101.1452687~7.0000486
   Foo  $0.01
+  ; ofxid: 1101.1452687~7.0000486
   Expenses:Misc  -$0.01
 """)
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
-  ; ofxid: 1101.1452687~7.0000487
   Foo  -$34.51
+  ; ofxid: 1101.1452687~7.0000487
   Expenses:Misc  $34.51
 """)
 
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
 """2011/04/07 RETURNED CHECK FEE, CHECK # 319 FOR $45.33 ON 04/07/11
-  ; ofxid: 1101.1452687~7.0000488
   Foo  -$25.00
+  ; ofxid: 1101.1452687~7.0000488
   Expenses:Misc  $25.00
 """)
 
@@ -59,8 +59,8 @@ class TestOfxConverter(LedgerTestCase):
         # testing indent, so do not use the string collapsing version of assert
         self.assertEqual(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
-    ; ofxid: 1101.1452687~7.0000486
     Foo                                                     $0.01
+    ; ofxid: 1101.1452687~7.0000486
     Expenses:Misc                                          -$0.01
 """)
 
@@ -69,15 +69,15 @@ class TestOfxConverter(LedgerTestCase):
         converter = OfxConverter(ofx=ofx, name="Foo")
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
-  ; ofxid: 7776.01234567890.0123456789020201120120720
   Foo  100.00000 INTC @ $25.635000000
+  ; ofxid: 7776.01234567890.0123456789020201120120720
   Assets:Unknown  -$2563.50
 """)
         # test no payee/memo
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2012/07/27 Foo: buystock
-  ; ofxid: 7776.01234567890.0123456789020901120120727
   Foo  128.00000 SDRL @ $39.390900000
+  ; ofxid: 7776.01234567890.0123456789020901120120727
   Assets:Unknown  -$5042.04
 """)
 
@@ -87,8 +87,8 @@ class TestOfxConverter(LedgerTestCase):
         converter = OfxConverter(ofx=ofx, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[1]).format(),
 """2011/04/05 AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )
-  ; ofxid: 1101.1452687~7.0000487
   Assets:Foo  -$34.51
+  ; ofxid: 1101.1452687~7.0000487
   Expenses:Bar  $34.51
 """)
 
@@ -107,8 +107,8 @@ class TestOfxConverter(LedgerTestCase):
         converter = OfxConverter(ofx=ofx, name="Assets:Foo", ledger=ledger)
         self.assertEqualLedgerPosting(converter.format_initial_balance(ofx.account.statement),
 """2000/01/01 * --Autosync Initial Balance
-  ; ofxid: 1101.1452687~7.autosync_initial
   Assets:Foo  $160.49
+  ; ofxid: 1101.1452687~7.autosync_initial
   Assets:Equity  -$160.49
 """)
 
@@ -118,8 +118,8 @@ class TestOfxConverter(LedgerTestCase):
                                  unknownaccount='Expenses:Unknown')
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
-  ; ofxid: 1101.1452687~7.0000486
   Foo  $0.01
+  ; ofxid: 1101.1452687~7.0000486
   Expenses:Unknown  -$0.01
 """)
 
@@ -128,8 +128,8 @@ class TestOfxConverter(LedgerTestCase):
         converter = OfxConverter(ofx=ofx, name="Foo")
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2012/07/20 YOU BOUGHT
-  ; ofxid: 7776.01234567890.0123456789020201120120720
   Foo  100.00000 INTC @ $25.635000000
+  ; ofxid: 7776.01234567890.0123456789020201120120720
   Assets:Unknown  -$2563.50
 """)
 
@@ -144,15 +144,15 @@ class TestOfxConverter(LedgerTestCase):
                 # unmerged pull request
                 self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
 """2014/06/30 Foo: transfer: out
-    ; ofxid: 1234.12345678.123456-01.3
     Foo  -9.060702 BAZ @ $21.928764
+    ; ofxid: 1234.12345678.123456-01.3
     Transfer  $198.69
 """)
             else:
                             self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[2]).format(),
 """2014/06/30 Foo: transfer
-    ; ofxid: 1234.12345678.123456-01.3
     Foo  -9.060702 BAZ @ $21.928764
+    ; ofxid: 1234.12345678.123456-01.3
     Transfer  $198.69
 """)
 
@@ -171,8 +171,8 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqualLedgerPosting(converter.convert(ofx.account.statement.transactions[0]).format(),
 """2016/10/12 DIVIDEND RECEIVED
     ; dividend_from: cusip_redacted
-    ; ofxid: 1234.12345678.123456-01.redacted
     Foo                                     $1234.56
+    ; ofxid: 1234.12345678.123456-01.redacted
     Income:Dividends                       -$1234.56
 """)
 
