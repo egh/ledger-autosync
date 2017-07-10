@@ -144,6 +144,14 @@ class CsvSynchronizer(Synchronizer):
         super(CsvSynchronizer, self).__init__(lgr)
         self.payee_format = payee_format
 
+    def is_row_synced(self, converter, row):
+        if self.lgr is None:
+            # User called with --no-ledger
+            # All transactions are considered "synced" in this case.
+            return False
+        else:
+            return self.lgr.check_transaction_by_id("csvid", converter.get_csv_id(row))
+
     def parse_file(self, path, accountname=None, unknownaccount=None):
         with open(path, 'rb') as f:
             dialect = csv.Sniffer().sniff(f.read(1024))
@@ -155,7 +163,4 @@ class CsvSynchronizer(Synchronizer):
                 name=accountname,
                 unknownaccount=unknownaccount,
                 payee_format=self.payee_format)
-            return [converter.convert(row)
-                    for row in reader
-                    if not(self.lgr.check_transaction_by_id(
-                            "csvid", converter.get_csv_id(row)))]
+            return [converter.convert(row) for row in reader if not(self.is_row_synced(converter, row))]

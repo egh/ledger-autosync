@@ -92,6 +92,12 @@ class TestCsvSync(TestCase):
             2, len(sync.parse_file(
                 os.path.join('fixtures', 'paypal.csv'))))
 
+    def test_sync_no_ledger(self):
+        sync = CsvSynchronizer(None)
+        self.assertEqual(
+            2, len(sync.parse_file(
+                os.path.join('fixtures', 'paypal.csv'))))
+
     def test_partial_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'paypal.lgr'))
         sync = CsvSynchronizer(ledger)
