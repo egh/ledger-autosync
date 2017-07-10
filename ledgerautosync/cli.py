@@ -162,7 +162,7 @@ file')
 if importing from file, set account name for import')
     parser.add_argument('-l', '--ledger', type=str, default=None,
                         help='specify ledger file to READ for syncing')
-    parser.add_argument('-L', dest='no_ledger', action='store_true', default=False,
+    parser.add_argument('-L', '--no-ledger', dest='no_ledger', action='store_true', default=False,
                         help='do not de-duplicate against a ledger file')
     parser.add_argument('-i', '--indent', type=int, default=4,
                         help='number of spaces to use for indentation')
