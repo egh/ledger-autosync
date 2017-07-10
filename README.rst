@@ -279,6 +279,7 @@ substitution based on the value of the transaction. Available substitutions are
 ``memo``, ``payee``, ``txntype``, ``account`` and ``tferaction``. For example:
 
 ::
+
    $ ledger-autosync --payee-format "Memo: {memo}"
    2011/03/31 Memo: DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
 
@@ -287,6 +288,7 @@ substitution any of the values of the rows in the CSV file by name. For
 instance, for Paypal files:
 
 ::
+
    $ ledger-autosync --payee-format "{Name} ({To Email Address})" -a Paypal paypal.csv
    2016/06/04 Jane Doe (someone@example.net)
 
