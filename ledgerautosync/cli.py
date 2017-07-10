@@ -132,7 +132,7 @@ empty and no accountname supplied!")
 def import_csv(ledger, args):
     if args.account is None:
         raise Exception("When importing a CSV file, you must specify an account name.")
-    sync = CsvSynchronizer(ledger)
+    sync = CsvSynchronizer(ledger, payee_format=args.payee_format)
     accountname = args.account
     for txn in sync.parse_file(args.PATH, accountname=args.account):
         print txn.format(args.indent)
@@ -184,7 +184,8 @@ found by payee')
                         as hledger-autosync)')
     parser.add_argument('--payee-format', type=str, default=None, dest='payee_format',
                         help="""Format string to use for generating the payee line.
-                        Substitutions can be written using {memo}, {payee}, {txntype}, {account} or {tferaction}.""")
+                        Substitutions can be written using {memo}, {payee}, {txntype}, {account} or {tferaction} for OFX.
+                        If the input file is a CSV file, substitutions are written using the CSV file column names between {}.""")
     parser.add_argument('--python', action='store_true', default=False,
                         help='use the ledger python interface')
     parser.add_argument('--slow', action='store_true', default=False,

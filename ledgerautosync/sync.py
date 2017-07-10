@@ -140,8 +140,9 @@ class OfxSynchronizer(Synchronizer):
 
 
 class CsvSynchronizer(Synchronizer):
-    def __init__(self, lgr):
+    def __init__(self, lgr, payee_format=None):
         super(CsvSynchronizer, self).__init__(lgr)
+        self.payee_format = payee_format
 
     def parse_file(self, path, accountname=None, unknownaccount=None):
         with open(path, 'rb') as f:
@@ -153,7 +154,8 @@ class CsvSynchronizer(Synchronizer):
                 reader,
                 name=accountname,
                 ledger=self.lgr,
-                unknownaccount=unknownaccount)
+                unknownaccount=unknownaccount,
+                payee_format=self.payee_format)
             return [converter.convert(row)
                     for row in reader
                     if not(self.lgr.check_transaction_by_id(

@@ -172,11 +172,12 @@ class Converter(object):
             replace('[', '_').\
             replace(']', '_')
 
-    def __init__(self, ledger=None, unknownaccount=None, currency='$', indent=4):
+    def __init__(self, ledger=None, unknownaccount=None, currency='$', indent=4, payee_format=None):
         self.lgr = ledger
         self.indent = indent
         self.unknownaccount = unknownaccount
         self.currency = currency.upper()
+        self.payee_format = payee_format
         if self.currency == "USD":
             self.currency = "$"
 
@@ -197,7 +198,8 @@ class OfxConverter(Converter):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
-                                           currency=ofx.account.statement.currency)
+                                           currency=ofx.account.statement.currency,
+                                           payee_format=payee_format)
         self.acctid = ofx.account.account_id
         self.payee_format = payee_format
 
@@ -432,13 +434,18 @@ class CsvConverter(Converter):
             h.update("%s=%s\n"%(key, row[key]))
         return h.hexdigest()
 
-    def __init__(self, csv, name=None, indent=4, ledger=None, unknownaccount=None):
+    def __init__(self, csv, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
         super(CsvConverter, self).__init__(
             ledger=ledger,
             indent=indent,
-            unknownaccount=unknownaccount)
+            unknownaccount=unknownaccount,
+            payee_format=payee_format)
         self.name = name
         self.csv = csv
+
+    def format_payee(self, row):
+        return re.sub(r"\s+", " ",
+                      self.payee_format.format(**row).strip())
 
 
 class PaypalConverter(CsvConverter):
@@ -446,6 +453,8 @@ class PaypalConverter(CsvConverter):
 
     def __init__(self, *args, **kwargs):
         super(PaypalConverter, self).__init__(*args, **kwargs)
+        if self.payee_format is None:
+            self.payee_format = "{Name} {To Email Address} {Item Title} ID: {Transaction ID}, {Type}"
 
     def get_csv_id(self, row):
         return "paypal.%s"%(Converter.clean_id(row['Transaction ID']))
@@ -481,9 +490,7 @@ class PaypalConverter(CsvConverter):
                     )]
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
-                payee=re.sub(
-                    r"\s+", " ",
-                    "%s %s %s ID: %s, %s"%(row['Name'], row['To Email Address'], row['Item Title'], row['Transaction ID'], row['Type'])),
+                payee=self.format_payee(row),
                 postings=postings)
 
 
