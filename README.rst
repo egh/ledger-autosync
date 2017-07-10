@@ -266,6 +266,30 @@ synchronized 90 days and now want to get 180 days of transactions,
 ledger-autosync would stop before going back to 180 days without the
 ``--resync`` option.
 
+payee format
+------------
+
+By default, ledger-autosync attempts to generate a decent payee line (the
+information that follows the date in a ledger transaction). Unfortunately,
+because of differences in preference and in the format of OFX files, it is not
+always possible to generate the user’s preferred payee format. ledger-autosync
+supports a ``payee-format`` option that can be used to generate your preferred
+payee line. This option is of the format ``Text {memo}``, where ``memo`` is a
+substitution based on the value of the transaction. Available substitutions are
+``memo``, ``payee``, ``txntype``, ``account`` and ``tferaction``. For example:
+
+::
+   $ ledger-autosync --payee-format "Memo: {memo}"
+   2011/03/31 Memo: DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
+
+This option is also available for CSV conversion. For CSV files, you can
+substitution any of the values of the rows in the CSV file by name. For
+instance, for Paypal files:
+
+::
+   $ ledger-autosync --payee-format "{Name} ({To Email Address})" -a Paypal paypal.csv
+   2016/06/04 Jane Doe (someone@example.net)
+
 python bindings
 ---------------
 
