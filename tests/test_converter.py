@@ -94,9 +94,9 @@ class TestPaypalConverter(LedgerTestCase):
             self.assertEqual(
                 converter.convert(reader.next()).format(),
                 """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
-    Foo                                                 20.00 USD
+    Foo                                               1120.00 USD
     ; csvid: paypal.XYZ2
-    Transfer:Paypal                                    -20.00 USD
+    Transfer:Paypal                                  -1120.00 USD
 """)
 
 @attr('generic')

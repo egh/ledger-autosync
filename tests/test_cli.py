@@ -85,7 +85,7 @@ class CliTest():
     def test_format_payee(self):
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             run([os.path.join('fixtures', 'paypal.csv'), '-a', 'Assets:Foo', '--payee-format', 'GROSS:{Gross}'])
-            self.assertRegexpMatches(mock_stdout.getvalue(), r"GROSS:20\.00")
+            self.assertRegexpMatches(mock_stdout.getvalue(), r"GROSS:-20\.00")
 
     def test_no_ledger(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))

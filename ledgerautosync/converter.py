@@ -465,22 +465,25 @@ class PaypalConverter(CsvConverter):
         else:
             currency = row['Currency']
             posting_metadata = {"csvid": self.get_csv_id(row)}
+            net = Decimal(row['Net'].replace(',', ''))
+            gross = Decimal(row['Gross'].replace(',', ''))
+
             if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
                 postings=[
                     Posting(
                         self.name,
-                        Amount(Decimal(row['Net']), currency),
+                        Amount(net, currency),
                         metadata=posting_metadata
                     ),
                     Posting(
                         "Transfer:Paypal",
-                        Amount(Decimal(row['Net']), currency, reverse=True)
+                        Amount(net, currency, reverse=True)
                     )]
             else:
                 postings=[
                     Posting(
                         self.name,
-                        Amount(Decimal(row['Gross']), currency),
+                        Amount(gross, currency),
                         metadata=posting_metadata
                     ),
                     Posting(
