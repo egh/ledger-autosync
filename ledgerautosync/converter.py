@@ -436,7 +436,6 @@ class CsvConverter(Converter):
 
     def __init__(self, csv, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
         super(CsvConverter, self).__init__(
-            ledger=ledger,
             indent=indent,
             unknownaccount=unknownaccount,
             payee_format=payee_format)

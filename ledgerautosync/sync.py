@@ -153,7 +153,6 @@ class CsvSynchronizer(Synchronizer):
             converter = CsvConverter.make_converter(
                 reader,
                 name=accountname,
-                ledger=self.lgr,
                 unknownaccount=unknownaccount,
                 payee_format=self.payee_format)
             return [converter.convert(row)
