@@ -194,13 +194,18 @@ class Converter(object):
 
 class OfxConverter(Converter):
     def __init__(self, ofx, name, indent=4, ledger=None, fid=None,
-                 unknownaccount=None, payee_format=None):
+                 unknownaccount=None, payee_format=None, hardcodeaccount=None, shortenaccount=None):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
                                            currency=ofx.account.statement.currency,
                                            payee_format=payee_format)
-        self.acctid = ofx.account.account_id
+        if hardcodeaccount is not None:
+            self.acctid = hardcodeaccount
+        elif shortenaccount:
+            self.acctid = ofx.account.account_id[-4:]
+        else:
+            self.acctid = ofx.account.account_id
         self.payee_format = payee_format
 
         # build SecurityList (including indexing by CUSIP and ticker symbol)
