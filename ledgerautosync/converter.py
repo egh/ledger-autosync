@@ -201,10 +201,13 @@ class OfxConverter(Converter):
                                            currency=ofx.account.statement.currency,
                                            payee_format=payee_format)
         if hardcodeaccount is not None:
+            self.real_acctid = ofx.account.account_id
             self.acctid = hardcodeaccount
         elif shortenaccount:
+            self.real_acctid = ofx.account.account_id
             self.acctid = ofx.account.account_id[-4:]
         else:
+            self.real_acctid = ofx.account.account_id
             self.acctid = ofx.account.account_id
         self.payee_format = payee_format
 
@@ -225,6 +228,10 @@ class OfxConverter(Converter):
         self.name = name
 
     def mk_ofxid(self, txnid):
+        if self.acctid != self.real_acctid:
+            # Some banks insert the bank account number into the transaction ID
+            # We will do this to properly hide the account number for privacy reasons
+            txnid = txnid.replace(self.real_acctid, self.acctid)
         return Converter.clean_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
 
     def format_payee(self, txn):
