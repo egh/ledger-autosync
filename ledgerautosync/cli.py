@@ -174,7 +174,7 @@ if importing from file, set account name for import')
     parser.add_argument('--fid', type=int, default=None,
                         help='pass in fid value for OFX files that do not \
 supply it')
-    parser.add_argument('--hardcode-account', type=int, default=None, dest='hardcodeaccount',
+    parser.add_argument('--hardcode-account', type=str, default=None, dest='hardcodeaccount',
                         help='pass in hardcoded account number for OFX files \
 to maintain ledger files without real account numbers')
     parser.add_argument('--shorten-account', default=False, action='store_true', dest='shortenaccount',
