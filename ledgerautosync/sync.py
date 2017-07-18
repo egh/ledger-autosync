@@ -47,13 +47,11 @@ class OfxSynchronizer(Synchronizer):
             txnid_to_use = txn.id
             if self.hardcodeaccount:
                 acctid_to_use = self.hardcodeaccount
-		print "replacing "+txnid_to_use+ " " +acctid + " "+acctid_to_use
                 txnid_to_use = txnid_to_use.replace(acctid, acctid_to_use)
             elif self.shortenaccount:
                 acctid_to_use = acctid[-4:]
                 txnid_to_use = txnid_to_use.replace(acctid, acctid_to_use)
             ofxid = "%s.%s" % (acctid_to_use, txnid_to_use)
-            print ofxid
             return self.lgr.check_transaction_by_id("ofxid", ofxid)
 
     # Filter out comment transactions. These have an amount of 0 and the same
