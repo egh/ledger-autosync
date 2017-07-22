@@ -95,6 +95,8 @@ ledger-autosync again, it should print no transactions. This is because
 of the deduplicating feature: only new transactions will be printed
 for insertion into your ledger files.
 
+ledger-autosync will also respect ledger include declaration: transactions in included files are parsed as well.
+
 Using the ofx protocol for automatic download
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -296,7 +298,7 @@ python bindings
 ---------------
 
 If the ledger python bindings are available, ledger-autosync can use them if you
-pass in the ``--python`` argument.Note, however, they can be buggy, which is why
+pass in the ``--python`` argument. Note, however, they can be buggy, which is why
 they are disabled by default
 
 Plugin support (Experimental)
