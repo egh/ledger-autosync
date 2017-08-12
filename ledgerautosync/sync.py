@@ -20,6 +20,7 @@ from __future__ import absolute_import
 from ofxparse import OfxParser
 from ledgerautosync.converter import CsvConverter
 from ofxparse.ofxparse import InvestmentTransaction
+from ofxparse import OfxParserException
 import logging
 import csv
 
@@ -97,7 +98,14 @@ class OfxSynchronizer(Synchronizer):
             if raw.read() == 'Server error occured.  Received HttpStatusCode of 400':
                 raise Exception("Error connecting to account %s"%(acct.description))
             raw.seek(0)
-            ofx = OfxParser.parse(raw)
+            ofx = None
+            try:
+                ofx = OfxParser.parse(raw)
+            except OfxParserException as ex:
+                if ex.message == 'The ofx file is empty!':
+                    return (ofx, [])
+                else:
+                    raise ex
             if not(hasattr(ofx, 'account')):
                 # some banks return this for no txns
                 if (days >= max_days):
