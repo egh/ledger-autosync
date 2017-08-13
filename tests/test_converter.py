@@ -73,16 +73,22 @@ class TestCsvConverter(LedgerTestCase):
         self.assertEqual(converter.get_csv_id(h),
                          hashlib.md5("bar=foo\nfoo=bar\n").hexdigest())
 
+class CsvConverterTestCase(LedgerTestCase):
+    def make_converter(self, f, name=None):
+        dialect = csv.Sniffer().sniff(f.read(1024))
+        f.seek(0)
+        dialect.skipinitialspace = True
+        reader = csv.DictReader(f, dialect=dialect)
+        converter = CsvConverter.make_converter(set(reader.fieldnames), dialect, name)
+        f.seek(0)
+        reader = csv.DictReader(f, dialect=dialect)
+        return (reader, converter)
 
 @attr('generic')
-class TestPaypalConverter(LedgerTestCase):
+class TestPaypalConverter(CsvConverterTestCase):
     def test_format(self):
         with open('fixtures/paypal.csv', 'rb') as f:
-            dialect = csv.Sniffer().sniff(f.read(1024))
-            f.seek(0)
-            dialect.skipinitialspace = True
-            reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter.make_converter(set(reader.fieldnames), name='Foo')
+            (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
@@ -100,14 +106,10 @@ class TestPaypalConverter(LedgerTestCase):
 """)
 
 @attr('generic')
-class TestAmazonConverter(LedgerTestCase):
+class TestAmazonConverter(CsvConverterTestCase):
     def test_format(self):
         with open('fixtures/amazon.csv', 'rb') as f:
-            dialect = csv.Sniffer().sniff(f.read(1024))
-            f.seek(0)
-            dialect.skipinitialspace = True
-            reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter.make_converter(set(reader.fieldnames), name='Foo')
+            (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
                 converter.convert(reader.next()).format(),
@@ -119,14 +121,25 @@ class TestAmazonConverter(LedgerTestCase):
 """)
 
 @attr('generic')
-class TestMintConverter(LedgerTestCase):
+class TestAmazonConverter2(CsvConverterTestCase):
+    def test_format(self):
+        with open('fixtures/amazon2.csv', 'rb') as f:
+            (reader, converter) = self.make_converter(f, 'Foo')
+            self.assertEqual(type(converter), AmazonConverter)
+            self.assertEqual(
+                converter.convert(reader.next()).format(),
+                """2017/06/05 Test " double quote
+    Foo                                                     $9.99
+    ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=111-1111111-1111111
+    ; csvid: amazon.111-1111111-1111111
+    Expenses:Misc                                          -$9.99
+""")
+
+@attr('generic')
+class TestMintConverter(CsvConverterTestCase):
     def test_format(self):
         with open('fixtures/mint.csv', 'rb') as f:
-            dialect = csv.Sniffer().sniff(f.read(1024))
-            f.seek(0)
-            dialect.skipinitialspace = True
-            reader = csv.DictReader(f, dialect=dialect)
-            converter = CsvConverter.make_converter(set(reader.fieldnames))
+            (reader, converter) = self.make_converter(f)
             self.assertEqual(type(converter), MintConverter)
             self.assertEqual(
                 converter.convert(reader.next()).format(),

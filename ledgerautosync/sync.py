@@ -168,7 +168,11 @@ class CsvSynchronizer(Synchronizer):
             reader = csv.DictReader(f, dialect=dialect)
             converter = CsvConverter.make_converter(
                 set(reader.fieldnames),
+                dialect,
                 name=accountname,
                 unknownaccount=unknownaccount,
                 payee_format=self.payee_format)
+            # Create a new reader in case the converter modified the dialect
+            f.seek(0)
+            reader = csv.DictReader(f, dialect=dialect)
             return [converter.convert(row) for row in reader if not(self.is_row_synced(converter, row))]

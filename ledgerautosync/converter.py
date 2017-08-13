@@ -418,10 +418,10 @@ class OfxConverter(Converter):
 
 class CsvConverter(Converter):
     @staticmethod
-    def make_converter(fieldset, name=None, **kwargs):
+    def make_converter(fieldset, dialect, name=None, **kwargs):
         for klass in CsvConverter.__subclasses__():
             if klass.FIELDSET <= fieldset:
-                return klass(name=name, **kwargs)
+                return klass(dialect, name=name, **kwargs)
         # Found no class, bail
         raise Exception('Cannot determine CSV type')
 
@@ -433,12 +433,13 @@ class CsvConverter(Converter):
             h.update("%s=%s\n"%(key, row[key]))
         return h.hexdigest()
 
-    def __init__(self, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
+    def __init__(self, dialect, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
         super(CsvConverter, self).__init__(
             indent=indent,
             unknownaccount=unknownaccount,
             payee_format=payee_format)
         self.name = name
+        self.dialect = dialect
 
     def format_payee(self, row):
         return re.sub(r"\s+", " ",
@@ -499,6 +500,7 @@ class AmazonConverter(CsvConverter):
 
     def __init__(self, *args, **kwargs):
         super(AmazonConverter, self).__init__(*args, **kwargs)
+        self.dialect.doublequote = True
 
     def mk_amount(self, row, reverse=False):
         currency = row['Currency']
