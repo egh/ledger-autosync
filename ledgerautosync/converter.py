@@ -418,11 +418,10 @@ class OfxConverter(Converter):
 
 class CsvConverter(Converter):
     @staticmethod
-    def make_converter(csv, name=None, **kwargs):
-        fieldset = set(csv.fieldnames)
+    def make_converter(fieldset, name=None, **kwargs):
         for klass in CsvConverter.__subclasses__():
             if klass.FIELDSET <= fieldset:
-                return klass(csv, name=name, **kwargs)
+                return klass(name=name, **kwargs)
         # Found no class, bail
         raise Exception('Cannot determine CSV type')
 
@@ -434,13 +433,12 @@ class CsvConverter(Converter):
             h.update("%s=%s\n"%(key, row[key]))
         return h.hexdigest()
 
-    def __init__(self, csv, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
+    def __init__(self, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
         super(CsvConverter, self).__init__(
             indent=indent,
             unknownaccount=unknownaccount,
             payee_format=payee_format)
         self.name = name
-        self.csv = csv
 
     def format_payee(self, row):
         return re.sub(r"\s+", " ",

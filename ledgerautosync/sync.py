@@ -167,7 +167,7 @@ class CsvSynchronizer(Synchronizer):
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
             converter = CsvConverter.make_converter(
-                reader,
+                set(reader.fieldnames),
                 name=accountname,
                 unknownaccount=unknownaccount,
                 payee_format=self.payee_format)
