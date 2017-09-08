@@ -23,9 +23,9 @@ from __future__ import absolute_import
 from ofxclient.config import OfxConfig
 import argparse
 import csv
-from ledgerautosync import EmptyInstitutionException, LedgerAutosyncException
+from ledgerautosync import LedgerAutosyncException
 from ledgerautosync.converter import OfxConverter, CsvConverter, AUTOSYNC_INITIAL, \
-    ALL_AUTOSYNC_INITIAL
+    ALL_AUTOSYNC_INITIAL, UNKNOWN_BANK_ACCOUNT
 from ledgerautosync.converter import SecurityList
 from ledgerautosync.sync import OfxSynchronizer, CsvSynchronizer
 from ledgerautosync.ledgerwrap import mk_ledger, Ledger, HLedger, LedgerPython
@@ -115,8 +115,7 @@ def import_ofx(ledger, args):
             accountname = "%s:%s" % (ofx.account.institution.organization,
                                      ofx.account.account_id)
         else:
-            raise EmptyInstitutionException("Institution provided by OFX is \
-empty and no accountname supplied!")
+            accountname = UNKNOWN_BANK_ACCOUNT
 
     converter = OfxConverter(ofx=ofx,
                              name=accountname,

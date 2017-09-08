@@ -27,6 +27,7 @@ import hashlib
 
 AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
+UNKNOWN_BANK_ACCOUNT = "Assets:Unknown"
 
 class SecurityList(object):
     """
