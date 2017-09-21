@@ -169,6 +169,7 @@ class Converter(object):
             replace(' ', '_').\
             replace('@', '_').\
             replace('*', '_').\
+            replace('+', '_').\
             replace('[', '_').\
             replace(']', '_')
 
