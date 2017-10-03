@@ -195,20 +195,18 @@ class Converter(object):
 
 class OfxConverter(Converter):
     def __init__(self, ofx, name, indent=4, ledger=None, fid=None,
-                 unknownaccount=None, payee_format=None, hardcodeaccount=None, shortenaccount=None):
+                 unknownaccount=None, payee_format=None, hardcodeaccount=None, shortenaccount=False):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
                                            currency=ofx.account.statement.currency,
                                            payee_format=payee_format)
+        self.real_acctid = ofx.account.account_id
         if hardcodeaccount is not None:
-            self.real_acctid = ofx.account.account_id
             self.acctid = hardcodeaccount
         elif shortenaccount:
-            self.real_acctid = ofx.account.account_id
             self.acctid = ofx.account.account_id[-4:]
         else:
-            self.real_acctid = ofx.account.account_id
             self.acctid = ofx.account.account_id
         self.payee_format = payee_format
 

@@ -97,7 +97,7 @@ def sync(ledger, accounts, args):
                                          indent=args.indent,
                                          unknownaccount=args.unknownaccount,
                                          payee_format=args.payee_format,
-					 shortenaccount=args.shortenaccount)
+                                         shortenaccount=args.shortenaccount)
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise

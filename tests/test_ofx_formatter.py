@@ -64,6 +64,28 @@ class TestOfxConverter(LedgerTestCase):
     Expenses:Misc                                          -$0.01
 """)
 
+    def test_shortenaccount(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        converter = OfxConverter(ofx=ofx, name="Foo", indent=4, shortenaccount=True)
+        # testing indent, so do not use the string collapsing version of assert
+        self.assertEqual(converter.convert(ofx.account.statement.transactions[0]).format(),
+"""2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
+    Foo                                                     $0.01
+    ; ofxid: 1101.87~7.0000486
+    Expenses:Misc                                          -$0.01
+""")
+
+    def test_hardcodeaccount(self):
+        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        converter = OfxConverter(ofx=ofx, name="Foo", indent=4, hardcodeaccount="9999")
+        # testing indent, so do not use the string collapsing version of assert
+        self.assertEqual(converter.convert(ofx.account.statement.transactions[0]).format(),
+"""2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
+    Foo                                                     $0.01
+    ; ofxid: 1101.9999.0000486
+    Expenses:Misc                                          -$0.01
+""")
+
     def test_investments(self):
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'fidelity.ofx')))
         converter = OfxConverter(ofx=ofx, name="Foo")
