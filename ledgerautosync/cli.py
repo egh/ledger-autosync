@@ -85,7 +85,7 @@ def print_results(converter, ofx, ledger, txns, args):
             print converter.format_position(pos)
 
 def sync(ledger, accounts, args):
-    sync = OfxSynchronizer(ledger)
+    sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
     for acct in accounts:
         try:
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
@@ -96,7 +96,8 @@ def sync(ledger, accounts, args):
                                          ledger=ledger,
                                          indent=args.indent,
                                          unknownaccount=args.unknownaccount,
-                                         payee_format=args.payee_format)
+                                         payee_format=args.payee_format,
+                                         shortenaccount=args.shortenaccount)
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -107,7 +108,8 @@ def sync(ledger, accounts, args):
 
 
 def import_ofx(ledger, args):
-    sync = OfxSynchronizer(ledger)
+    sync = OfxSynchronizer(ledger, hardcodeaccount=args.hardcodeaccount, 
+                                   shortenaccount=args.shortenaccount)
     (ofx, txns) = sync.parse_file(args.PATH)
     accountname = args.account
     if accountname is None:
@@ -123,7 +125,9 @@ def import_ofx(ledger, args):
                              indent=args.indent,
                              fid=args.fid,
                              unknownaccount=args.unknownaccount,
-                             payee_format=args.payee_format)
+                             payee_format=args.payee_format,
+                             hardcodeaccount=args.hardcodeaccount,
+                             shortenaccount=args.shortenaccount)
 
     print_results(converter, ofx, ledger, txns, args)
 
@@ -170,6 +174,12 @@ if importing from file, set account name for import')
     parser.add_argument('--fid', type=int, default=None,
                         help='pass in fid value for OFX files that do not \
 supply it')
+    parser.add_argument('--hardcode-account', type=str, default=None, dest='hardcodeaccount',
+                        help='pass in hardcoded account number for OFX files \
+to maintain ledger files without real account numbers')
+    parser.add_argument('--shorten-account', default=False, action='store_true', dest='shortenaccount',
+                        help='shorten all account numbers to last 4 digits \
+to maintain ledger files without full account numbers')
     parser.add_argument('--unknown-account', type=str, dest='unknownaccount',
                         default=None,
                         help='specify account name to use when one can\'t be \

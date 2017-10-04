@@ -29,7 +29,9 @@ class Synchronizer(object):
         self.lgr = lgr
 
 class OfxSynchronizer(Synchronizer):
-    def __init__(self, lgr):
+    def __init__(self, lgr, hardcodeaccount=None, shortenaccount=None):
+        self.hardcodeaccount = hardcodeaccount
+        self.shortenaccount  = shortenaccount
         super(OfxSynchronizer, self).__init__(lgr)
 
     def parse_file(self, path, accountname=None):
@@ -42,7 +44,15 @@ class OfxSynchronizer(Synchronizer):
             # All transactions are considered "synced" in this case.
             return False
         else:
-            ofxid = "%s.%s" % (acctid, txn.id)
+            acctid_to_use = acctid
+            txnid_to_use = txn.id
+            if self.hardcodeaccount:
+                acctid_to_use = self.hardcodeaccount
+                txnid_to_use = txnid_to_use.replace(acctid, acctid_to_use)
+            elif self.shortenaccount:
+                acctid_to_use = acctid[-4:]
+                txnid_to_use = txnid_to_use.replace(acctid, acctid_to_use)
+            ofxid = "%s.%s" % (acctid_to_use, txnid_to_use)
             return self.lgr.check_transaction_by_id("ofxid", ofxid)
 
     # Filter out comment transactions. These have an amount of 0 and the same

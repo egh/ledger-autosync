@@ -170,6 +170,7 @@ class Converter(object):
             replace(' ', '_').\
             replace('@', '_').\
             replace('*', '_').\
+            replace('+', '_').\
             replace('[', '_').\
             replace(']', '_')
 
@@ -195,13 +196,19 @@ class Converter(object):
 
 class OfxConverter(Converter):
     def __init__(self, ofx, name, indent=4, ledger=None, fid=None,
-                 unknownaccount=None, payee_format=None):
+                 unknownaccount=None, payee_format=None, hardcodeaccount=None, shortenaccount=False):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
                                            currency=ofx.account.statement.currency,
                                            payee_format=payee_format)
-        self.acctid = ofx.account.account_id
+        self.real_acctid = ofx.account.account_id
+        if hardcodeaccount is not None:
+            self.acctid = hardcodeaccount
+        elif shortenaccount:
+            self.acctid = ofx.account.account_id[-4:]
+        else:
+            self.acctid = ofx.account.account_id
         self.payee_format = payee_format
 
         # build SecurityList (including indexing by CUSIP and ticker symbol)
@@ -221,6 +228,10 @@ class OfxConverter(Converter):
         self.name = name
 
     def mk_ofxid(self, txnid):
+        if self.acctid != self.real_acctid:
+            # Some banks insert the bank account number into the transaction ID
+            # We will do this to properly hide the account number for privacy reasons
+            txnid = txnid.replace(self.real_acctid, self.acctid)
         return Converter.clean_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
 
     def format_payee(self, txn):
