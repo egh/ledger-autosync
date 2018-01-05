@@ -23,6 +23,7 @@ from ofxparse.ofxparse import InvestmentTransaction
 from ofxparse import OfxParserException
 import logging
 import csv
+import codecs
 
 class Synchronizer(object):
     def __init__(self, lgr):
@@ -172,8 +173,12 @@ class CsvSynchronizer(Synchronizer):
 
     def parse_file(self, path, accountname=None, unknownaccount=None):
         with open(path, 'rb') as f:
+            has_bom = f.read(3) == codecs.BOM_UTF8
+            if not(has_bom): f.seek(0)
+            else: f.seek(3)
             dialect = csv.Sniffer().sniff(f.read(1024))
-            f.seek(0)
+            if not(has_bom): f.seek(0)
+            else: f.seek(3)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
             converter = CsvConverter.make_converter(
@@ -183,6 +188,7 @@ class CsvSynchronizer(Synchronizer):
                 unknownaccount=unknownaccount,
                 payee_format=self.payee_format)
             # Create a new reader in case the converter modified the dialect
-            f.seek(0)
+            if not(has_bom): f.seek(0)
+            else: f.seek(3)
             reader = csv.DictReader(f, dialect=dialect)
             return [converter.convert(row) for row in reader if not(self.is_row_synced(converter, row))]
