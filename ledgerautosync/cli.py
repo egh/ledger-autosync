@@ -263,7 +263,7 @@ All transactions will be printed!")
                         if acct.description == args.account]
         sync(ledger, accounts, args)
     else:
-        _, file_extension = os.path.splitext(args.PATH)
+        _, file_extension = os.path.splitext(args.PATH.lower())
         if file_extension == '.csv':
             import_csv(ledger, args)
         else:
