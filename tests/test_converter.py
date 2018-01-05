@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
-from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, MintConverter, PaypalConverter, Amount, Posting
+from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, MintConverter, PaypalConverter, PaypalAlternateConverter, Amount, Posting
 from decimal import Decimal
 import hashlib
 import csv
@@ -103,6 +103,27 @@ class TestPaypalConverter(CsvConverterTestCase):
     Foo                                               1120.00 USD
     ; csvid: paypal.XYZ2
     Transfer:Paypal                                  -1120.00 USD
+""")
+
+@attr('generic')
+class TestPaypalAlternateConverter(CsvConverterTestCase):
+    def test_format(self):
+        with open('fixtures/paypal_alternate.csv', 'rb') as f:
+            (reader, converter) = self.make_converter(f, 'Foo')
+            self.assertEqual(type(converter), PaypalAlternateConverter)
+            self.assertEqual(
+                converter.convert(reader.next()).format(),
+                """2016/12/31 Some User: Payment Sent
+    Foo                                                   -$12.34
+    ; csvid: 1209a7bb0d17276248d463b71a6a8b8c
+    Expenses:Misc                                          $12.34
+""")
+            self.assertEqual(
+                converter.convert(reader.next()).format(),
+                """2016/12/31 Bank Account: Add Funds from a Bank Account
+    Foo                                                    $12.34
+    ; csvid: 581e62da71bab74c7ce61854c2b6b6a5
+    Transfer:Paypal                                       -$12.34
 """)
 
 @attr('generic')

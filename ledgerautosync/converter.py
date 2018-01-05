@@ -506,6 +506,48 @@ class PaypalConverter(CsvConverter):
                 payee=self.format_payee(row),
                 postings=postings)
 
+# Apparently Paypal has another CSV
+class PaypalAlternateConverter(CsvConverter):
+    FIELDSET = set(["Date", "Time", "Time Zone", "Name", "Type", "Status", "Amount", "Receipt ID", "Balance"])
+
+    def __init__(self, *args, **kwargs):
+        super(PaypalAlternateConverter, self).__init__(*args, **kwargs)
+        if self.payee_format is None:
+            self.payee_format = "{Name}: {Type}"
+
+    def convert(self, row):
+        if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
+            return ""
+        else:
+            currency = '$'
+            posting_metadata = {"csvid": self.get_csv_id(row)}
+            if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
+                postings=[
+                    Posting(
+                        self.name,
+                        Amount(Decimal(row['Amount']), currency),
+                        metadata=posting_metadata
+                    ),
+                    Posting(
+                        "Transfer:Paypal",
+                        Amount(Decimal(row['Amount']), currency, reverse=True)
+                    )]
+            else:
+                postings=[
+                    Posting(
+                        self.name,
+                        Amount(Decimal(row['Amount']), currency),
+                        metadata=posting_metadata
+                    ),
+                    Posting(
+                        "Expenses:Misc",
+                        Amount(Decimal(row['Amount']), currency, reverse=True)
+                    )]
+            return Transaction(
+                date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
+                payee=self.format_payee(row),
+                postings=postings)
+
 
 class AmazonConverter(CsvConverter):
     FIELDSET = set(['Currency', 'Title', 'Order Date', 'Order ID'])
