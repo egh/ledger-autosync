@@ -516,7 +516,7 @@ class PaypalConverter(CsvConverter):
                     Posting(
                         # TODO Our payees are breaking the payee search in mk_dynamic_account
                         "Expenses:Misc", #self.mk_dynamic_account(payee, exclude=self.name),
-                        Amount(Decimal(row['Gross']), currency, reverse=True)
+                        Amount(gross, currency, reverse=True)
                     )]
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
