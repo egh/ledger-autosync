@@ -108,7 +108,7 @@ def sync(ledger, accounts, args):
 
 
 def import_ofx(ledger, args):
-    sync = OfxSynchronizer(ledger, hardcodeaccount=args.hardcodeaccount, 
+    sync = OfxSynchronizer(ledger, hardcodeaccount=args.hardcodeaccount,
                                    shortenaccount=args.shortenaccount)
     (ofx, txns) = sync.parse_file(args.PATH)
     accountname = args.account
@@ -137,7 +137,10 @@ def import_csv(ledger, args):
         raise Exception("When importing a CSV file, you must specify an account name.")
     sync = CsvSynchronizer(ledger, payee_format=args.payee_format)
     accountname = args.account
-    for txn in sync.parse_file(args.PATH, accountname=args.account):
+    txns = sync.parse_file(args.PATH, accountname=args.account)
+    if args.reverse:
+        txns = reversed(txns)
+    for txn in txns:
         print txn.format(args.indent)
 
 def load_plugins(config_dir):
@@ -204,6 +207,8 @@ calling ledger (no subprocess)')
                         help='display which version of ledger (cli), hledger, \
 or ledger (python) will be used by ledger-autosync to check for previous \
 transactions')
+    parser.add_argument('--reverse', action='store_true', default=False,
+                        help='print CSV transactions in reverse order')
     args = parser.parse_args(args)
     if sys.argv[0][-16:] == "hledger-autosync":
         args.hledger = True
