@@ -518,7 +518,7 @@ class PaypalConverter(CsvConverter):
 
 # Apparently Paypal has another CSV
 class PaypalAlternateConverter(CsvConverter):
-    FIELDSET = set(["Date", "Time", "Time Zone", "Name", "Type", "Status", "Amount", "Receipt ID", "Balance"])
+    FIELDSET = set(["Date", "Name", "Type", "Status", "Amount"])
 
     def __init__(self, *args, **kwargs):
         super(PaypalAlternateConverter, self).__init__(*args, **kwargs)
