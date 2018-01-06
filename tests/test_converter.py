@@ -126,6 +126,11 @@ class TestPaypalAlternateConverter(CsvConverterTestCase):
     Transfer:Paypal                                       -$12.34
 """)
 
+    def test_mk_amount(self):
+        converter = PaypalAlternateConverter(None)
+        row = { "Currency": "USD", "Amount": "12.34" }
+        self.assertEqual(converter.mk_amount(row), Amount(Decimal('12.34'), "USD"))
+
 @attr('generic')
 class TestAmazonConverter(CsvConverterTestCase):
     def test_format(self):

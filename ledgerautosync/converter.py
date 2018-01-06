@@ -525,34 +525,25 @@ class PaypalAlternateConverter(CsvConverter):
         if self.payee_format is None:
             self.payee_format = "{Name}: {Type}"
 
+    def mk_amount(self, row, reverse=False):
+        currency = '$'
+        if 'Currency' in row:
+            currency = row['Currency']
+        return Amount(Decimal(re.sub(r"\$", "", row['Amount'])), currency, reverse=reverse)
+
     def convert(self, row):
         if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
             return ""
         else:
-            currency = '$'
             posting_metadata = {"csvid": self.get_csv_id(row)}
             if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
                 postings=[
-                    Posting(
-                        self.name,
-                        Amount(Decimal(row['Amount']), currency),
-                        metadata=posting_metadata
-                    ),
-                    Posting(
-                        "Transfer:Paypal",
-                        Amount(Decimal(row['Amount']), currency, reverse=True)
-                    )]
+                    Posting(self.name, self.mk_amount(row), metadata=posting_metadata),
+                    Posting("Transfer:Paypal", self.mk_amount(row, reverse=True))]
             else:
                 postings=[
-                    Posting(
-                        self.name,
-                        Amount(Decimal(row['Amount']), currency),
-                        metadata=posting_metadata
-                    ),
-                    Posting(
-                        "Expenses:Misc",
-                        Amount(Decimal(row['Amount']), currency, reverse=True)
-                    )]
+                    Posting(self.name, self.mk_amount(row), metadata=posting_metadata),
+                    Posting("Expenses:Misc", self.mk_amount(row, reverse=True))]
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
                 payee=self.format_payee(row),
