@@ -117,6 +117,9 @@ class OfxSynchronizer(Synchronizer):
                     return (ofx, [])
                 else:
                     raise ex
+            if ofx.signon is not None:
+                if ofx.signon.severity == 'ERROR':
+                    raise Exception("Error returned from server for %s: %s"%(acct.description, ofx.signon.message))
             if not(hasattr(ofx, 'account')):
                 # some banks return this for no txns
                 if (days >= max_days):
