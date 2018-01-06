@@ -29,6 +29,16 @@ AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
 UNKNOWN_BANK_ACCOUNT = "Assets:Unknown"
 
+class EasyEquality(object):
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 class SecurityList(object):
     """
     The SecurityList represents the OFX <SECLIST>...</SECLIST>
@@ -132,7 +142,7 @@ class Posting(object):
             retval += "%s; %s: %s\n" % (" "*indent, k, v)
         return retval
 
-class Amount(object):
+class Amount(EasyEquality):
     def __init__(self, number, currency, reverse=False, unlimited=False):
         self.number = Decimal(number)
         self.reverse = reverse
