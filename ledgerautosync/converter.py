@@ -441,11 +441,18 @@ class OfxConverter(Converter):
 class CsvConverter(Converter):
     @staticmethod
     def make_converter(fieldset, dialect, name=None, **kwargs):
-        for klass in CsvConverter.__subclasses__():
+        for klass in CsvConverter.descendants():
             if klass.FIELDSET <= fieldset:
                 return klass(dialect, name=name, **kwargs)
         # Found no class, bail
         raise Exception('Cannot determine CSV type')
+
+    @classmethod
+    def descendants(cls):
+        retval = cls.__subclasses__()
+        for cls2 in cls.__subclasses__():
+            retval.extend(cls2.descendants())
+        return retval
 
     # By default, return an MD5 of the key-value pairs in the row.
     # If a better ID is available, should be overridden.
