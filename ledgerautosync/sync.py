@@ -37,7 +37,7 @@ class OfxSynchronizer(Synchronizer):
 
     def parse_file(self, path, accountname=None):
         ofx = OfxParser.parse(file(path))
-        return (ofx, self.filter(ofx))
+        return (ofx, self.filter(ofx.account.statement.transactions, ofx.account.account_id))
 
     def is_txn_synced(self, acctid, txn):
         if self.lgr is None:
@@ -85,13 +85,11 @@ class OfxSynchronizer(Synchronizer):
             return txn.settleDate
         return None
 
-    def filter(self, ofx):
-        txns = ofx.account.statement.transactions
+    def filter(self, txns, acctid):
         if len(txns) == 0:
             sorted_txns = txns
         else:
             sorted_txns = sorted(txns, key=OfxSynchronizer.extract_sort_key)
-        acctid = ofx.account.account_id
         retval = [txn for txn in sorted_txns
                   if not(self.is_txn_synced(acctid, txn))]
         return self.filter_comment_txns(retval)
@@ -138,7 +136,7 @@ class OfxSynchronizer(Synchronizer):
                     last_txns_len = 0
             else:
                 txns = ofx.account.statement.transactions
-                new_txns = self.filter(ofx)
+                new_txns = self.filter(txns, ofx.account.account_id)
                 logging.debug("txns: %d" % (len(txns)))
                 logging.debug("new txns: %d" % (len(new_txns)))
                 if ((len(txns) > 0) and (last_txns_len == len(txns))):

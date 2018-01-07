@@ -34,14 +34,14 @@ class TestOfxSync(TestCase):
         sync = OfxSynchronizer(ledger)
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
         txns1 = ofx.account.statement.transactions
-        txns2 = sync.filter(ofx)
+        txns2 = sync.filter(txns1, ofx.account.account_id)
         self.assertEqual(txns1, txns2)
 
     def test_sync_order(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
         ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking_order.ofx')))
-        txns = sync.filter(ofx)
+        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
         self.assertTrue(txns[0].date < txns[1].date and
                         txns[1].date < txns[2].date)
 
