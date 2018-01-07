@@ -75,20 +75,22 @@ class OfxSynchronizer(Synchronizer):
                 retval.append(txn)
         return retval
 
+    @staticmethod
+    def extract_sort_key(txn):
+        if hasattr(txn, 'tradeDate'):
+            return txn.tradeDate
+        elif hasattr(txn, 'date'):
+            return txn.date
+        elif hasattr(txn, 'settleDate'):
+            return txn.settleDate
+        return None
+
     def filter(self, ofx):
-        def extract_sort_key(txn):
-            if hasattr(txn, 'tradeDate'):
-                return txn.tradeDate
-            elif hasattr(txn, 'date'):
-                return txn.date
-            elif hasattr(txn, 'settleDate'):
-                return txn.settleDate
-            return None
         txns = ofx.account.statement.transactions
         if len(txns) == 0:
             sorted_txns = txns
         else:
-            sorted_txns = sorted(txns, key=extract_sort_key)
+            sorted_txns = sorted(txns, key=OfxSynchronizer.extract_sort_key)
         acctid = ofx.account.account_id
         retval = [txn for txn in sorted_txns
                   if not(self.is_txn_synced(acctid, txn))]
