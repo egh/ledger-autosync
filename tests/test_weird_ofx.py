@@ -40,21 +40,30 @@ class WeirdOfxTest(object):
 
     def test_no_institution(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        OfxSynchronizer(self.lgr).parse_file(ofxpath)
+        sync = OfxSynchronizer(self.lgr)
+        ofx = OfxSynchronizer.parse_file(ofxpath)
+        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        self.assertEquals(len(txns), 3)
 
     @raises(EmptyInstitutionException)
     def test_no_institution_no_accountname(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
-        (ofx, txns) = OfxSynchronizer(self.lgr).parse_file(ofxpath)
+        ofx = OfxSynchronizer.parse_file(ofxpath)
         OfxConverter(account=ofx.account, name=None)
 
     def test_apostrophe(self):
         ofxpath = os.path.join('fixtures', 'apostrophe.ofx')
-        OfxSynchronizer(self.lgr).parse_file(ofxpath)
+        ofx = OfxSynchronizer.parse_file(ofxpath)
+        sync = OfxSynchronizer(self.lgr)
+        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        self.assertEquals(len(txns), 1)
 
     def test_one_settleDate(self):
         ofxpath = os.path.join('fixtures', 'fidelity-one-dtsettle.ofx')
-        OfxSynchronizer(self.lgr).parse_file(ofxpath)
+        ofx = OfxSynchronizer.parse_file(ofxpath)
+        sync = OfxSynchronizer(self.lgr)
+        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        self.assertEquals(len(txns), 17)
 
 
 @attr('hledger')

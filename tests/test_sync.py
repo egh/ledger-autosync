@@ -48,13 +48,15 @@ class TestOfxSync(TestCase):
     def test_fully_synced(self):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         sync = OfxSynchronizer(ledger)
-        (ofx, txns) = sync.parse_file(os.path.join('fixtures', 'checking.ofx'))
+        ofx = OfxSynchronizer.parse_file(os.path.join('fixtures', 'checking.ofx'))
+        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
         self.assertEqual(txns, [])
 
     def test_partial_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'checking-partial.lgr'))
         sync = OfxSynchronizer(ledger)
-        (ofx, txns) = sync.parse_file(os.path.join('fixtures', 'checking.ofx'))
+        ofx = OfxSynchronizer.parse_file(os.path.join('fixtures', 'checking.ofx'))
+        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
         self.assertEqual(len(txns), 1)
 
     def test_no_new_txns(self):
@@ -74,7 +76,8 @@ class TestOfxSync(TestCase):
     def test_comment_txns(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
-        (ofx, txns) = sync.parse_file(os.path.join('fixtures', 'comments.ofx'))
+        ofx = OfxSynchronizer.parse_file(os.path.join('fixtures', 'comments.ofx'))
+        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
         self.assertEqual(len(txns), 1)
 
     def test_sync_no_ledger(self):

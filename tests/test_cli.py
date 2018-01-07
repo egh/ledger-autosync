@@ -87,6 +87,11 @@ class CliTest():
             run([os.path.join('fixtures', 'paypal.csv'), '-a', 'Assets:Foo', '--payee-format', 'GROSS:{Gross}'])
             self.assertRegexpMatches(mock_stdout.getvalue(), r"GROSS:-20\.00")
 
+    # def test_multi_account(self):
+    #     with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+    #         run([os.path.join('fixtures', 'multi_account.ofx'), '-a', 'Assets:Foo'])
+    #         self.assertRegexpMatches(mock_stdout.getvalue(), r"GROSS:-20\.00")
+
     def test_no_ledger(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         acct = config.accounts()[0]

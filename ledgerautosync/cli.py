@@ -111,7 +111,8 @@ def sync(ledger, accounts, args):
 def import_ofx(ledger, args):
     sync = OfxSynchronizer(ledger, hardcodeaccount=args.hardcodeaccount,
                                    shortenaccount=args.shortenaccount)
-    (ofx, txns) = sync.parse_file(args.PATH)
+    ofx = OfxSynchronizer.parse_file(args.PATH)
+    txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
     accountname = args.account
     if accountname is None:
         if ofx.account.institution is not None:

@@ -35,9 +35,9 @@ class OfxSynchronizer(Synchronizer):
         self.shortenaccount  = shortenaccount
         super(OfxSynchronizer, self).__init__(lgr)
 
-    def parse_file(self, path, accountname=None):
-        ofx = OfxParser.parse(file(path))
-        return (ofx, self.filter(ofx.account.statement.transactions, ofx.account.account_id))
+    @staticmethod
+    def parse_file(path):
+        return OfxParser.parse(file(path))
 
     def is_txn_synced(self, acctid, txn):
         if self.lgr is None:
