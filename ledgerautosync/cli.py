@@ -91,13 +91,14 @@ def sync(ledger, accounts, args):
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
                                             max_days=args.max)
             if ofx is not None:
-                converter = OfxConverter(ofx=ofx,
+                converter = OfxConverter(account=ofx.account,
                                          name=acct.description,
                                          ledger=ledger,
                                          indent=args.indent,
                                          unknownaccount=args.unknownaccount,
                                          payee_format=args.payee_format,
-                                         shortenaccount=args.shortenaccount)
+                                         shortenaccount=args.shortenaccount,
+                                         security_list=SecurityList(ofx))
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -119,7 +120,10 @@ def import_ofx(ledger, args):
         else:
             accountname = UNKNOWN_BANK_ACCOUNT
 
-    converter = OfxConverter(ofx=ofx,
+    # build SecurityList (including indexing by CUSIP and ticker symbol)
+    security_list = SecurityList(ofx)
+
+    converter = OfxConverter(account=ofx.account,
                              name=accountname,
                              ledger=ledger,
                              indent=args.indent,
@@ -127,8 +131,8 @@ def import_ofx(ledger, args):
                              unknownaccount=args.unknownaccount,
                              payee_format=args.payee_format,
                              hardcodeaccount=args.hardcodeaccount,
-                             shortenaccount=args.shortenaccount)
-
+                             shortenaccount=args.shortenaccount,
+                             security_list=security_list)
     print_results(converter, ofx, ledger, txns, args)
 
 

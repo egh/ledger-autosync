@@ -46,7 +46,7 @@ class WeirdOfxTest(object):
     def test_no_institution_no_accountname(self):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
         (ofx, txns) = OfxSynchronizer(self.lgr).parse_file(ofxpath)
-        OfxConverter(ofx, name=None)
+        OfxConverter(account=ofx.account, name=None)
 
     def test_apostrophe(self):
         ofxpath = os.path.join('fixtures', 'apostrophe.ofx')

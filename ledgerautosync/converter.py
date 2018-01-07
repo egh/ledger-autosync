@@ -51,7 +51,11 @@ class SecurityList(object):
     It is iterable, and also provides lookup table (LUT) functionality
     provides __next__() for Py3
     """
-    def __init__(self, securities):
+    def __init__(self, ofx):
+        securities = []
+        if hasattr(ofx, 'security_list') and ofx.security_list is not None:
+            securities = ofx.security_list
+
         self.cusip_lut = dict()
         self.ticker_lut = dict()
 
@@ -205,36 +209,32 @@ class Converter(object):
 
 
 class OfxConverter(Converter):
-    def __init__(self, ofx, name, indent=4, ledger=None, fid=None,
-                 unknownaccount=None, payee_format=None, hardcodeaccount=None, shortenaccount=False):
+    def __init__(self, account, name, indent=4, ledger=None, fid=None,
+                 unknownaccount=None, payee_format=None, hardcodeaccount=None, shortenaccount=False,
+                 security_list=SecurityList([])):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
-                                           currency=ofx.account.statement.currency,
+                                           currency=account.statement.currency,
                                            payee_format=payee_format)
-        self.real_acctid = ofx.account.account_id
+        self.real_acctid = account.account_id
         if hardcodeaccount is not None:
             self.acctid = hardcodeaccount
         elif shortenaccount:
-            self.acctid = ofx.account.account_id[-4:]
+            self.acctid = account.account_id[-4:]
         else:
-            self.acctid = ofx.account.account_id
+            self.acctid = account.account_id
         self.payee_format = payee_format
-
-        # build SecurityList (including indexing by CUSIP and ticker symbol)
-        if hasattr(ofx, 'security_list') and ofx.security_list is not None:
-            self.security_list = SecurityList(ofx.security_list)
-        else:
-            self.security_list = SecurityList([])
+        self.security_list = security_list
 
         if fid is not None:
             self.fid = fid
         else:
-            if ofx.account.institution is None:
+            if account.institution is None:
                 raise EmptyInstitutionException(
                     "Institution provided by OFX is empty and no fid supplied!")
             else:
-                self.fid = ofx.account.institution.fid
+                self.fid = account.institution.fid
         self.name = name
 
     def mk_ofxid(self, txnid):
