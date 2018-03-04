@@ -104,7 +104,7 @@ class Transaction(object):
         self.metadata = metadata
         self.cleared = cleared
 
-    def format(self, indent=4, assertions=False):
+    def format(self, indent=4, assertions=True):
         retval = ""
         cleared_str = " "
         if self.cleared:
@@ -127,7 +127,7 @@ class Posting(object):
         self.unit_price = unit_price
         self.metadata = metadata
 
-    def format(self, indent=4, assertions=False):
+    def format(self, indent=4, assertions=True):
         space_count = 65 - indent - len(self.account) - len(self.amount.format())
         if space_count < 2:
             space_count = 2
