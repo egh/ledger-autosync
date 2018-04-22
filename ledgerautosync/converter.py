@@ -563,6 +563,7 @@ class AmazonConverter(CsvConverter):
     def __init__(self, *args, **kwargs):
         super(AmazonConverter, self).__init__(*args, **kwargs)
         self.dialect.doublequote = True
+        self.dialect.quotechar = '"'
 
     def mk_amount(self, row, reverse=False):
         currency = row['Currency']
