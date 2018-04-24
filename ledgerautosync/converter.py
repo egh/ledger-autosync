@@ -108,7 +108,7 @@ class Transaction(object):
         self.metadata = metadata
         self.cleared = cleared
 
-    def format(self, indent=4):
+    def format(self, indent=4, assertions=True):
         retval = ""
         cleared_str = " "
         if self.cleared:
@@ -120,7 +120,7 @@ class Transaction(object):
         for k,v in self.metadata.iteritems():
             retval += "%s; %s: %s\n" % (" "*indent, k, v)
         for posting in self.postings:
-            retval += posting.format(indent)
+            retval += posting.format(indent, assertions)
         return retval
 
 class Posting(object):
@@ -131,13 +131,13 @@ class Posting(object):
         self.unit_price = unit_price
         self.metadata = metadata
 
-    def format(self, indent=4):
+    def format(self, indent=4, assertions=True):
         space_count = 65 - indent - len(self.account) - len(self.amount.format())
         if space_count < 2:
             space_count = 2
         retval = "%s%s%s%s" % (
             " " * indent, self.account, " "*space_count, self.amount.format())
-        if self.asserted is not None:
+        if assertions and self.asserted is not None:
             retval = "%s = %s"%(retval, self.asserted.format())
         if self.unit_price is not None:
             retval = "%s @ %s"%(retval, self.unit_price.format())
