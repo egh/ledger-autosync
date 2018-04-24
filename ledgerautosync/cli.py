@@ -137,11 +137,12 @@ def import_csv(ledger, args):
         raise Exception("When importing a CSV file, you must specify an account name.")
     sync = CsvSynchronizer(ledger, payee_format=args.payee_format)
     accountname = args.account
-    txns = sync.parse_file(args.PATH, accountname=args.account)
+    txns = sync.parse_file(args.PATH, accountname=args.account,
+                            unknownaccount=args.unknownaccount)
     if args.reverse:
         txns = reversed(txns)
     for txn in txns:
-        print txn.format(args.indent)
+        print txn.format(args.indent, args.assertions)
 
 def load_plugins(config_dir):
     plugin_dir = os.path.join(config_dir, 'ledger-autosync', 'plugins')
