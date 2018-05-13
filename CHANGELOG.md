@@ -1,3 +1,29 @@
+## Unreleased
+- Add --reverse option to print txns in reverse
+- Better error handling on OFX server error
+- Add --shorten-account, --hardcode-account options
+  improve user privacy
+- Add --payee-format argument
+- Move ofxid metadata to correct posting
+- Misc bugfixes
+
+## Version 0.3.5
+- Disable default usage of python bindings
+- Change to using 65 spaces to align txns (per ledger-mode)
+- Improve .ledgerrc parsing
+- Better error messages
+- Add basic plugin system
+- Misc bugfixes
+
+## Version 0.3.4
+- Packaging fixes
+  
+## Version 0.3.3
+- Fix problem building on ubuntu trusty
+
+## Version 0.3.2
+- Fix problem with certain characters in transaction id
+
 ## Version 0.3.0
 - Support CSV files (Mint, Paypal and Amazon flavors)
 - Uses ticker symbol by for currencies, not CUSIP (You will need to change
