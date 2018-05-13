@@ -87,7 +87,7 @@ class CsvConverterTestCase(LedgerTestCase):
 @attr('generic')
 class TestPaypalConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/paypal.csv', 'rb') as f:
+        with open('fixtures/paypal.csv') as f:
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
@@ -108,7 +108,7 @@ class TestPaypalConverter(CsvConverterTestCase):
 @attr('generic')
 class TestPaypalAlternateConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/paypal_alternate.csv', 'rb') as f:
+        with open('fixtures/paypal_alternate.csv') as f:
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), PaypalAlternateConverter)
             self.assertEqual(
@@ -134,7 +134,7 @@ class TestPaypalAlternateConverter(CsvConverterTestCase):
 @attr('generic')
 class TestAmazonConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/amazon.csv', 'rb') as f:
+        with open('fixtures/amazon.csv') as f:
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
@@ -149,7 +149,7 @@ class TestAmazonConverter(CsvConverterTestCase):
 @attr('generic')
 class TestAmazonConverter2(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/amazon2.csv', 'rb') as f:
+        with open('fixtures/amazon2.csv') as f:
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
@@ -164,7 +164,7 @@ class TestAmazonConverter2(CsvConverterTestCase):
 @attr('generic')
 class TestMintConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/mint.csv', 'rb') as f:
+        with open('fixtures/mint.csv') as f:
             (reader, converter) = self.make_converter(f)
             self.assertEqual(type(converter), MintConverter)
             self.assertEqual(
