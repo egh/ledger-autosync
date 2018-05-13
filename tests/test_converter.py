@@ -71,7 +71,7 @@ class TestCsvConverter(LedgerTestCase):
         converter = CsvConverter(None)
         h = {'foo': 'bar', 'bar': 'foo'}
         self.assertEqual(converter.get_csv_id(h),
-                         hashlib.md5("bar=foo\nfoo=bar\n").hexdigest())
+                         hashlib.md5("bar=foo\nfoo=bar\n".encode('utf-8')).hexdigest())
 
 class CsvConverterTestCase(LedgerTestCase):
     def make_converter(self, f, name=None):

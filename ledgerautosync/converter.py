@@ -459,7 +459,7 @@ class CsvConverter(Converter):
     def get_csv_id(self, row):
         h = hashlib.md5()
         for key in sorted(row.keys()):
-            h.update("%s=%s\n"%(key, row[key]))
+            h.update(("%s=%s\n"%(key, row[key])).encode('utf-8'))
         return h.hexdigest()
 
     def __init__(self, dialect, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
