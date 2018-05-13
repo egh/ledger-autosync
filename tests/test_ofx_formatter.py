@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ledgerautosync.converter import OfxConverter, SecurityList
 from ledgerautosync.ledgerwrap import Ledger
 import os.path

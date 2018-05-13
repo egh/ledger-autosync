@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ofxparse import OfxParser
 from ledgerautosync.converter import CsvConverter
 from ofxparse.ofxparse import InvestmentTransaction

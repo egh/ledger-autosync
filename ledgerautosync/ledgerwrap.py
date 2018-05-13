@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 import csv
 import os
 import re
@@ -24,7 +24,7 @@ import distutils.spawn
 import subprocess
 from subprocess import Popen, PIPE
 from threading import Thread
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from ledgerautosync.converter import Converter
 import logging
 from fuzzywuzzy import process
@@ -163,7 +163,7 @@ class Ledger(MetaLedger):
     def check_transaction_by_id(self, key, value):
         q = ["-E", "meta", "%s=%s" % (key, Converter.clean_id(value))]
         try:
-            self.run(q).next()
+            next(self.run(q))
             return True
         except StopIteration:
             return False
@@ -254,6 +254,6 @@ class HLedger(MetaLedger):
             self.payees = {}
             cmd = ["reg", "-O", "csv"]
             r = csv.DictReader(self.run(cmd).splitlines())
-            headers = r.next()
+            headers = next(r)
             for line in r:
                 self.add_payee(line['description'], line['account'])

@@ -19,7 +19,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ofxclient.config import OfxConfig
 import argparse
 import csv
@@ -70,11 +70,11 @@ def print_results(converter, ofx, ledger, txns, args):
         if (not(ledger.check_transaction_by_id
                 ("ofxid", converter.mk_ofxid(AUTOSYNC_INITIAL))) and
                 not(ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL))):
-            print converter.format_initial_balance(ofx.account.statement)
+            print(converter.format_initial_balance(ofx.account.statement))
     for txn in txns:
-        print converter.convert(txn).format(args.indent)
+        print(converter.convert(txn).format(args.indent))
     if args.assertions:
-        print converter.format_balance(ofx.account.statement)
+        print(converter.format_balance(ofx.account.statement))
 
     # if OFX has positions use these to obtain commodity prices
     # and print "P" records to provide dated/timed valuations
@@ -82,7 +82,7 @@ def print_results(converter, ofx, ledger, txns, args):
     # not your position (e.g. # shares), even though this is in the OFX record
     if hasattr(ofx.account.statement, 'positions'):
         for pos in ofx.account.statement.positions:
-            print converter.format_position(pos)
+            print(converter.format_position(pos))
 
 def sync(ledger, accounts, args):
     sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
@@ -147,7 +147,7 @@ def import_csv(ledger, args):
     if args.reverse:
         txns = reversed(txns)
     for txn in txns:
-        print txn.format(args.indent, args.assertions)
+        print(txn.format(args.indent, args.assertions))
 
 def load_plugins(config_dir):
     plugin_dir = os.path.join(config_dir, 'ledger-autosync', 'plugins')
@@ -247,11 +247,11 @@ All transactions will be printed!")
 
     if args.which:
         sys.stderr.write("ledger-autosync is using ")
-        if type(ledger) == Ledger:
+        if isinstance(ledger, Ledger):
             sys.stderr.write("ledger (cli)\n")
-        elif type(ledger) == HLedger:
+        elif isinstance(ledger, HLedger):
             sys.stderr.write("hledger\n")
-        elif type(ledger) == LedgerPython:
+        elif isinstance(ledger, LedgerPython):
             sys.stderr.write("ledger.so (python)\n")
         exit()
 

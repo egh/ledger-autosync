@@ -17,7 +17,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from decimal import Decimal
 import re
 from ofxparse.ofxparse import Transaction as OfxTransaction, InvestmentTransaction
@@ -80,7 +80,7 @@ class SecurityList(object):
     def __next__(self):         # Py3 iterable
         return next(self._iter)
 
-    def next(self):             # Python 2
+    def __next__(self):             # Python 2
         return next(self._iter)
 
     def __len__(self):
@@ -117,7 +117,7 @@ class Transaction(object):
         if self.aux_date is not None:
             aux_date_str = "=%s"%(self.aux_date.strftime("%Y/%m/%d"))
         retval += "%s%s%s%s\n"%(self.date.strftime("%Y/%m/%d"), aux_date_str, cleared_str, self.payee)
-        for k,v in self.metadata.iteritems():
+        for k, v in self.metadata.items():
             retval += "%s; %s: %s\n" % (" "*indent, k, v)
         for posting in self.postings:
             retval += posting.format(indent, assertions)
@@ -142,7 +142,7 @@ class Posting(object):
         if self.unit_price is not None:
             retval = "%s @ %s"%(retval, self.unit_price.format())
         retval += "\n"
-        for k,v in self.metadata.iteritems():
+        for k, v in self.metadata.items():
             retval += "%s; %s: %s\n" % (" "*indent, k, v)
         return retval
 
@@ -367,7 +367,7 @@ class OfxConverter(Converter):
 
             security = self.maybe_get_ticker(txn.security)
 
-            if isinstance(txn.type, basestring):
+            if isinstance(txn.type, str):
                 # recent versions of ofxparse
                 if re.match('^(buy|sell)', txn.type):
                     acct2 = self.unknownaccount or 'Assets:Unknown'
@@ -476,7 +476,7 @@ class CsvConverter(Converter):
 
 
 class PaypalConverter(CsvConverter):
-    FIELDSET = set(['Currency', 'Date', 'Gross', 'Item Title', 'Name', 'Net', 'Status', 'To Email Address', 'Transaction ID', 'Type'])
+    FIELDSET = {'Currency', 'Date', 'Gross', 'Item Title', 'Name', 'Net', 'Status', 'To Email Address', 'Transaction ID', 'Type'}
 
     def __init__(self, *args, **kwargs):
         super(PaypalConverter, self).__init__(*args, **kwargs)
@@ -525,7 +525,7 @@ class PaypalConverter(CsvConverter):
 
 # Apparently Paypal has another CSV
 class PaypalAlternateConverter(CsvConverter):
-    FIELDSET = set(["Date", "Name", "Type", "Status", "Amount"])
+    FIELDSET = {"Date", "Name", "Type", "Status", "Amount"}
 
     def __init__(self, *args, **kwargs):
         super(PaypalAlternateConverter, self).__init__(*args, **kwargs)
@@ -558,7 +558,7 @@ class PaypalAlternateConverter(CsvConverter):
 
 
 class AmazonConverter(CsvConverter):
-    FIELDSET = set(['Currency', 'Title', 'Order Date', 'Order ID'])
+    FIELDSET = {'Currency', 'Title', 'Order Date', 'Order ID'}
 
     def __init__(self, *args, **kwargs):
         super(AmazonConverter, self).__init__(*args, **kwargs)
@@ -586,7 +586,7 @@ class AmazonConverter(CsvConverter):
             ])
 
 class MintConverter(CsvConverter):
-    FIELDSET = set(['Date', 'Amount', 'Description', 'Account Name', 'Category', 'Transaction Type'])
+    FIELDSET = {'Date', 'Amount', 'Description', 'Account Name', 'Category', 'Transaction Type'}
 
     def __init__(self, *args, **kwargs):
         super(MintConverter, self).__init__(*args, **kwargs)

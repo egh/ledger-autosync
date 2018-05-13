@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ledgerautosync import LedgerAutosyncException
 from ledgerautosync.cli import run, find_ledger_file
 from ledgerautosync.ledgerwrap import Ledger, LedgerPython, HLedger
@@ -24,7 +24,7 @@ from ofxclient.config import OfxConfig
 import os.path
 import tempfile
 import sys
-from StringIO import StringIO
+from io import StringIO
 
 from unittest import TestCase
 from mock import Mock, call, patch
@@ -85,7 +85,7 @@ class CliTest():
     def test_format_payee(self):
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             run([os.path.join('fixtures', 'paypal.csv'), '-a', 'Assets:Foo', '--payee-format', 'GROSS:{Gross}'])
-            self.assertRegexpMatches(mock_stdout.getvalue(), r"GROSS:-20\.00")
+            self.assertRegex(mock_stdout.getvalue(), r"GROSS:-20\.00")
 
     # def test_multi_account(self):
     #     with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
@@ -101,7 +101,7 @@ class CliTest():
         with patch('ledgerautosync.cli.find_ledger_file', return_value=None):
             with patch('sys.stderr', new_callable=StringIO) as mock_stdout:
                 run([], config)
-                self.assertEquals(mock_stdout.getvalue(), 'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!')
+                self.assertEqual(mock_stdout.getvalue(), 'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!')
 
 @attr('hledger')
 class TestCliHledger(TestCase, CliTest):

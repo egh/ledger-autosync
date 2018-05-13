@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, MintConverter, PaypalConverter, PaypalAlternateConverter, Amount, Posting
 from decimal import Decimal
 import hashlib
@@ -91,14 +91,14 @@ class TestPaypalConverter(CsvConverterTestCase):
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
     Foo                                                -20.00 USD
     ; csvid: paypal.XYZ1
     Expenses:Misc                                       20.00 USD
 """)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
     Foo                                               1120.00 USD
     ; csvid: paypal.XYZ2
@@ -112,14 +112,14 @@ class TestPaypalAlternateConverter(CsvConverterTestCase):
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), PaypalAlternateConverter)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2016/12/31 Some User: Payment Sent
     Foo                                                   -$12.34
     ; csvid: 1209a7bb0d17276248d463b71a6a8b8c
     Expenses:Misc                                          $12.34
 """)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2016/12/31 Bank Account: Add Funds from a Bank Account
     Foo                                                    $12.34
     ; csvid: 581e62da71bab74c7ce61854c2b6b6a5
@@ -138,7 +138,7 @@ class TestAmazonConverter(CsvConverterTestCase):
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2016/01/29 Best Soap Ever
     Foo                                                    $21.90
     ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
@@ -153,7 +153,7 @@ class TestAmazonConverter2(CsvConverterTestCase):
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2017/06/05 Test " double quote
     Foo                                                     $9.99
     ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=111-1111111-1111111
@@ -168,14 +168,14 @@ class TestMintConverter(CsvConverterTestCase):
             (reader, converter) = self.make_converter(f)
             self.assertEqual(type(converter), MintConverter)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2016/08/02 Amazon
     1234                                                   $29.99
     ; csvid: mint.a7c028a73d76956453dab634e8e5bdc1
     Expenses:Shopping                                     -$29.99
 """)
             self.assertEqual(
-                converter.convert(reader.next()).format(),
+                converter.convert(next(reader)).format(),
                 """2016/06/02 Autopay Rautopay Auto
     1234                                                 -$123.45
     ; csvid: mint.a404e70594502dd62bfc6f15d80b7cd7
