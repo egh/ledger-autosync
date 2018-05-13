@@ -94,7 +94,7 @@ class Ledger(MetaLedger):
     @staticmethod
     def available():
         return ((distutils.spawn.find_executable('ledger') is not None) and
-                (Popen(["ledger", "--version"], stdout=PIPE).
+                (Popen(["ledger", "--version"], stdout=PIPE, universal_newlines=True).
                  communicate()[0]).startswith("Ledger 3"))
 
     def __init__(self, ledger_file=None, no_pipe=True):
@@ -118,7 +118,7 @@ class Ledger(MetaLedger):
             self.args += ["-f", ledger_file]
         if self.use_pipe:
             self.p = Popen(self.args, bufsize=1, stdin=PIPE, stdout=PIPE,
-                           close_fds=True)
+                           universal_newlines=True, close_fds=True)
             self.q = Queue()
             self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))
             self.t.daemon = True  # thread dies with the program
@@ -157,7 +157,7 @@ class Ledger(MetaLedger):
             cmd = self.args + ["csv"] + cmd
             if os.name == 'nt':
                 cmd = MetaLedger.windows_clean(cmd)
-            return csv.reader(subprocess.check_output(cmd).splitlines(), dialect='ledger')
+            return csv.reader(subprocess.check_output(cmd, universal_newlines=True).splitlines(), dialect='ledger')
 
 
     def check_transaction_by_id(self, key, value):
@@ -243,7 +243,7 @@ class HLedger(MetaLedger):
         if os.name == 'nt':
             cmd = MetaLedger.windows_clean(cmd)
         logging.debug(" ".join(cmd))
-        return subprocess.check_output(cmd)
+        return subprocess.check_output(cmd, universal_newlines=True)
 
     def check_transaction_by_id(self, key, value):
         cmd = ["reg", "tag:%s=%s" % (key, Converter.clean_id(value))]
