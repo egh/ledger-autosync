@@ -101,7 +101,7 @@ class CliTest():
         with patch('ledgerautosync.cli.find_ledger_file', return_value=None):
             with patch('sys.stderr', new_callable=StringIO) as mock_stdout:
                 run([], config)
-                self.assertEquals(mock_stdout.getvalue(), 'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!')
+                self.assertEquals(mock_stdout.getvalue(), 'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!\n')
 
 @attr('hledger')
 class TestCliHledger(TestCase, CliTest):
