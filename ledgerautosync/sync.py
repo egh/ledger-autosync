@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ofxparse import OfxParser
 from ledgerautosync.converter import CsvConverter
 from ofxparse.ofxparse import InvestmentTransaction
@@ -37,7 +37,7 @@ class OfxSynchronizer(Synchronizer):
 
     @staticmethod
     def parse_file(path):
-        return OfxParser.parse(file(path))
+        return OfxParser.parse(open(path))
 
     def is_txn_synced(self, acctid, txn):
         if self.lgr is None:
@@ -175,7 +175,7 @@ class CsvSynchronizer(Synchronizer):
             return self.lgr.check_transaction_by_id("csvid", converter.get_csv_id(row))
 
     def parse_file(self, path, accountname=None, unknownaccount=None):
-        with open(path, 'rb') as f:
+        with open(path) as f:
             has_bom = f.read(3) == codecs.BOM_UTF8
             if not(has_bom): f.seek(0)
             else: f.seek(3)

@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
 from nose.plugins.attrib import attr
 from unittest import TestCase
@@ -86,7 +86,7 @@ class TestLedger(LedgerTest, TestCase):
             f.write("--period 2012")
         # If the command returns no trasnactions, as we would expect if we
         # parsed the init file, then this will throw an exception.
-        self.lgr.run([""]).next()
+        next(self.lgr.run([""]))
         os.unlink(tmprcpath)
 
 @attr('ledger-python')

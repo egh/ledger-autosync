@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 from ledgerautosync.cli import run
 from ledgerautosync.converter import OfxConverter
 from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
@@ -43,7 +43,7 @@ class WeirdOfxTest(object):
         sync = OfxSynchronizer(self.lgr)
         ofx = OfxSynchronizer.parse_file(ofxpath)
         txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
-        self.assertEquals(len(txns), 3)
+        self.assertEqual(len(txns), 3)
 
     @raises(EmptyInstitutionException)
     def test_no_institution_no_accountname(self):
@@ -56,14 +56,14 @@ class WeirdOfxTest(object):
         ofx = OfxSynchronizer.parse_file(ofxpath)
         sync = OfxSynchronizer(self.lgr)
         txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
-        self.assertEquals(len(txns), 1)
+        self.assertEqual(len(txns), 1)
 
     def test_one_settleDate(self):
         ofxpath = os.path.join('fixtures', 'fidelity-one-dtsettle.ofx')
         ofx = OfxSynchronizer.parse_file(ofxpath)
         sync = OfxSynchronizer(self.lgr)
         txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
-        self.assertEquals(len(txns), 17)
+        self.assertEqual(len(txns), 17)
 
 
 @attr('hledger')

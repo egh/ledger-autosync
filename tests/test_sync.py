@@ -16,7 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
+
 import os
 import os.path
 from ofxparse import OfxParser
@@ -32,7 +32,7 @@ class TestOfxSync(TestCase):
     def test_fresh_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking.ofx')))
+        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
         txns1 = ofx.account.statement.transactions
         txns2 = sync.filter(txns1, ofx.account.account_id)
         self.assertEqual(txns1, txns2)
@@ -40,7 +40,7 @@ class TestOfxSync(TestCase):
     def test_sync_order(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxParser.parse(file(os.path.join('fixtures', 'checking_order.ofx')))
+        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking_order.ofx')))
         txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
         self.assertTrue(txns[0].date < txns[1].date and
                         txns[1].date < txns[2].date)
@@ -62,14 +62,14 @@ class TestOfxSync(TestCase):
     def test_no_new_txns(self):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         acct = Mock()
-        acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
+        acct.download = Mock(return_value=open(os.path.join('fixtures', 'checking.ofx')))
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 0)
 
     def test_all_new_txns(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         acct = Mock()
-        acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
+        acct.download = Mock(return_value=open(os.path.join('fixtures', 'checking.ofx')))
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
 
@@ -82,7 +82,7 @@ class TestOfxSync(TestCase):
 
     def test_sync_no_ledger(self):
         acct = Mock()
-        acct.download = Mock(return_value=file(os.path.join('fixtures', 'checking.ofx')))
+        acct.download = Mock(return_value=open(os.path.join('fixtures', 'checking.ofx')))
         sync = OfxSynchronizer(None)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
 

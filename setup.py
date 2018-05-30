@@ -25,7 +25,7 @@ setup(
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Office/Business :: Financial :: Accounting',
         'Topic :: Office/Business :: Financial :: Investment',
         'Topic :: Office/Business :: Financial'
