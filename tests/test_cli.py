@@ -84,7 +84,7 @@ class CliTest():
 
     def test_format_payee(self):
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            run([os.path.join('fixtures', 'paypal.csv'), '-a', 'Assets:Foo', '--payee-format', 'GROSS:{Gross}'])
+            run([os.path.join('fixtures', 'paypal.csv'), '-a', 'Assets:Foo', '--payee-format', 'GROSS:{Gross}', '-L'])
             self.assertRegex(mock_stdout.getvalue(), r"GROSS:-20\.00")
 
     # def test_multi_account(self):
