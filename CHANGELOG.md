@@ -1,4 +1,5 @@
 ## Unreleased
+- Migrated to python3
 - Add --reverse option to print txns in reverse
 - Better error handling on OFX server error
 - Add --shorten-account, --hardcode-account options
