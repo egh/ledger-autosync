@@ -103,7 +103,7 @@ def sync(ledger, accounts, args):
         except KeyboardInterrupt:
             raise
         except:
-            sys.stderr.write("Caught exception processing %s" %
+            sys.stderr.write("Caught exception processing %s\n" %
                              (acct.description))
             traceback.print_exc(file=sys.stderr)
 
@@ -232,7 +232,7 @@ transactions')
     if ledger_file is None:
         sys.stderr.write("LEDGER_FILE environment variable not set, and no \
 .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. \
-All transactions will be printed!")
+All transactions will be printed!\n")
         ledger = None
     elif args.no_ledger:
         ledger = None
