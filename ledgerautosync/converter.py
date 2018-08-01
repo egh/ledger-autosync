@@ -494,7 +494,7 @@ class OfxConverter(Converter):
 
             return Transaction(
                 date=txn.tradeDate,
-                aux_date=txn.settleDate,
+                aux_date=aux_date,
                 payee=self.format_payee(txn),
                 metadata=metadata,
                 postings=[posting1, posting2]
