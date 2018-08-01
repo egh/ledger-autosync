@@ -31,6 +31,7 @@ from mock import Mock, call, patch
 from nose.plugins.attrib import attr
 from nose.tools import raises
 
+
 class CliTest():
     def test_run(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
@@ -44,7 +45,8 @@ class CliTest():
 
     def test_run_csv_file(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
-        run(['-a', 'Paypal', '-l', os.path.join('fixtures', 'empty.lgr'), os.path.join('fixtures', 'paypal.csv')], config)
+        run(['-a', 'Paypal', '-l', os.path.join('fixtures', 'empty.lgr'),
+             os.path.join('fixtures', 'paypal.csv')], config)
 
     def test_filter_account(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
@@ -63,17 +65,26 @@ class CliTest():
 
     def test_find_ledger_path(self):
         os.environ["LEDGER_FILE"] = "/tmp/foo"
-        self.assertEqual(find_ledger_file(), "/tmp/foo", "Should use LEDGER_FILE to find ledger path.")
+        self.assertEqual(
+            find_ledger_file(),
+            "/tmp/foo",
+            "Should use LEDGER_FILE to find ledger path.")
 
         (f, tmprcpath) = tempfile.mkstemp(".ledgerrc")
-        os.close(f) # Who wants to deal with low-level file descriptors?
+        os.close(f)  # Who wants to deal with low-level file descriptors?
         with open(tmprcpath, 'w') as f:
             f.write("--bar foo\n")
             f.write("--file /tmp/bar\n")
             f.write("--foo bar\n")
-        self.assertEqual(find_ledger_file(tmprcpath), "/tmp/foo", "Should prefer LEDGER_FILE to --file arg in ledgerrc")
+        self.assertEqual(
+            find_ledger_file(tmprcpath),
+            "/tmp/foo",
+            "Should prefer LEDGER_FILE to --file arg in ledgerrc")
         del os.environ["LEDGER_FILE"]
-        self.assertEqual(find_ledger_file(tmprcpath), "/tmp/bar", "Should parse ledgerrc")
+        self.assertEqual(
+            find_ledger_file(tmprcpath),
+            "/tmp/bar",
+            "Should parse ledgerrc")
         os.unlink(tmprcpath)
 
     @raises(LedgerAutosyncException)
@@ -84,7 +95,8 @@ class CliTest():
 
     def test_format_payee(self):
         with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            run([os.path.join('fixtures', 'paypal.csv'), '-a', 'Assets:Foo', '--payee-format', 'GROSS:{Gross}', '-L'])
+            run([os.path.join('fixtures', 'paypal.csv'), '-a',
+                 'Assets:Foo', '--payee-format', 'GROSS:{Gross}', '-L'])
             self.assertRegex(mock_stdout.getvalue(), r"GROSS:-20\.00")
 
     # def test_multi_account(self):
@@ -101,7 +113,10 @@ class CliTest():
         with patch('ledgerautosync.cli.find_ledger_file', return_value=None):
             with patch('sys.stderr', new_callable=StringIO) as mock_stdout:
                 run([], config)
-                self.assertEqual(mock_stdout.getvalue(), 'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!\n')
+                self.assertEqual(
+                    mock_stdout.getvalue(),
+                    'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!\n')
+
 
 @attr('hledger')
 class TestCliHledger(TestCase, CliTest):

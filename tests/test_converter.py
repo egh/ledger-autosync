@@ -37,6 +37,7 @@ class TestPosting(LedgerTestCase):
             ).format(indent=2),
             "  Foo  $10.00\n  ; foo: bar\n")
 
+
 @attr('generic')
 class TestAmount(LedgerTestCase):
     def test_amount(self):
@@ -70,8 +71,9 @@ class TestCsvConverter(LedgerTestCase):
     def test_get_csv_id(self):
         converter = CsvConverter(None)
         h = {'foo': 'bar', 'bar': 'foo'}
-        self.assertEqual(converter.get_csv_id(h),
-                         hashlib.md5("bar=foo\nfoo=bar\n".encode('utf-8')).hexdigest())
+        self.assertEqual(converter.get_csv_id(h), hashlib.md5(
+            "bar=foo\nfoo=bar\n".encode('utf-8')).hexdigest())
+
 
 class CsvConverterTestCase(LedgerTestCase):
     def make_converter(self, f, name=None):
@@ -79,10 +81,12 @@ class CsvConverterTestCase(LedgerTestCase):
         f.seek(0)
         dialect.skipinitialspace = True
         reader = csv.DictReader(f, dialect=dialect)
-        converter = CsvConverter.make_converter(set(reader.fieldnames), dialect, name)
+        converter = CsvConverter.make_converter(
+            set(reader.fieldnames), dialect, name)
         f.seek(0)
         reader = csv.DictReader(f, dialect=dialect)
         return (reader, converter)
+
 
 @attr('generic')
 class TestPaypalConverter(CsvConverterTestCase):
@@ -91,7 +95,8 @@ class TestPaypalConverter(CsvConverterTestCase):
             (reader, converter) = self.make_converter(f, 'Foo')
             self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
-                converter.convert(next(reader)).format(),
+                converter.convert(
+                    next(reader)).format(),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
     Foo                                                -20.00 USD
     ; csvid: paypal.XYZ1
@@ -104,6 +109,7 @@ class TestPaypalConverter(CsvConverterTestCase):
     ; csvid: paypal.XYZ2
     Transfer:Paypal                                  -1120.00 USD
 """)
+
 
 @attr('generic')
 class TestPaypalAlternateConverter(CsvConverterTestCase):
@@ -128,8 +134,11 @@ class TestPaypalAlternateConverter(CsvConverterTestCase):
 
     def test_mk_amount(self):
         converter = PaypalAlternateConverter(None)
-        row = { "Currency": "USD", "Amount": "12.34" }
-        self.assertEqual(converter.mk_amount(row), Amount(Decimal('12.34'), "USD"))
+        row = {"Currency": "USD", "Amount": "12.34"}
+        self.assertEqual(
+            converter.mk_amount(row), Amount(
+                Decimal('12.34'), "USD"))
+
 
 @attr('generic')
 class TestAmazonConverter(CsvConverterTestCase):
@@ -146,6 +155,7 @@ class TestAmazonConverter(CsvConverterTestCase):
     Expenses:Misc                                         -$21.90
 """)
 
+
 @attr('generic')
 class TestAmazonConverter2(CsvConverterTestCase):
     def test_format(self):
@@ -160,6 +170,7 @@ class TestAmazonConverter2(CsvConverterTestCase):
     ; csvid: amazon.111-1111111-1111111
     Expenses:Misc                                          -$9.99
 """)
+
 
 @attr('generic')
 class TestMintConverter(CsvConverterTestCase):

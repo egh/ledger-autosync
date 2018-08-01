@@ -24,6 +24,7 @@ class EmptyInstitutionException(Exception):
     def __str__(self):
         return repr(self.value)
 
+
 class LedgerAutosyncException(Exception):
     def __init__(self, value):
         self.value = value

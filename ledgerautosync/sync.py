@@ -25,14 +25,16 @@ import logging
 import csv
 import codecs
 
+
 class Synchronizer(object):
     def __init__(self, lgr):
         self.lgr = lgr
 
+
 class OfxSynchronizer(Synchronizer):
     def __init__(self, lgr, hardcodeaccount=None, shortenaccount=None):
         self.hardcodeaccount = hardcodeaccount
-        self.shortenaccount  = shortenaccount
+        self.shortenaccount = shortenaccount
         super(OfxSynchronizer, self).__init__(lgr)
 
     @staticmethod
@@ -107,7 +109,9 @@ class OfxSynchronizer(Synchronizer):
             raw = acct.download(days=days)
 
             if raw.read() == 'Server error occured.  Received HttpStatusCode of 400':
-                raise Exception("Error connecting to account %s"%(acct.description))
+                raise Exception(
+                    "Error connecting to account %s" %
+                    (acct.description))
             raw.seek(0)
             ofx = None
             try:
@@ -119,7 +123,9 @@ class OfxSynchronizer(Synchronizer):
                     raise ex
             if ofx.signon is not None:
                 if ofx.signon.severity == 'ERROR':
-                    raise Exception("Error returned from server for %s: %s"%(acct.description, ofx.signon.message))
+                    raise Exception(
+                        "Error returned from server for %s: %s" %
+                        (acct.description, ofx.signon.message))
             if not(hasattr(ofx, 'account')):
                 # some banks return this for no txns
                 if (days >= max_days):
@@ -142,7 +148,8 @@ class OfxSynchronizer(Synchronizer):
                 if ((len(txns) > 0) and (last_txns_len == len(txns))):
                     # not getting more txns than last time; we have
                     # reached the beginning
-                    logging.debug("Not getting more txns than last time, done.")
+                    logging.debug(
+                        "Not getting more txns than last time, done.")
                     return (ofx, new_txns)
                 elif (len(txns) > len(new_txns)) or (days >= max_days):
                     # got more txns than were new or hit max_days, we've
@@ -172,16 +179,21 @@ class CsvSynchronizer(Synchronizer):
             # All transactions are considered "synced" in this case.
             return False
         else:
-            return self.lgr.check_transaction_by_id("csvid", converter.get_csv_id(row))
+            return self.lgr.check_transaction_by_id(
+                "csvid", converter.get_csv_id(row))
 
     def parse_file(self, path, accountname=None, unknownaccount=None):
         with open(path) as f:
             has_bom = f.read(3) == codecs.BOM_UTF8
-            if not(has_bom): f.seek(0)
-            else: f.seek(3)
+            if not(has_bom):
+                f.seek(0)
+            else:
+                f.seek(3)
             dialect = csv.Sniffer().sniff(f.read(1024))
-            if not(has_bom): f.seek(0)
-            else: f.seek(3)
+            if not(has_bom):
+                f.seek(0)
+            else:
+                f.seek(3)
             dialect.skipinitialspace = True
             reader = csv.DictReader(f, dialect=dialect)
             converter = CsvConverter.make_converter(
@@ -191,7 +203,12 @@ class CsvSynchronizer(Synchronizer):
                 unknownaccount=unknownaccount,
                 payee_format=self.payee_format)
             # Create a new reader in case the converter modified the dialect
-            if not(has_bom): f.seek(0)
-            else: f.seek(3)
+            if not(has_bom):
+                f.seek(0)
+            else:
+                f.seek(3)
             reader = csv.DictReader(f, dialect=dialect)
-            return [converter.convert(row) for row in reader if not(self.is_row_synced(converter, row))]
+            return [
+                converter.convert(row) for row in reader if not(
+                    self.is_row_synced(
+                        converter, row))]

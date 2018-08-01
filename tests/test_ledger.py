@@ -24,12 +24,16 @@ import os
 import os.path
 import tempfile
 
+
 class LedgerTest(object):
     ledger_path = os.path.join('fixtures', 'checking.lgr')
-    dynamic_ledger_path = os.path.join('fixtures', 'checking-dynamic-account.lgr')
+    dynamic_ledger_path = os.path.join(
+        'fixtures', 'checking-dynamic-account.lgr')
 
     def check_transaction(self):
-        self.assertTrue(self.lgr.check_transaction_by_id("ofxid", "1101.1452687~7.0000486"))
+        self.assertTrue(
+            self.lgr.check_transaction_by_id(
+                "ofxid", "1101.1452687~7.0000486"))
 
     def test_nonexistent_transaction(self):
         self.assertFalse(self.lgr.check_transaction_by_id("ofxid", "FOO"))
@@ -38,11 +42,14 @@ class LedgerTest(object):
         self.assertTrue(self.lgr.check_transaction_by_id("ofxid", "empty"))
 
     def test_get_account_by_payee(self):
-        account = self.lgr.get_account_by_payee("AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )", exclude="Assets:Foo")
+        account = self.lgr.get_account_by_payee(
+            "AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )",
+            exclude="Assets:Foo")
         self.assertEqual(account, "Expenses:Bar")
 
     def test_get_ambiguous_account_by_payee(self):
-        account = self.dynamic_lgr.get_account_by_payee("Generic", exclude="Assets:Foo")
+        account = self.dynamic_lgr.get_account_by_payee(
+            "Generic", exclude="Assets:Foo")
         # shoud use the latest
         self.assertEqual(account, "Expenses:Bar")
 
@@ -55,22 +62,33 @@ class LedgerTest(object):
                   'PAYEE TEST"QUOTE',
                   'PAYEE TEST.PERIOD']
         for payee in payees:
-            self.assertNotEqual(self.lgr.get_account_by_payee(payee, ['Assets:Foo']), None,
-                             msg="Did not find %s in %s" % (payee, self.lgr))
+            self.assertNotEqual(
+                self.lgr.get_account_by_payee(
+                    payee, ['Assets:Foo']), None, msg="Did not find %s in %s" %
+                (payee, self.lgr))
 
     def test_ofx_id_quoting(self):
-        self.assertEqual(self.lgr.check_transaction_by_id("ofxid", "1/2"), True,
-                         msg="Did not find 1/2 in %s" % (self.lgr))
+        self.assertEqual(
+            self.lgr.check_transaction_by_id(
+                "ofxid",
+                "1/2"),
+            True,
+            msg="Did not find 1/2 in %s" %
+            (self.lgr))
 
     def test_load_payees(self):
         self.lgr.load_payees()
-        self.assertEqual(self.lgr.payees['PAYEE TEST:COLON'], ['Assets:Foo', 'Income:Bar'])
+        self.assertEqual(
+            self.lgr.payees['PAYEE TEST:COLON'], [
+                'Assets:Foo', 'Income:Bar'])
+
 
 @attr('hledger')
 class TestHledger(TestCase, LedgerTest):
     def setUp(self):
         self.lgr = HLedger(self.ledger_path)
         self.dynamic_lgr = HLedger(self.dynamic_ledger_path)
+
 
 @attr('ledger')
 class TestLedger(LedgerTest, TestCase):
@@ -80,14 +98,16 @@ class TestLedger(LedgerTest, TestCase):
 
     def test_args_only(self):
         (f, tmprcpath) = tempfile.mkstemp(".ledgerrc")
-        os.close(f) # Who wants to deal with low-level file descriptors?
-        # Create an init file that will narrow the test data to a period that contains no trasnactions
+        os.close(f)  # Who wants to deal with low-level file descriptors?
+        # Create an init file that will narrow the test data to a period that
+        # contains no trasnactions
         with open(tmprcpath, 'w') as f:
             f.write("--period 2012")
         # If the command returns no trasnactions, as we would expect if we
         # parsed the init file, then this will throw an exception.
         next(self.lgr.run([""]))
         os.unlink(tmprcpath)
+
 
 @attr('ledger-python')
 class TestLedgerPython(TestCase, LedgerTest):

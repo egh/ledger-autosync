@@ -29,6 +29,7 @@ AUTOSYNC_INITIAL = "autosync_initial"
 ALL_AUTOSYNC_INITIAL = "all.%s" % (AUTOSYNC_INITIAL)
 UNKNOWN_BANK_ACCOUNT = "Assets:Unknown"
 
+
 class EasyEquality(object):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -38,6 +39,7 @@ class EasyEquality(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
 
 class SecurityList(object):
     """
@@ -51,6 +53,7 @@ class SecurityList(object):
     It is iterable, and also provides lookup table (LUT) functionality
     provides __next__() for Py3
     """
+
     def __init__(self, ofx):
         securities = []
         if hasattr(ofx, 'security_list') and ofx.security_list is not None:
@@ -61,14 +64,17 @@ class SecurityList(object):
 
         self._iter = iter(securities)
         self.securities = securities
-        if len(securities) == 0: return
+        if len(securities) == 0:
+            return
 
         # index
         for sec in securities:
             # unfortunately OFXparse does not currently implement
             # security.uniqueid_type so I am presuming here
-            if sec.uniqueid: self.cusip_lut[sec.uniqueid] = sec
-            if sec.ticker:   self.ticker_lut[sec.ticker]  = sec
+            if sec.uniqueid:
+                self.cusip_lut[sec.uniqueid] = sec
+            if sec.ticker:
+                self.ticker_lut[sec.ticker] = sec
             # This indexing strategy (whereby I index the object instead of
             # the inverse value (e.g. ticker symbol) directly has a flaw
             # in that an OFX file could define a security list section and
@@ -91,16 +97,27 @@ class SecurityList(object):
     # I'll have no idea if what I am seeing is a CUSISP
     # unless I look it up specifically as a CUSIP (and it exists)
     def find_cusip(self, cusip):
-        if cusip in self.cusip_lut: return self.cusip_lut[cusip]
-        else: return None
+        if cusip in self.cusip_lut:
+            return self.cusip_lut[cusip]
+        else:
+            return None
 
     def find_ticker(self, ticker):
-        if ticker in self.ticker_lut: return self.ticker_lut[ticker]
-        else: return None
+        if ticker in self.ticker_lut:
+            return self.ticker_lut[ticker]
+        else:
+            return None
 
 
 class Transaction(object):
-    def __init__(self, date, payee, postings, cleared=False, metadata={}, aux_date=None):
+    def __init__(
+            self,
+            date,
+            payee,
+            postings,
+            cleared=False,
+            metadata={},
+            aux_date=None):
         self.date = date
         self.aux_date = aux_date
         self.payee = payee
@@ -115,16 +132,24 @@ class Transaction(object):
             cleared_str = " * "
         aux_date_str = ""
         if self.aux_date is not None:
-            aux_date_str = "=%s"%(self.aux_date.strftime("%Y/%m/%d"))
-        retval += "%s%s%s%s\n"%(self.date.strftime("%Y/%m/%d"), aux_date_str, cleared_str, self.payee)
+            aux_date_str = "=%s" % (self.aux_date.strftime("%Y/%m/%d"))
+        retval += "%s%s%s%s\n" % (self.date.strftime("%Y/%m/%d"),
+                                  aux_date_str, cleared_str, self.payee)
         for k, v in self.metadata.items():
-            retval += "%s; %s: %s\n" % (" "*indent, k, v)
+            retval += "%s; %s: %s\n" % (" " * indent, k, v)
         for posting in self.postings:
             retval += posting.format(indent, assertions)
         return retval
 
+
 class Posting(object):
-    def __init__(self, account, amount, asserted=None, unit_price=None, metadata={}):
+    def __init__(
+            self,
+            account,
+            amount,
+            asserted=None,
+            unit_price=None,
+            metadata={}):
         self.account = account
         self.amount = amount
         self.asserted = asserted
@@ -132,19 +157,23 @@ class Posting(object):
         self.metadata = metadata
 
     def format(self, indent=4, assertions=True):
-        space_count = 65 - indent - len(self.account) - len(self.amount.format())
+        space_count = 65 - indent - \
+            len(self.account) - len(self.amount.format())
         if space_count < 2:
             space_count = 2
-        retval = "%s%s%s%s" % (
-            " " * indent, self.account, " "*space_count, self.amount.format())
+        retval = "%s%s%s%s" % (" " * indent,
+                               self.account,
+                               " " * space_count,
+                               self.amount.format())
         if assertions and self.asserted is not None:
-            retval = "%s = %s"%(retval, self.asserted.format())
+            retval = "%s = %s" % (retval, self.asserted.format())
         if self.unit_price is not None:
-            retval = "%s @ %s"%(retval, self.unit_price.format())
+            retval = "%s @ %s" % (retval, self.unit_price.format())
         retval += "\n"
         for k, v in self.metadata.items():
-            retval += "%s; %s: %s\n" % (" "*indent, k, v)
+            retval += "%s; %s: %s\n" % (" " * indent, k, v)
         return retval
+
 
 class Amount(EasyEquality):
     def __init__(self, number, currency, reverse=False, unlimited=False):
@@ -188,7 +217,13 @@ class Converter(object):
             replace('[', '_').\
             replace(']', '_')
 
-    def __init__(self, ledger=None, unknownaccount=None, currency='$', indent=4, payee_format=None):
+    def __init__(
+            self,
+            ledger=None,
+            unknownaccount=None,
+            currency='$',
+            indent=4,
+            payee_format=None):
         self.lgr = ledger
         self.indent = indent
         self.unknownaccount = unknownaccount
@@ -209,9 +244,19 @@ class Converter(object):
 
 
 class OfxConverter(Converter):
-    def __init__(self, account, name, indent=4, ledger=None, fid=None,
-                 unknownaccount=None, payee_format=None, hardcodeaccount=None, shortenaccount=False,
-                 security_list=SecurityList([])):
+    def __init__(
+            self,
+            account,
+            name,
+            indent=4,
+            ledger=None,
+            fid=None,
+            unknownaccount=None,
+            payee_format=None,
+            hardcodeaccount=None,
+            shortenaccount=False,
+            security_list=SecurityList(
+            [])):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
@@ -240,7 +285,8 @@ class OfxConverter(Converter):
     def mk_ofxid(self, txnid):
         if self.acctid != self.real_acctid:
             # Some banks insert the bank account number into the transaction ID
-            # We will do this to properly hide the account number for privacy reasons
+            # We will do this to properly hide the account number for privacy
+            # reasons
             txnid = txnid.replace(self.real_acctid, self.acctid)
         return Converter.clean_id("%s.%s.%s" % (self.fid, self.acctid, txnid))
 
@@ -277,12 +323,17 @@ class OfxConverter(Converter):
             if payee.startswith(memo):
                 memo = ""
 
-        return payee_format.format(payee=payee, memo=memo, txntype=txntype, account=self.name, tferaction=tferaction).strip()
+        return payee_format.format(
+            payee=payee,
+            memo=memo,
+            txntype=txntype,
+            account=self.name,
+            tferaction=tferaction).strip()
 
     def format_balance(self, statement):
         # Get date. Ensure the date is a date-like object.
         if (hasattr(statement, 'balance_date') and
-            hasattr(statement.balance_date, 'strftime')):
+                hasattr(statement.balance_date, 'strftime')):
             date = statement.balance_date
         elif (hasattr(statement, 'end_date') and
               hasattr(statement.end_date, 'strftime')):
@@ -315,13 +366,20 @@ class OfxConverter(Converter):
                 postings=[
                     Posting(
                         self.name,
-                        Amount(initbal, currency=self.currency),
-                        metadata={"ofxid": self.mk_ofxid(AUTOSYNC_INITIAL)}),
+                        Amount(
+                            initbal,
+                            currency=self.currency),
+                        metadata={
+                            "ofxid": self.mk_ofxid(AUTOSYNC_INITIAL)}),
                     Posting(
                         "Assets:Equity",
-                        Amount(initbal, currency=self.currency, reverse=True)).format(self.indent)
-                    ],
-            ).format(self.indent)
+                        Amount(
+                            initbal,
+                            currency=self.currency,
+                            reverse=True)).format(
+                                self.indent)],
+            ).format(
+                self.indent)
         else:
             return ""
 
@@ -345,19 +403,13 @@ class OfxConverter(Converter):
 
         if isinstance(txn, OfxTransaction):
             return Transaction(
-                date=txn.date,
-                payee=self.format_payee(txn),
-                postings=[
+                date=txn.date, payee=self.format_payee(txn), postings=[
                     Posting(
-                        self.name,
-                        Amount(txn.amount, self.currency),
-                        metadata=posting_metadata
-                    ),
-                    Posting(
-                        self.mk_dynamic_account(self.format_payee(txn), exclude=self.name),
-                        Amount(txn.amount, self.currency, reverse=True)
-                    )]
-            )
+                        self.name, Amount(
+                            txn.amount, self.currency), metadata=posting_metadata), Posting(
+                        self.mk_dynamic_account(
+                            self.format_payee(txn), exclude=self.name), Amount(
+                            txn.amount, self.currency, reverse=True))])
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
@@ -382,14 +434,19 @@ class OfxConverter(Converter):
                     # type: income, income_type: DIV
                     # TODO: determine how dividend income is listed from other institutions
                     # income/DIV transactions do not involve buying or selling a security
-                    # so their postings need special handling compared to others
+                    # so their postings need special handling compared to
+                    # others
                     metadata['dividend_from'] = security
                     acct2 = 'Income:Dividends'
                     posting1 = Posting(acct1,
                                        Amount(txn.total, self.currency),
                                        metadata=posting_metadata)
-                    posting2 = Posting(acct2,
-                                       Amount(txn.total, self.currency, reverse=True))
+                    posting2 = Posting(
+                        acct2,
+                        Amount(
+                            txn.total,
+                            self.currency,
+                            reverse=True))
                 else:
                     # ???
                     pass
@@ -413,12 +470,24 @@ class OfxConverter(Converter):
             # income/DIV already defined above;
             # this block defines all other posting types
             if posting1 is None and posting2 is None:
-                posting1 = Posting(acct1,
-                                   Amount(txn.units, security, unlimited=True),
-                                   unit_price=Amount(txn.unit_price, self.currency, unlimited=True),
-                                   metadata=posting_metadata)
-                posting2 = Posting(acct2,
-                                   Amount(txn.units * txn.unit_price, self.currency, reverse=True))
+                posting1 = Posting(
+                    acct1,
+                    Amount(
+                        txn.units,
+                        security,
+                        unlimited=True),
+                    unit_price=Amount(
+                        txn.unit_price,
+                        self.currency,
+                        unlimited=True),
+                    metadata=posting_metadata)
+                posting2 = Posting(
+                    acct2,
+                    Amount(
+                        txn.units *
+                        txn.unit_price,
+                        self.currency,
+                        reverse=True))
             else:
                 # Previously defined if type:income income_type/DIV
                 pass
@@ -428,14 +497,15 @@ class OfxConverter(Converter):
                 aux_date=txn.settleDate,
                 payee=self.format_payee(txn),
                 metadata=metadata,
-                postings=[ posting1, posting2 ]
+                postings=[posting1, posting2]
             )
 
     def format_position(self, pos):
         if hasattr(pos, 'date') and hasattr(pos, 'security') and \
            hasattr(pos, 'unit_price'):
             dateStr = pos.date.strftime("%Y/%m/%d %H:%M:%S")
-            return "P %s %s %s\n" % (dateStr, self.maybe_get_ticker(pos.security), pos.unit_price)
+            return "P %s %s %s\n" % (
+                dateStr, self.maybe_get_ticker(pos.security), pos.unit_price)
 
 
 class CsvConverter(Converter):
@@ -459,10 +529,17 @@ class CsvConverter(Converter):
     def get_csv_id(self, row):
         h = hashlib.md5()
         for key in sorted(row.keys()):
-            h.update(("%s=%s\n"%(key, row[key])).encode('utf-8'))
+            h.update(("%s=%s\n" % (key, row[key])).encode('utf-8'))
         return h.hexdigest()
 
-    def __init__(self, dialect, name=None, indent=4, ledger=None, unknownaccount=None, payee_format=None):
+    def __init__(
+            self,
+            dialect,
+            name=None,
+            indent=4,
+            ledger=None,
+            unknownaccount=None,
+            payee_format=None):
         super(CsvConverter, self).__init__(
             indent=indent,
             unknownaccount=unknownaccount,
@@ -476,7 +553,17 @@ class CsvConverter(Converter):
 
 
 class PaypalConverter(CsvConverter):
-    FIELDSET = {'Currency', 'Date', 'Gross', 'Item Title', 'Name', 'Net', 'Status', 'To Email Address', 'Transaction ID', 'Type'}
+    FIELDSET = {
+        'Currency',
+        'Date',
+        'Gross',
+        'Item Title',
+        'Name',
+        'Net',
+        'Status',
+        'To Email Address',
+        'Transaction ID',
+        'Type'}
 
     def __init__(self, *args, **kwargs):
         super(PaypalConverter, self).__init__(*args, **kwargs)
@@ -484,10 +571,11 @@ class PaypalConverter(CsvConverter):
             self.payee_format = "{Name} {To Email Address} {Item Title} ID: {Transaction ID}, {Type}"
 
     def get_csv_id(self, row):
-        return "paypal.%s"%(Converter.clean_id(row['Transaction ID']))
+        return "paypal.%s" % (Converter.clean_id(row['Transaction ID']))
 
     def convert(self, row):
-        if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
+        if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (
+                row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
             return ""
         else:
             currency = row['Currency']
@@ -496,7 +584,7 @@ class PaypalConverter(CsvConverter):
             gross = Decimal(row['Gross'].replace(',', ''))
 
             if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
-                postings=[
+                postings = [
                     Posting(
                         self.name,
                         Amount(net, currency),
@@ -507,15 +595,17 @@ class PaypalConverter(CsvConverter):
                         Amount(net, currency, reverse=True)
                     )]
             else:
-                postings=[
+                postings = [
                     Posting(
                         self.name,
                         Amount(gross, currency),
                         metadata=posting_metadata
                     ),
                     Posting(
-                        # TODO Our payees are breaking the payee search in mk_dynamic_account
-                        "Expenses:Misc", #self.mk_dynamic_account(payee, exclude=self.name),
+                        # TODO Our payees are breaking the payee search in
+                        # mk_dynamic_account
+                        "Expenses:Misc",
+                        # self.mk_dynamic_account(payee, exclude=self.name),
                         Amount(gross, currency, reverse=True)
                     )]
             return Transaction(
@@ -524,6 +614,8 @@ class PaypalConverter(CsvConverter):
                 postings=postings)
 
 # Apparently Paypal has another CSV
+
+
 class PaypalAlternateConverter(CsvConverter):
     FIELDSET = {"Date", "Name", "Type", "Status", "Amount"}
 
@@ -536,21 +628,43 @@ class PaypalAlternateConverter(CsvConverter):
         currency = '$'
         if 'Currency' in row:
             currency = row['Currency']
-        return Amount(Decimal(re.sub(r"\$", "", row['Amount'])), currency, reverse=reverse)
+        return Amount(
+            Decimal(
+                re.sub(
+                    r"\$",
+                    "",
+                    row['Amount'])),
+            currency,
+            reverse=reverse)
 
     def convert(self, row):
-        if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
+        if (((row['Status'] != "Completed") and (row['Status'] != "Refunded") and (
+                row['Status'] != "Reversed")) or (row['Type'] == "Shopping Cart Item")):
             return ""
         else:
             posting_metadata = {"csvid": self.get_csv_id(row)}
             if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
-                postings=[
-                    Posting(self.name, self.mk_amount(row), metadata=posting_metadata),
-                    Posting("Transfer:Paypal", self.mk_amount(row, reverse=True))]
+                postings = [
+                    Posting(
+                        self.name,
+                        self.mk_amount(row),
+                        metadata=posting_metadata),
+                    Posting(
+                        "Transfer:Paypal",
+                        self.mk_amount(
+                            row,
+                            reverse=True))]
             else:
-                postings=[
-                    Posting(self.name, self.mk_amount(row), metadata=posting_metadata),
-                    Posting("Expenses:Misc", self.mk_amount(row, reverse=True))]
+                postings = [
+                    Posting(
+                        self.name,
+                        self.mk_amount(row),
+                        metadata=posting_metadata),
+                    Posting(
+                        "Expenses:Misc",
+                        self.mk_amount(
+                            row,
+                            reverse=True))]
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
                 payee=self.format_payee(row),
@@ -566,27 +680,49 @@ class AmazonConverter(CsvConverter):
 
     def mk_amount(self, row, reverse=False):
         currency = row['Currency']
-        if currency == "USD": currency = "$"
-        return Amount(Decimal(re.sub(r"\$", "", row['Item Total'])), currency, reverse=reverse)
+        if currency == "USD":
+            currency = "$"
+        return Amount(
+            Decimal(
+                re.sub(
+                    r"\$",
+                    "",
+                    row['Item Total'])),
+            currency,
+            reverse=reverse)
 
     def get_csv_id(self, row):
-        return "amazon.%s"%(Converter.clean_id(row['Order ID']))
+        return "amazon.%s" % (Converter.clean_id(row['Order ID']))
 
     def convert(self, row):
         return Transaction(
-            date=datetime.datetime.strptime(row['Order Date'], "%m/%d/%y"),
+            date=datetime.datetime.strptime(
+                row['Order Date'],
+                "%m/%d/%y"),
             payee=row['Title'],
             postings=[
-                Posting(self.name,
-                        self.mk_amount(row),
-                        metadata={
-                            "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s"%(row['Order ID']),
-                            "csvid": self.get_csv_id(row)}),
-                Posting("Expenses:Misc", self.mk_amount(row, reverse=True))
-            ])
+                Posting(
+                    self.name,
+                    self.mk_amount(row),
+                    metadata={
+                        "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s" %
+                        (row['Order ID']),
+                        "csvid": self.get_csv_id(row)}),
+                Posting(
+                    "Expenses:Misc",
+                    self.mk_amount(
+                        row,
+                        reverse=True))])
+
 
 class MintConverter(CsvConverter):
-    FIELDSET = {'Date', 'Amount', 'Description', 'Account Name', 'Category', 'Transaction Type'}
+    FIELDSET = {
+        'Date',
+        'Amount',
+        'Description',
+        'Account Name',
+        'Category',
+        'Transaction Type'}
 
     def __init__(self, *args, **kwargs):
         super(MintConverter, self).__init__(*args, **kwargs)
@@ -599,15 +735,23 @@ class MintConverter(CsvConverter):
         if account is None:
             account = row['Account Name']
         postings = []
-        posting_metadata = {"csvid": "mint.%s"%(self.get_csv_id(row))}
+        posting_metadata = {"csvid": "mint.%s" % (self.get_csv_id(row))}
         if (row['Transaction Type'] == 'credit'):
             postings = [Posting(account, self.mk_amount(row, reverse=True),
                                 metadata=posting_metadata),
                         Posting(row['Category'], self.mk_amount(row))]
         else:
-            postings = [Posting(account, self.mk_amount(row),
-                                metadata=posting_metadata),
-                        Posting("Expenses:%s"%(row['Category']), self.mk_amount(row, reverse=True))]
+            postings = [
+                Posting(
+                    account,
+                    self.mk_amount(row),
+                    metadata=posting_metadata),
+                Posting(
+                    "Expenses:%s" %
+                    (row['Category']),
+                    self.mk_amount(
+                        row,
+                        reverse=True))]
 
         return Transaction(
             date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),

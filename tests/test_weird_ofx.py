@@ -42,7 +42,9 @@ class WeirdOfxTest(object):
         ofxpath = os.path.join('fixtures', 'no-institution.ofx')
         sync = OfxSynchronizer(self.lgr)
         ofx = OfxSynchronizer.parse_file(ofxpath)
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
         self.assertEqual(len(txns), 3)
 
     @raises(EmptyInstitutionException)
@@ -55,14 +57,18 @@ class WeirdOfxTest(object):
         ofxpath = os.path.join('fixtures', 'apostrophe.ofx')
         ofx = OfxSynchronizer.parse_file(ofxpath)
         sync = OfxSynchronizer(self.lgr)
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
         self.assertEqual(len(txns), 1)
 
     def test_one_settleDate(self):
         ofxpath = os.path.join('fixtures', 'fidelity-one-dtsettle.ofx')
         ofx = OfxSynchronizer.parse_file(ofxpath)
         sync = OfxSynchronizer(self.lgr)
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
         self.assertEqual(len(txns), 17)
 
 

@@ -30,7 +30,12 @@ import logging
 from fuzzywuzzy import process
 
 
-csv.register_dialect('ledger', delimiter=',', quoting=csv.QUOTE_ALL, escapechar="\\")
+csv.register_dialect(
+    'ledger',
+    delimiter=',',
+    quoting=csv.QUOTE_ALL,
+    escapechar="\\")
+
 
 def mk_ledger(ledger_file):
     if Ledger.available():
@@ -38,7 +43,8 @@ def mk_ledger(ledger_file):
     elif HLedger.available():
         return HLedger(ledger_file)
     elif LedgerPython.available():
-        # string_read=True works around http://bugs.ledger-cli.org/show_bug.cgi?id=973
+        # string_read=True works around
+        # http://bugs.ledger-cli.org/show_bug.cgi?id=973
         return LedgerPython(ledger_file, string_read=True)
     else:
         raise Exception("Neither ledger 3 nor hledger found!")
@@ -90,6 +96,7 @@ class MetaLedger(object):
     def __init__(self):
         self.payees = None
 
+
 class Ledger(MetaLedger):
     @staticmethod
     def available():
@@ -120,7 +127,9 @@ class Ledger(MetaLedger):
             self.p = Popen(self.args, bufsize=1, stdin=PIPE, stdout=PIPE,
                            universal_newlines=True, close_fds=True)
             self.q = Queue()
-            self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))
+            self.t = Thread(
+                target=enqueue_output, args=(
+                    self.p.stdout, self.q))
             self.t.daemon = True  # thread dies with the program
             self.t.start()
             # read output until prompt
@@ -157,8 +166,11 @@ class Ledger(MetaLedger):
             cmd = self.args + ["csv"] + cmd
             if os.name == 'nt':
                 cmd = MetaLedger.windows_clean(cmd)
-            return csv.reader(subprocess.check_output(cmd, universal_newlines=True).splitlines(), dialect='ledger')
-
+            return csv.reader(
+                subprocess.check_output(
+                    cmd,
+                    universal_newlines=True).splitlines(),
+                dialect='ledger')
 
     def check_transaction_by_id(self, key, value):
         q = ["-E", "meta", "%s=%s" % (key, Converter.clean_id(value))]
@@ -209,7 +221,8 @@ class LedgerPython(MetaLedger):
             self.payees = {}
             for xact in self.journal:
                 for post in xact.posts():
-                    self.add_payee(xact.payee, post.reported_account().fullname())
+                    self.add_payee(
+                        xact.payee, post.reported_account().fullname())
 
     def check_transaction_by_id(self, key, value):
         q = self.journal.query("-E meta %s=\"%s\"" %

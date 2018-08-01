@@ -27,6 +27,7 @@ from unittest import TestCase
 from nose.plugins.attrib import attr
 from mock import Mock
 
+
 @attr('generic')
 class TestOfxSync(TestCase):
     def test_fresh_sync(self):
@@ -40,51 +41,79 @@ class TestOfxSync(TestCase):
     def test_sync_order(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking_order.ofx')))
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        ofx = OfxParser.parse(
+            open(
+                os.path.join(
+                    'fixtures',
+                    'checking_order.ofx')))
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
         self.assertTrue(txns[0].date < txns[1].date and
                         txns[1].date < txns[2].date)
 
     def test_fully_synced(self):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxSynchronizer.parse_file(os.path.join('fixtures', 'checking.ofx'))
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        ofx = OfxSynchronizer.parse_file(
+            os.path.join('fixtures', 'checking.ofx'))
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
         self.assertEqual(txns, [])
 
     def test_partial_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'checking-partial.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxSynchronizer.parse_file(os.path.join('fixtures', 'checking.ofx'))
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        ofx = OfxSynchronizer.parse_file(
+            os.path.join('fixtures', 'checking.ofx'))
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
         self.assertEqual(len(txns), 1)
 
     def test_no_new_txns(self):
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         acct = Mock()
-        acct.download = Mock(return_value=open(os.path.join('fixtures', 'checking.ofx')))
+        acct.download = Mock(
+            return_value=open(
+                os.path.join(
+                    'fixtures',
+                    'checking.ofx')))
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 0)
 
     def test_all_new_txns(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         acct = Mock()
-        acct.download = Mock(return_value=open(os.path.join('fixtures', 'checking.ofx')))
+        acct.download = Mock(
+            return_value=open(
+                os.path.join(
+                    'fixtures',
+                    'checking.ofx')))
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
 
     def test_comment_txns(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxSynchronizer.parse_file(os.path.join('fixtures', 'comments.ofx'))
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+        ofx = OfxSynchronizer.parse_file(
+            os.path.join('fixtures', 'comments.ofx'))
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
         self.assertEqual(len(txns), 1)
 
     def test_sync_no_ledger(self):
         acct = Mock()
-        acct.download = Mock(return_value=open(os.path.join('fixtures', 'checking.ofx')))
+        acct.download = Mock(
+            return_value=open(
+                os.path.join(
+                    'fixtures',
+                    'checking.ofx')))
         sync = OfxSynchronizer(None)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
+
 
 @attr('generic')
 class TestCsvSync(TestCase):

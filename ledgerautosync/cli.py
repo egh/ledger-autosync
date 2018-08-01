@@ -84,6 +84,7 @@ def print_results(converter, ofx, ledger, txns, args):
         for pos in ofx.account.statement.positions:
             print(converter.format_position(pos))
 
+
 def sync(ledger, accounts, args):
     sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
     for acct in accounts:
@@ -102,7 +103,7 @@ def sync(ledger, accounts, args):
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
-        except:
+        except BaseException:
             sys.stderr.write("Caught exception processing %s\n" %
                              (acct.description))
             traceback.print_exc(file=sys.stderr)
@@ -110,9 +111,11 @@ def sync(ledger, accounts, args):
 
 def import_ofx(ledger, args):
     sync = OfxSynchronizer(ledger, hardcodeaccount=args.hardcodeaccount,
-                                   shortenaccount=args.shortenaccount)
+                           shortenaccount=args.shortenaccount)
     ofx = OfxSynchronizer.parse_file(args.PATH)
-    txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+    txns = sync.filter(
+        ofx.account.statement.transactions,
+        ofx.account.account_id)
     accountname = args.account
     if accountname is None:
         if ofx.account.institution is not None:
@@ -139,24 +142,33 @@ def import_ofx(ledger, args):
 
 def import_csv(ledger, args):
     if args.account is None:
-        raise Exception("When importing a CSV file, you must specify an account name.")
+        raise Exception(
+            "When importing a CSV file, you must specify an account name.")
     sync = CsvSynchronizer(ledger, payee_format=args.payee_format)
     accountname = args.account
     txns = sync.parse_file(args.PATH, accountname=args.account,
-                            unknownaccount=args.unknownaccount)
+                           unknownaccount=args.unknownaccount)
     if args.reverse:
         txns = reversed(txns)
     for txn in txns:
         print(txn.format(args.indent, args.assertions))
 
+
 def load_plugins(config_dir):
     plugin_dir = os.path.join(config_dir, 'ledger-autosync', 'plugins')
     if os.path.isdir(plugin_dir):
-        for plugin in filter(re.compile('.py$', re.IGNORECASE).search, os.listdir(plugin_dir)):
+        for plugin in filter(
+                re.compile(
+                    '.py$',
+                    re.IGNORECASE).search,
+                os.listdir(plugin_dir)):
             # Quiet loader
             import ledgerautosync.plugins
             path = os.path.join(plugin_dir, plugin)
-            imp.load_source('ledgerautosync.plugins.%s'%(os.path.splitext(plugin)[0]), path)
+            imp.load_source(
+                'ledgerautosync.plugins.%s' %
+                (os.path.splitext(plugin)[0]), path)
+
 
 def run(args=None, config=None):
     if args is None:
@@ -174,8 +186,13 @@ file')
 if importing from file, set account name for import')
     parser.add_argument('-l', '--ledger', type=str, default=None,
                         help='specify ledger file to READ for syncing')
-    parser.add_argument('-L', '--no-ledger', dest='no_ledger', action='store_true', default=False,
-                        help='do not de-duplicate against a ledger file')
+    parser.add_argument(
+        '-L',
+        '--no-ledger',
+        dest='no_ledger',
+        action='store_true',
+        default=False,
+        help='do not de-duplicate against a ledger file')
     parser.add_argument('-i', '--indent', type=int, default=4,
                         help='number of spaces to use for indentation')
     parser.add_argument('--initial', action='store_true', default=False,
@@ -183,11 +200,19 @@ if importing from file, set account name for import')
     parser.add_argument('--fid', type=int, default=None,
                         help='pass in fid value for OFX files that do not \
 supply it')
-    parser.add_argument('--hardcode-account', type=str, default=None, dest='hardcodeaccount',
-                        help='pass in hardcoded account number for OFX files \
+    parser.add_argument(
+        '--hardcode-account',
+        type=str,
+        default=None,
+        dest='hardcodeaccount',
+        help='pass in hardcoded account number for OFX files \
 to maintain ledger files without real account numbers')
-    parser.add_argument('--shorten-account', default=False, action='store_true', dest='shortenaccount',
-                        help='shorten all account numbers to last 4 digits \
+    parser.add_argument(
+        '--shorten-account',
+        default=False,
+        action='store_true',
+        dest='shortenaccount',
+        help='shorten all account numbers to last 4 digits \
 to maintain ledger files without full account numbers')
     parser.add_argument('--unknown-account', type=str, dest='unknownaccount',
                         default=None,
@@ -200,8 +225,12 @@ found by payee')
     parser.add_argument('--hledger', action='store_true', default=False,
                         help='force use of hledger (on by default if invoked \
                         as hledger-autosync)')
-    parser.add_argument('--payee-format', type=str, default=None, dest='payee_format',
-                        help="""Format string to use for generating the payee line.
+    parser.add_argument(
+        '--payee-format',
+        type=str,
+        default=None,
+        dest='payee_format',
+        help="""Format string to use for generating the payee line.
                         Substitutions can be written using {memo}, {payee}, {txntype}, {account} or {tferaction} for OFX.
                         If the input file is a CSV file, substitutions are written using the CSV file column names between {}.""")
     parser.add_argument('--python', action='store_true', default=False,
@@ -221,7 +250,8 @@ transactions')
 
     ledger_file = None
     if args.ledger and args.no_ledger:
-        raise LedgerAutosyncException('You cannot specify a ledger file and -L')
+        raise LedgerAutosyncException(
+            'You cannot specify a ledger file and -L')
     elif args.ledger:
         ledger_file = args.ledger
     else:
@@ -279,6 +309,7 @@ All transactions will be printed!\n")
             import_csv(ledger, args)
         else:
             import_ofx(ledger, args)
+
 
 if __name__ == '__main__':
     run()
