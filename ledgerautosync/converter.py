@@ -132,8 +132,8 @@ class Transaction(object):
             aux_date_str = "=%s" % (self.aux_date.strftime("%Y/%m/%d"))
         retval += "%s%s%s%s\n" % (self.date.strftime("%Y/%m/%d"),
                                   aux_date_str, cleared_str, self.payee)
-        for k, v in self.metadata.items():
-            retval += "%s; %s: %s\n" % (" " * indent, k, v)
+        for k in sorted(self.metadata.keys()):
+            retval += "%s; %s: %s\n" % (" " * indent, k, self.metadata[k])
         for posting in self.postings:
             retval += posting.format(indent, assertions)
         return retval
@@ -167,8 +167,8 @@ class Posting(object):
         if self.unit_price is not None:
             retval = "%s @ %s" % (retval, self.unit_price.format())
         retval += "\n"
-        for k, v in self.metadata.items():
-            retval += "%s; %s: %s\n" % (" " * indent, k, v)
+        for k in sorted(self.metadata.keys()):
+            retval += "%s; %s: %s\n" % (" " * indent, k, self.metadata[k])
         return retval
 
 

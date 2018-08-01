@@ -152,8 +152,8 @@ class TestAmazonConverter(CsvConverterTestCase):
                 converter.convert(next(reader)).format(),
                 """2016/01/29 Best Soap Ever
     Foo                                                    $21.90
-    ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
     ; csvid: amazon.123-4567890-1234567
+    ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
     Expenses:Misc                                         -$21.90
 """)
 
@@ -168,8 +168,8 @@ class TestAmazonConverter2(CsvConverterTestCase):
                 converter.convert(next(reader)).format(),
                 """2017/06/05 Test " double quote
     Foo                                                     $9.99
-    ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=111-1111111-1111111
     ; csvid: amazon.111-1111111-1111111
+    ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=111-1111111-1111111
     Expenses:Misc                                          -$9.99
 """)
 
