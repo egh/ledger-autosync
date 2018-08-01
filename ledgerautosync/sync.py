@@ -19,7 +19,6 @@
 
 from ofxparse import OfxParser
 from ledgerautosync.converter import CsvConverter
-from ofxparse.ofxparse import InvestmentTransaction
 from ofxparse import OfxParserException
 import logging
 import csv

@@ -192,7 +192,7 @@ class LedgerPython(MetaLedger):
     @staticmethod
     def available():
         try:
-            import ledger
+            import ledger  # noqa: F401
             return True
         except ImportError:
             return False
@@ -267,6 +267,6 @@ class HLedger(MetaLedger):
             self.payees = {}
             cmd = ["reg", "-O", "csv"]
             r = csv.DictReader(self.run(cmd).splitlines())
-            headers = next(r)
+            next(r)  # skip headers
             for line in r:
                 self.add_payee(line['description'], line['account'])

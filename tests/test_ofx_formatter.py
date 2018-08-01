@@ -16,11 +16,11 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
+# flake8: noqa E501
 
 from ledgerautosync.converter import OfxConverter, SecurityList
 from ledgerautosync.ledgerwrap import Ledger
 import os.path
-from decimal import Decimal
 
 from ofxparse import OfxParser
 

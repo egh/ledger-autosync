@@ -16,6 +16,7 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
+# flake8: noqa E501
 
 from ledgerautosync import LedgerAutosyncException
 from ledgerautosync.cli import run, find_ledger_file
@@ -23,7 +24,6 @@ from ledgerautosync.ledgerwrap import Ledger, LedgerPython, HLedger
 from ofxclient.config import OfxConfig
 import os.path
 import tempfile
-import sys
 from io import StringIO
 
 from unittest import TestCase

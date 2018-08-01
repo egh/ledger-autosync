@@ -83,10 +83,7 @@ class SecurityList(object):
     def __iter__(self):
         return self
 
-    def __next__(self):         # Py3 iterable
-        return next(self._iter)
-
-    def __next__(self):             # Python 2
+    def __next__(self):
         return next(self._iter)
 
     def __len__(self):
@@ -568,7 +565,8 @@ class PaypalConverter(CsvConverter):
     def __init__(self, *args, **kwargs):
         super(PaypalConverter, self).__init__(*args, **kwargs)
         if self.payee_format is None:
-            self.payee_format = "{Name} {To Email Address} {Item Title} ID: {Transaction ID}, {Type}"
+            self.payee_format = \
+                "{Name} {To Email Address} {Item Title} ID: {Transaction ID}, {Type}"
 
     def get_csv_id(self, row):
         return "paypal.%s" % (Converter.clean_id(row['Transaction ID']))
@@ -583,7 +581,8 @@ class PaypalConverter(CsvConverter):
             net = Decimal(row['Net'].replace(',', ''))
             gross = Decimal(row['Gross'].replace(',', ''))
 
-            if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
+            if row['Type'] == "Add Funds from a Bank Account" or \
+               row['Type'] == "Charge From Debit Card":
                 postings = [
                     Posting(
                         self.name,
@@ -643,7 +642,8 @@ class PaypalAlternateConverter(CsvConverter):
             return ""
         else:
             posting_metadata = {"csvid": self.get_csv_id(row)}
-            if row['Type'] == "Add Funds from a Bank Account" or row['Type'] == "Charge From Debit Card":
+            if row['Type'] == "Add Funds from a Bank Account" \
+               or row['Type'] == "Charge From Debit Card":
                 postings = [
                     Posting(
                         self.name,
@@ -705,7 +705,7 @@ class AmazonConverter(CsvConverter):
                     self.name,
                     self.mk_amount(row),
                     metadata={
-                        "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s" %
+                        "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s" %  # noqa E501
                         (row['Order ID']),
                         "csvid": self.get_csv_id(row)}),
                 Posting(

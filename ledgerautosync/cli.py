@@ -22,9 +22,8 @@
 
 from ofxclient.config import OfxConfig
 import argparse
-import csv
 from ledgerautosync import LedgerAutosyncException
-from ledgerautosync.converter import OfxConverter, CsvConverter, AUTOSYNC_INITIAL, \
+from ledgerautosync.converter import OfxConverter, AUTOSYNC_INITIAL, \
     ALL_AUTOSYNC_INITIAL, UNKNOWN_BANK_ACCOUNT
 from ledgerautosync.converter import SecurityList
 from ledgerautosync.sync import OfxSynchronizer, CsvSynchronizer
@@ -145,7 +144,6 @@ def import_csv(ledger, args):
         raise Exception(
             "When importing a CSV file, you must specify an account name.")
     sync = CsvSynchronizer(ledger, payee_format=args.payee_format)
-    accountname = args.account
     txns = sync.parse_file(args.PATH, accountname=args.account,
                            unknownaccount=args.unknownaccount)
     if args.reverse:
@@ -163,7 +161,7 @@ def load_plugins(config_dir):
                     re.IGNORECASE).search,
                 os.listdir(plugin_dir)):
             # Quiet loader
-            import ledgerautosync.plugins
+            import ledgerautosync.plugins  # noqa: F401
             path = os.path.join(plugin_dir, plugin)
             imp.load_source(
                 'ledgerautosync.plugins.%s' %
@@ -230,9 +228,11 @@ found by payee')
         type=str,
         default=None,
         dest='payee_format',
-        help="""Format string to use for generating the payee line.
-                        Substitutions can be written using {memo}, {payee}, {txntype}, {account} or {tferaction} for OFX.
-                        If the input file is a CSV file, substitutions are written using the CSV file column names between {}.""")
+        help="""Format string to use for generating the payee line. Substitutions
+        can be written using {memo}, {payee}, {txntype}, {account} or
+        {tferaction} for OFX. If the input file is a CSV file,
+        substitutions are written using the CSV file column names
+        between {}.""")
     parser.add_argument('--python', action='store_true', default=False,
                         help='use the ledger python interface')
     parser.add_argument('--slow', action='store_true', default=False,

@@ -16,8 +16,10 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
+# flake8: noqa E501
 
-from ledgerautosync.converter import Converter, CsvConverter, AmazonConverter, MintConverter, PaypalConverter, PaypalAlternateConverter, Amount, Posting
+from ledgerautosync.converter import CsvConverter, AmazonConverter, MintConverter, \
+    PaypalConverter, PaypalAlternateConverter, Amount, Posting
 from decimal import Decimal
 import hashlib
 import csv
