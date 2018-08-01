@@ -39,6 +39,7 @@ Features
 -  import of downloaded OFX files, for banks not supporting automatic
    download
 -  import of downloaded CSV files from Paypal, Amazon and Mint
+-  any CSV file can be supported via plugins
 
 Platforms
 ---------
@@ -141,19 +142,19 @@ those transactions in your ledger.
 How it works
 ------------
 
-ledger-autosync stores a unique identifier, (for OFX files, this is a
-unique ID provided by your institution for each transaction), as
-metadata in each transaction. When syncing with your bank, it will
-check if the transaction exists by running the ledger or hledger
+ledger-autosync stores a unique identifier as metadata with each
+transaction. (For OFX files, this is a unique ID provided by your
+institution for each transaction.) When syncing with your bank, it
+will check if the transaction exists by running the ledger or hledger
 command. If the transaction exists, it does nothing. If it does not
 exist, the transaction is printed to stdout.
 
 ofxid/csvid metadata tag
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-ledger-autosync stores a metatag with every posting that it outputs to support
-deduplication. This metadata tag is either ``ofxid`` (for OFX imports) or
-``csvid`` for CSV imports.
+ledger-autosync stores a metatag with every posting that it outputs to
+support deduplication. This metadata tag is either ``ofxid`` (for OFX
+imports) or ``csvid`` for CSV imports.
 
 Pre-0.4.0 versions of ledger-autosync put this metadata tag in a
 slightly incorrect place, associating the metadata tag with the
@@ -196,6 +197,7 @@ because they seem old.
 If you are a developer, you should fine it easy enough to add a new
 CSV format to ledger-autosync. See, for example, the ``MintConverter``
 class in the ``ledgerautosync/converter.py`` file in this repository.
+See below for how to add these as plugins.
 
 Assertions
 ----------
@@ -304,17 +306,17 @@ python bindings
 ---------------
 
 If the ledger python bindings are available, ledger-autosync can use
-them if you pass in the ``--python`` argument.Note, however, they can
+them if you pass in the ``--python`` argument. Note, however, they can
 be buggy, which is why they are disabled by default
 
-Plugin support (Experimental)
------------------------------
+Plugin support
+--------------
 
-ledger-autosync has experimental support for plugins. By placing
-python files a directory named ``~/.config/ledger-autosync/plugins/``
-it should be possible to automatically load python files from there.
-This allows you to extend the csv converters with your own code. For
-example, given the input CSV file:
+ledger-autosync has support for plugins. By placing python files a
+directory named ``~/.config/ledger-autosync/plugins/`` it should be
+possible to automatically load python files from there. This allows
+you to extend the csv converters with your own code. For example,
+given the input CSV file:
 
 ::
 
@@ -362,6 +364,9 @@ Running ``ledger-autosync file.csv -a assets:bank`` will generate:
 
 For more examples, see
 https://gitlab.com/egh/ledger-autosync/blob/master/ledgerautosync/converter.py#L421
+
+If you develop a CSV converter that you think will be generally
+useful, please consider submitting a pull request.
 
 Testing
 -------
