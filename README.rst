@@ -13,12 +13,13 @@ better than all the alternatives I have seen.
 News
 ----
 
-6 May 2017
-~~~~~~~~~~
+v1.0.0
+~~~~~~
 
-Versions of ledger-autosync before 0.4 printed the ofxid in a slightly
-incorrect position. This should not effect usage of the program, but
-if you would like to correct the error, see below for more details.
+Versions of ledger-autosync before 1.0.0 printed the ofxid in a
+slightly incorrect position. This should not effect usage of the
+program, but if you would like to correct the error, see below for
+more details.
 
 Features
 --------
@@ -156,7 +157,7 @@ ledger-autosync stores a metatag with every posting that it outputs to
 support deduplication. This metadata tag is either ``ofxid`` (for OFX
 imports) or ``csvid`` for CSV imports.
 
-Pre-0.4.0 versions of ledger-autosync put this metadata tag in a
+Pre-1.0.0 versions of ledger-autosync put this metadata tag in a
 slightly incorrect place, associating the metadata tag with the
 transaction itself, and not simply one posting. This should not effect
 the usage of ledger-autosync, but if you would like to correct your
