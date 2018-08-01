@@ -2,6 +2,7 @@ ledger-autosync
 ===============
 
 .. image:: https://travis-ci.org/egh/ledger-autosync.svg?branch=master
+  :target: https://travis-ci.org/egh/ledger-autosync
 
 ledger-autosync is a program to pull down transactions from your bank
 and create `ledger <http://ledger-cli.org/>`__ transactions for them.
