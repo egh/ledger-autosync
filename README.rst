@@ -1,22 +1,24 @@
 ledger-autosync
 ===============
 
-ledger-autosync is a program to pull down transactions from your bank and create
-`ledger <http://ledger-cli.org/>`__ transactions for them. It is designed to
-only create transactions that are not already present in your ledger files (that
-is, it will deduplicate transactions). This should make it comparable to some of
-the automated synchronization features available in products like GnuCash, Mint,
-etc. In fact, ledger-autosync performs OFX import and synchronization better
-than all the alternatives I have seen.
+ledger-autosync is a program to pull down transactions from your bank
+and create `ledger <http://ledger-cli.org/>`__ transactions for them.
+It is designed to only create transactions that are not already
+present in your ledger files (that is, it will deduplicate
+transactions). This should make it comparable to some of the automated
+synchronization features available in products like GnuCash, Mint,
+etc. In fact, ledger-autosync performs OFX import and synchronization
+better than all the alternatives I have seen.
 
 News
 ----
 
 6 May 2017
 ~~~~~~~~~~
-Versions of ledger-autosync before 0.4 printed the ofxid in a slightly incorrect
-position. This should not effect usage of the program, but if you would like to
-correct the error, see below for more details.
+
+Versions of ledger-autosync before 0.4 printed the ofxid in a slightly
+incorrect position. This should not effect usage of the program, but
+if you would like to correct the error, see below for more details.
 
 Features
 --------
@@ -41,10 +43,11 @@ Features
 Platforms
 ---------
 
-ledger-autosync is developed on Linux with ledger 3 and python 3; it has been
-tested on Windows (although it will run slower) and should run on OS X. It
-requires ledger 3 or hledger, but it should run faster with ledger, because it
-will not need to start a command to check every transaction.
+ledger-autosync is developed on Linux with ledger 3 and python 3; it
+has been tested on Windows (although it will run slower) and should
+run on OS X. It requires ledger 3 or hledger, but it should run faster
+with ledger, because it will not need to start a command to check
+every transaction.
 
 
 Quickstart
@@ -89,11 +92,11 @@ from your bank and run ledger-autosync against it:
     $ ledger-autosync download.ofx
 
 This should print a number of transactions to stdout. If you add these
-transactions to your default ledger file (whatever is read when you run
-``ledger`` without arguments), you should find that if you run
-ledger-autosync again, it should print no transactions. This is because
-of the deduplicating feature: only new transactions will be printed
-for insertion into your ledger files.
+transactions to your default ledger file (whatever is read when you
+run ``ledger`` without arguments), you should find that if you run
+ledger-autosync again, it should print no transactions. This is
+because of the deduplicating feature: only new transactions will be
+printed for insertion into your ledger files.
 
 Using the ofx protocol for automatic download
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -113,9 +116,10 @@ When you have added your institution, quit ofxclient.
 setting up OFX direct connect. Although this seems unusual, please be
 aware of this.)
 
-Edit the generated ``~/ofxclient.ini`` file. Change the ``description``
-field of your accounts to the name used in ledger. Optionally, move the
-``~/ofxclient.ini`` file to your ``~/.config`` directory.
+Edit the generated ``~/ofxclient.ini`` file. Change the
+``description`` field of your accounts to the name used in ledger.
+Optionally, move the ``~/ofxclient.ini`` file to your ``~/.config``
+directory.
 
 Run:
 
@@ -124,8 +128,8 @@ Run:
     ledger-autosync
 
 This will download a maximum of 90 days previous activity from your
-accounts. The output will be in ledger format and printed to stdout. Add
-this output to your ledger file. When that is done, you can call:
+accounts. The output will be in ledger format and printed to stdout.
+Add this output to your ledger file. When that is done, you can call:
 
 ::
 
@@ -139,10 +143,10 @@ How it works
 
 ledger-autosync stores a unique identifier, (for OFX files, this is a
 unique ID provided by your institution for each transaction), as
-metadata in each transaction. When syncing with your bank, it will check
-if the transaction exists by running the ledger or hledger command. If
-the transaction exists, it does nothing. If it does not exist, the
-transaction is printed to stdout.
+metadata in each transaction. When syncing with your bank, it will
+check if the transaction exists by running the ledger or hledger
+command. If the transaction exists, it does nothing. If it does not
+exist, the transaction is printed to stdout.
 
 ofxid/csvid metadata tag
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -151,11 +155,12 @@ ledger-autosync stores a metatag with every posting that it outputs to support
 deduplication. This metadata tag is either ``ofxid`` (for OFX imports) or
 ``csvid`` for CSV imports.
 
-Pre-0.4.0 versions of ledger-autosync put this metadata tag in a slightly
-incorrect place, associating the metadata tag with the transaction itself, and
-not simply one posting. This should not effect the usage of ledger-autosync, but
-if you would like to correct your ledger files, there is a small python script
-``fix_ofxid.py`` included with ledger-autosync. It can be run as:
+Pre-0.4.0 versions of ledger-autosync put this metadata tag in a
+slightly incorrect place, associating the metadata tag with the
+transaction itself, and not simply one posting. This should not effect
+the usage of ledger-autosync, but if you would like to correct your
+ledger files, there is a small python script ``fix_ofxid.py`` included
+with ledger-autosync. It can be run as:
 
 ::
 
@@ -166,40 +171,40 @@ and will print a corrected file to stdout.
 Syncing a CSV file
 ------------------
 
-If you have a CSV file, you may also be able to import it using a recent
-(installed via source) version of ledger-autosync. ledger-autosync can
-currently process CSV files as provided by Paypal, Amazon, or Mint. You
-can process the CSV file as follows:
+If you have a CSV file, you may also be able to import it using a
+recent (installed via source) version of ledger-autosync.
+ledger-autosync can currently process CSV files as provided by Paypal,
+Amazon, or Mint. You can process the CSV file as follows:
 
 ::
 
     ledger-autosync /path/to/file.csv -a Assets:Paypal
 
-With Amazon and Paypal CSV files, each row includes a unique identifier,
-so ledger-autosync will be able to deduplicate against any previously
-imported entries in your ledger files.
+With Amazon and Paypal CSV files, each row includes a unique
+identifier, so ledger-autosync will be able to deduplicate against any
+previously imported entries in your ledger files.
 
-With Mint, a unique identifier based on the data in the row is generated
-and stored. If future downloads contain identical rows, they will be
-deduplicated. This method is probably not as robust as a method based on
-unique ids, but Mint does not provide a unique id, and it should be
-better than nothing. It is likely to generate false negatives:
-transactions that seem new, but are in fact old. It will not generate
-false positives: transactions that are not generated because they seem
-old.
+With Mint, a unique identifier based on the data in the row is
+generated and stored. If future downloads contain identical rows, they
+will be deduplicated. This method is probably not as robust as a
+method based on unique ids, but Mint does not provide a unique id, and
+it should be better than nothing. It is likely to generate false
+negatives: transactions that seem new, but are in fact old. It will
+not generate false positives: transactions that are not generated
+because they seem old.
 
-If you are a developer, you should fine it easy enough to add a new CSV
-format to ledger-autosync. See, for example, the ``MintConverter`` class
-in the ``ledgerautosync/converter.py`` file in this repository.
+If you are a developer, you should fine it easy enough to add a new
+CSV format to ledger-autosync. See, for example, the ``MintConverter``
+class in the ``ledgerautosync/converter.py`` file in this repository.
 
 Assertions
 ----------
 
-If you supply the ``--assertions`` flag, ledger-autosync will also print
-out valid ledger assertions based on your bank balances at the time of
-the sync. These otherwise empty transactions tell ledger that your
-balance *should* be something at a given time, and if not, ledger will
-fail with an error.
+If you supply the ``--assertions`` flag, ledger-autosync will also
+print out valid ledger assertions based on your bank balances at the
+time of the sync. These otherwise empty transactions tell ledger that
+your balance *should* be something at a given time, and if not, ledger
+will fail with an error.
 
 401k and investment accounts
 ----------------------------
@@ -209,8 +214,8 @@ state of it. You will need OFX files (or an OFX protocol connection as
 set up by ofxclient) provided by your 401k.
 
 In general, your 401k account will consist of buy transactions,
-transfers and reinvestments. The type will be printed in the payee line
-after a colon (``:``)
+transfers and reinvestments. The type will be printed in the payee
+line after a colon (``:``)
 
 The buy transactions are your contributions to the 401k. These will be
 printed as follows:
@@ -226,8 +231,9 @@ This means that you bought (contributed) $138.32 worth of FOOBAR (your
 investment fund) at the price of $123.123456. The money to buy the
 investment came from your income. In ledger-autosync, the
 ``Assets:Retirement:401k`` account is the one specified using the
-``--account`` command line, or configured in your ``ofxclient.ini``. The
-``Income:Salary`` is specified by the ``--unknown-account`` option.
+``--account`` command line, or configured in your ``ofxclient.ini``.
+The ``Income:Salary`` is specified by the ``--unknown-account``
+option.
 
 If the transaction is a “transfer” transaction, this usually means
 either a fee or a change in your investment option:
@@ -239,8 +245,8 @@ either a fee or a change in your investment option:
       ; ofxid: 1234
       Transfer                                                  $198.69
 
-You will need to examine your statements to determine if this was a fee
-or a real transfer back into your 401k.
+You will need to examine your statements to determine if this was a
+fee or a real transfer back into your 401k.
 
 Another type of transaction is a “reinvest” transaction:
 
@@ -269,23 +275,25 @@ ledger-autosync would stop before going back to 180 days without the
 payee format
 ------------
 
-By default, ledger-autosync attempts to generate a decent payee line (the
-information that follows the date in a ledger transaction). Unfortunately,
-because of differences in preference and in the format of OFX files, it is not
-always possible to generate the user’s preferred payee format. ledger-autosync
-supports a ``payee-format`` option that can be used to generate your preferred
-payee line. This option is of the format ``Text {memo}``, where ``memo`` is a
-substitution based on the value of the transaction. Available substitutions are
-``memo``, ``payee``, ``txntype``, ``account`` and ``tferaction``. For example:
+By default, ledger-autosync attempts to generate a decent payee line
+(the information that follows the date in a ledger transaction).
+Unfortunately, because of differences in preference and in the format
+of OFX files, it is not always possible to generate the user’s
+preferred payee format. ledger-autosync supports a ``payee-format``
+option that can be used to generate your preferred payee line. This
+option is of the format ``Text {memo}``, where ``memo`` is a
+substitution based on the value of the transaction. Available
+substitutions are ``memo``, ``payee``, ``txntype``, ``account`` and
+``tferaction``. For example:
 
 ::
 
    $ ledger-autosync --payee-format "Memo: {memo}"
    2011/03/31 Memo: DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
 
-This option is also available for CSV conversion. For CSV files, you can
-substitution any of the values of the rows in the CSV file by name. For
-instance, for Paypal files:
+This option is also available for CSV conversion. For CSV files, you
+can substitution any of the values of the rows in the CSV file by
+name. For instance, for Paypal files:
 
 ::
 
@@ -295,17 +303,18 @@ instance, for Paypal files:
 python bindings
 ---------------
 
-If the ledger python bindings are available, ledger-autosync can use them if you
-pass in the ``--python`` argument.Note, however, they can be buggy, which is why
-they are disabled by default
+If the ledger python bindings are available, ledger-autosync can use
+them if you pass in the ``--python`` argument.Note, however, they can
+be buggy, which is why they are disabled by default
 
 Plugin support (Experimental)
 -----------------------------
 
-ledger-autosync has experimental support for plugins. By placing python files a
-directory named ``~/.config/ledger-autosync/plugins/`` it should be possible to
-automatically load python files from there. This allows you to extend the csv
-converters with your own code. For example, given the input CSV file:
+ledger-autosync has experimental support for plugins. By placing
+python files a directory named ``~/.config/ledger-autosync/plugins/``
+it should be possible to automatically load python files from there.
+This allows you to extend the csv converters with your own code. For
+example, given the input CSV file:
 
 ::
 
@@ -358,8 +367,8 @@ Testing
 -------
 
 ledger-autosync uses nose for tests. To test, run nosetests in the
-project directory. This will test the ledger, hledger and ledger-python
-interfaces. To test a single interface, use nosetests -a hledger. To
-test the generic code, use nosetests -a generic. To test both, use
-nosetests -a generic -a hledger. For some reason nosetests -a '!hledger'
-will not work.
+project directory. This will test the ledger, hledger and
+ledger-python interfaces. To test a single interface, use nosetests -a
+hledger. To test the generic code, use nosetests -a generic. To test
+both, use nosetests -a generic -a hledger. For some reason
+nosetests -a '!hledger' will not work.
