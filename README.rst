@@ -368,6 +368,7 @@ Running ``ledger-autosync file.csv -a assets:bank`` will generate:
 
 For more examples, see
 https://gitlab.com/egh/ledger-autosync/blob/master/ledgerautosync/converter.py#L421
+or the `example plugins directory <examples/plugins>`_.
 
 If you develop a CSV converter that you think will be generally
 useful, please consider submitting a pull request.
