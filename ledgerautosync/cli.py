@@ -244,7 +244,7 @@ or ledger (python) will be used by ledger-autosync to check for previous \
 transactions')
     parser.add_argument('--reverse', action='store_true', default=False,
                         help='print CSV transactions in reverse order')
-    parser.add_argument('-c', '--config', type=str, default=None,
+    parser.add_argument('-o', '--ofxconfig', type=str, default=None,
                         help='specify config file for ofxclient')
     args = parser.parse_args(args)
     if sys.argv[0][-16:] == "hledger-autosync":
@@ -295,10 +295,10 @@ All transactions will be printed!\n")
 
     if args.PATH is None:
         if config is None:
-            if args.config is None:
+            if args.ofxconfig is None:
                 config_file = os.path.join(config_dir, 'ofxclient.ini')
             else:
-                config_file = args.config
+                config_file = args.ofxconfig
             if (os.path.exists(config_file)):
                 config = OfxConfig(file_name=config_file)
             else:
