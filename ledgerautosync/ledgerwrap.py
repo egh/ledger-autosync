@@ -174,6 +174,15 @@ class Ledger(MetaLedger):
             for line in r:
                 self.add_payee(line[2], line[3])
 
+    def get_autosync_payee(self, payee, account):
+        q = [account, "--last", "1", "--format", "%(quoted(payee))\n",
+             "--limit", 'tag("AutosyncPayee") == "%s"' % (payee)]
+        r = self.run(q)
+        try:
+            return next(r)[0]
+        except StopIteration:
+            return payee
+
 
 class LedgerPython(MetaLedger):
     @staticmethod
