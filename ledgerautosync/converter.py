@@ -171,6 +171,12 @@ class Posting(object):
             retval += "%s; %s: %s\n" % (" " * indent, k, self.metadata[k])
         return retval
 
+    def clone_inverted(self, account, asserted=None, metadata={}):
+        return Posting(account,
+                       self.amount.clone_inverted(),
+                       asserted=asserted,
+                       unit_price=self.unit_price,
+                       metadata=metadata)
 
 class Amount(EasyEquality):
     def __init__(self, number, currency, reverse=False, unlimited=False):
@@ -201,6 +207,11 @@ class Amount(EasyEquality):
             # USD comes after
             return "%s%s %s" % (prefix, number, currency)
 
+    def clone_inverted(self):
+        return Amount(self.number,
+                      self.currency,
+                      reverse=not(self.reverse),
+                      unlimited=self.unlimited)
 
 class Converter(object):
     @staticmethod
@@ -356,25 +367,22 @@ class OfxConverter(Converter):
             initbal = statement.balance
             for txn in statement.transactions:
                 initbal -= txn.amount
-            return Transaction(
-                date=statement.start_date,
-                payee="--Autosync Initial Balance",
-                cleared=True,
-                postings=[
-                    Posting(
+
+            posting = Posting(
                         self.name,
                         Amount(
                             initbal,
                             currency=self.currency),
                         metadata={
-                            "ofxid": self.mk_ofxid(AUTOSYNC_INITIAL)}),
-                    Posting(
-                        "Assets:Equity",
-                        Amount(
-                            initbal,
-                            currency=self.currency,
-                            reverse=True)).format(
-                                self.indent)],
+                            "ofxid": self.mk_ofxid(AUTOSYNC_INITIAL)})
+
+            return Transaction(
+                date=statement.start_date,
+                payee="--Autosync Initial Balance",
+                cleared=True,
+                postings=[
+                    posting,
+                    posting.clone_inverted("Assets:Equity").format(self.indent)],
             ).format(
                 self.indent)
         else:
@@ -399,14 +407,17 @@ class OfxConverter(Converter):
         posting_metadata = {"ofxid": ofxid}
 
         if isinstance(txn, OfxTransaction):
+            posting = Posting(self.name,
+                              Amount(txn.amount, self.currency),
+                              metadata=posting_metadata)
             return Transaction(
-                date=txn.date, payee=self.format_payee(txn), postings=[
-                    Posting(
-                        self.name, Amount(
-                            txn.amount, self.currency), metadata=posting_metadata), Posting(
-                        self.mk_dynamic_account(
-                            self.format_payee(txn), exclude=self.name), Amount(
-                            txn.amount, self.currency, reverse=True))])
+                date=txn.date,
+                payee=self.format_payee(txn),
+                postings=[
+                    posting,
+                    posting.clone_inverted(
+                        self.mk_dynamic_account(self.format_payee(txn),
+                                                exclude=self.name))])
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
@@ -438,12 +449,7 @@ class OfxConverter(Converter):
                     posting1 = Posting(acct1,
                                        Amount(txn.total, self.currency),
                                        metadata=posting_metadata)
-                    posting2 = Posting(
-                        acct2,
-                        Amount(
-                            txn.total,
-                            self.currency,
-                            reverse=True))
+                    posting2 = posting1.clone_inverted(acct2)
                 else:
                     # ???
                     pass
@@ -583,30 +589,21 @@ class PaypalConverter(CsvConverter):
 
             if row['Type'] == "Add Funds from a Bank Account" or \
                row['Type'] == "Charge From Debit Card":
-                postings = [
-                    Posting(
-                        self.name,
-                        Amount(net, currency),
-                        metadata=posting_metadata
-                    ),
-                    Posting(
-                        "Transfer:Paypal",
-                        Amount(net, currency, reverse=True)
-                    )]
+                posting = Posting(self.name,
+                                  Amount(net, currency),
+                                  metadata=posting_metadata)
+                postings = [posting,
+                            posting.clone_inverted("Transfer:Paypal")]
             else:
+                posting = Posting(self.name,
+                                  Amount(gross, currency),
+                                  metadata=posting_metadata)
                 postings = [
-                    Posting(
-                        self.name,
-                        Amount(gross, currency),
-                        metadata=posting_metadata
-                    ),
-                    Posting(
-                        # TODO Our payees are breaking the payee search in
-                        # mk_dynamic_account
-                        "Expenses:Misc",
-                        # self.mk_dynamic_account(payee, exclude=self.name),
-                        Amount(gross, currency, reverse=True)
-                    )]
+                    posting,
+                    # TODO Our payees are breaking the payee search in
+                    # mk_dynamic_account
+                    # self.mk_dynamic_account(payee, exclude=self.name),
+                    posting.clone_inverted("Expenses:Misc")]
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
                 payee=self.format_payee(row),
@@ -642,33 +639,19 @@ class PaypalAlternateConverter(CsvConverter):
             return ""
         else:
             posting_metadata = {"csvid": self.get_csv_id(row)}
+            posting = Posting(self.name,
+                              self.mk_amount(row),
+                              metadata=posting_metadata)
             if row['Type'] == "Add Funds from a Bank Account" \
                or row['Type'] == "Charge From Debit Card":
-                postings = [
-                    Posting(
-                        self.name,
-                        self.mk_amount(row),
-                        metadata=posting_metadata),
-                    Posting(
-                        "Transfer:Paypal",
-                        self.mk_amount(
-                            row,
-                            reverse=True))]
+
+                posting2_account="Transfer:Paypal"
             else:
-                postings = [
-                    Posting(
-                        self.name,
-                        self.mk_amount(row),
-                        metadata=posting_metadata),
-                    Posting(
-                        "Expenses:Misc",
-                        self.mk_amount(
-                            row,
-                            reverse=True))]
+                posting2_account="Expenses:Misc"
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
                 payee=self.format_payee(row),
-                postings=postings)
+                postings=[posting,posting.clone_inverted(posting2_account)])
 
 
 class AmazonConverter(CsvConverter):
@@ -695,24 +678,21 @@ class AmazonConverter(CsvConverter):
         return "amazon.%s" % (Converter.clean_id(row['Order ID']))
 
     def convert(self, row):
-        return Transaction(
-            date=datetime.datetime.strptime(
-                row['Order Date'],
-                "%m/%d/%y"),
-            payee=row['Title'],
-            postings=[
-                Posting(
+        posting = Posting(
                     self.name,
                     self.mk_amount(row),
                     metadata={
                         "url": "https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=%s" %  # noqa E501
                         (row['Order ID']),
-                        "csvid": self.get_csv_id(row)}),
-                Posting(
-                    "Expenses:Misc",
-                    self.mk_amount(
-                        row,
-                        reverse=True))])
+                        "csvid": self.get_csv_id(row)})
+
+        return Transaction(
+            date=datetime.datetime.strptime(
+                row['Order Date'],
+                "%m/%d/%y"),
+            payee=row['Title'],
+            postings=[posting,
+                      posting.clone_inverted("Expenses:Misc")])
 
 
 class MintConverter(CsvConverter):
@@ -737,21 +717,17 @@ class MintConverter(CsvConverter):
         postings = []
         posting_metadata = {"csvid": "mint.%s" % (self.get_csv_id(row))}
         if (row['Transaction Type'] == 'credit'):
-            postings = [Posting(account, self.mk_amount(row, reverse=True),
-                                metadata=posting_metadata),
-                        Posting(row['Category'], self.mk_amount(row))]
+            posting = Posting(account,
+                              self.mk_amount(row, reverse=True),
+                              metadata=posting_metadata)
+            postings = [posting,
+                        posting.clone_inverted(row['Category'])]
         else:
-            postings = [
-                Posting(
-                    account,
-                    self.mk_amount(row),
-                    metadata=posting_metadata),
-                Posting(
-                    "Expenses:%s" %
-                    (row['Category']),
-                    self.mk_amount(
-                        row,
-                        reverse=True))]
+            posting = Posting(account,
+                              self.mk_amount(row),
+                              metadata=posting_metadata)
+            postings = [posting,
+                        posting.clone_inverted("Expenses:%s" % (row['Category']))]
 
         return Transaction(
             date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
