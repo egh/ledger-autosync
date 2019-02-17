@@ -10,7 +10,7 @@ keyring==12.2.0
 lxml==4.2.1
 mock==2.0.0
 nose==1.3.7
-ofxclient==2.0.3
+ofxclient==2.0.4
 ofxhome==0.3.3
 ofxparse==0.17
 pbr==4.0.2
