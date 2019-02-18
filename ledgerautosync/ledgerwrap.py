@@ -225,6 +225,9 @@ class LedgerPython(MetaLedger):
                                (key, Converter.clean_id(value)))
         return len(q) > 0
 
+    def get_autosync_payee(self, payee, account):
+        raise Exception("not implemented!")
+
 
 class HLedger(MetaLedger):
     @staticmethod
@@ -266,3 +269,6 @@ class HLedger(MetaLedger):
             next(r)  # skip headers
             for line in r:
                 self.add_payee(line['description'], line['account'])
+
+    def get_autosync_payee(self, payee, account):
+        raise Exception("not implemented!")
