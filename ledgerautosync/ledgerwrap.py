@@ -226,7 +226,8 @@ class LedgerPython(MetaLedger):
         return len(q) > 0
 
     def get_autosync_payee(self, payee, account):
-        raise Exception("not implemented!")
+        logging.error("payee lookup not implemented for LedgerPython, using raw payee")
+        return payee
 
 
 class HLedger(MetaLedger):
@@ -271,4 +272,5 @@ class HLedger(MetaLedger):
                 self.add_payee(line['description'], line['account'])
 
     def get_autosync_payee(self, payee, account):
-        raise Exception("not implemented!")
+        logging.error("payee lookup not implemented for HLedger, using raw payee")
+        return payee
