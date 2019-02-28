@@ -55,7 +55,7 @@ found."""
         return None
 
 
-def print_results(converter, ofx, ledger, txns, args):
+def print_results(converter, ofx, account_idx, ledger, txns, args):
     """
     This function is the final common pathway of program:
 
@@ -69,18 +69,18 @@ def print_results(converter, ofx, ledger, txns, args):
         if (not(ledger.check_transaction_by_id
                 ("ofxid", converter.mk_ofxid(AUTOSYNC_INITIAL))) and
                 not(ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL))):
-            print(converter.format_initial_balance(ofx.account.statement))
+            print(converter.format_initial_balance(ofx.accounts[account_idx].statement))
     for txn in txns:
         print(converter.convert(txn).format(args.indent))
     if args.assertions:
-        print(converter.format_balance(ofx.account.statement))
+        print(converter.format_balance(ofx.accounts[account_idx].statement))
 
     # if OFX has positions use these to obtain commodity prices
     # and print "P" records to provide dated/timed valuations
     # Note that this outputs only the commodity price,
     # not your position (e.g. # shares), even though this is in the OFX record
-    if hasattr(ofx.account.statement, 'positions'):
-        for pos in ofx.account.statement.positions:
+    if hasattr(ofx.accounts[account_idx].statement, 'positions'):
+        for pos in ofx.accounts[account_idx].statement.positions:
             print(converter.format_position(pos))
 
 
@@ -112,31 +112,44 @@ def import_ofx(ledger, args):
     sync = OfxSynchronizer(ledger, hardcodeaccount=args.hardcodeaccount,
                            shortenaccount=args.shortenaccount)
     ofx = OfxSynchronizer.parse_file(args.PATH)
-    txns = sync.filter(
-        ofx.account.statement.transactions,
-        ofx.account.account_id)
-    accountname = args.account
-    if accountname is None:
-        if ofx.account.institution is not None:
-            accountname = "%s:%s" % (ofx.account.institution.organization,
-                                     ofx.account.account_id)
-        else:
-            accountname = UNKNOWN_BANK_ACCOUNT
 
-    # build SecurityList (including indexing by CUSIP and ticker symbol)
-    security_list = SecurityList(ofx)
+    account_idx = 0
+    for account in ofx.accounts:
+        txns = sync.filter(
+            account.statement.transactions,
+            account.account_id)
+        try:
+            accountname = args.account[account_idx]
+        except IndexError:
+            accountname = None
+        if accountname is None:
+            if account.institution is not None:
+                accountname = "%s:%s" % (account.institution.organization,
+                                         account.account_id)
+            elif args.account_format is not None:
+                accountname = args.account_format.format(
+                        account_id=account.account_id,
+                        account_type=account.account_type,
+                        routing_number=account.routing_number,
+                        branch_id=account.branch_id)
+            else:
+                accountname = "%s:%s" % (UNKNOWN_BANK_ACCOUNT, account_idx)
 
-    converter = OfxConverter(account=ofx.account,
-                             name=accountname,
-                             ledger=ledger,
-                             indent=args.indent,
-                             fid=args.fid,
-                             unknownaccount=args.unknownaccount,
-                             payee_format=args.payee_format,
-                             hardcodeaccount=args.hardcodeaccount,
-                             shortenaccount=args.shortenaccount,
-                             security_list=security_list)
-    print_results(converter, ofx, ledger, txns, args)
+        # build SecurityList (including indexing by CUSIP and ticker symbol)
+        security_list = SecurityList(ofx)
+
+        converter = OfxConverter(account=account,
+                                 name=accountname,
+                                 ledger=ledger,
+                                 indent=args.indent,
+                                 fid=args.fid,
+                                 unknownaccount=args.unknownaccount,
+                                 payee_format=args.payee_format,
+                                 hardcodeaccount=args.hardcodeaccount, #TODO
+                                 shortenaccount=args.shortenaccount, #TODO
+                                 security_list=security_list)
+        print_results(converter, ofx, account_idx, ledger, txns, args)
+        account_idx += 1
 
 
 def import_csv(ledger, args):
@@ -233,6 +246,14 @@ found by payee')
         {tferaction} for OFX. If the input file is a CSV file,
         substitutions are written using the CSV file column names
         between {}.""")
+    parser.add_argument(
+        '--account-format',
+        type=str,
+        default=None,
+        dest='account_format',
+        help="""Format string to use for generating the account line.
+        Substitutions can be written using {account_id}, {routing_number},
+        {branch_id}, {account_type} for OFX.""")
     parser.add_argument('--python', action='store_true', default=False,
                         help='use the ledger python interface')
     parser.add_argument('--slow', action='store_true', default=False,
