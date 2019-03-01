@@ -55,7 +55,7 @@ found."""
         return None
 
 
-def print_results(converter, ofx, account_idx, ledger, txns, args):
+def print_results(converter, ofx, ledger, txns, args, account_idx=0):
     """
     This function is the final common pathway of program:
 
@@ -113,6 +113,10 @@ def import_ofx(ledger, args):
                            shortenaccount=args.shortenaccount)
     ofx = OfxSynchronizer.parse_file(args.PATH)
 
+    if args.account != None and len(args.account) != len(ofx.accounts):
+        sys.stderr.write("number of account name (--account) does not match the number of accounts in the OFX file\n")
+        exit(1)
+
     account_idx = 0
     for account in ofx.accounts:
         txns = sync.filter(
@@ -120,7 +124,7 @@ def import_ofx(ledger, args):
             account.account_id)
         try:
             accountname = args.account[account_idx]
-        except IndexError:
+        except (IndexError, TypeError):
             accountname = None
         if accountname is None:
             if account.institution is not None:
@@ -148,7 +152,7 @@ def import_ofx(ledger, args):
                                  hardcodeaccount=args.hardcodeaccount, #TODO
                                  shortenaccount=args.shortenaccount, #TODO
                                  security_list=security_list)
-        print_results(converter, ofx, account_idx, ledger, txns, args)
+        print_results(converter, ofx, ledger, txns, args, account_idx)
         account_idx += 1
 
 
@@ -192,7 +196,7 @@ def run(args=None, config=None):
                         help='do not stop until max days reached')
     parser.add_argument('PATH', nargs='?', help='do not sync; import from OFX \
 file')
-    parser.add_argument('-a', '--account', type=str, default=None,
+    parser.add_argument('-a', '--account', type=str, default=None, action='append',
                         help='sync only the named account; \
 if importing from file, set account name for import')
     parser.add_argument('-l', '--ledger', type=str, default=None,
