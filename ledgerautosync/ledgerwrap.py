@@ -60,13 +60,6 @@ class MetaLedger(object):
             return s
         return [clean_str(s) for s in a]
 
-    @staticmethod
-    def clean_payee(s):
-        s = s.replace('%', '')
-        s = s.replace('/', '\/')
-        s = s.replace("'", "")
-        return s
-
     # Return True if this ledgerlike interface is available
     @staticmethod
     def available():
