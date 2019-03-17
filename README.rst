@@ -318,9 +318,13 @@ Plugin support
 
 ledger-autosync has support for plugins. By placing python files a
 directory named ``~/.config/ledger-autosync/plugins/`` it should be
-possible to automatically load python files from there. This allows
-you to extend the csv converters with your own code. For example,
-given the input CSV file:
+possible to automatically load python files from there. You may place
+``CsvCconverter`` subclasses here, which will be selected based on the
+columns in the CSV file being parsed and the FIELDSET of the CSV
+converters. You may also place a single ``OfxConverter`` in the plugin
+directory, which will be used in place of the stock ``OfxConverter``.
+
+Below is an example CSV converter, starting with the input CSV file:
 
 ::
 
@@ -370,7 +374,7 @@ For more examples, see
 https://gitlab.com/egh/ledger-autosync/blob/master/ledgerautosync/converter.py#L421
 or the `example plugins directory <examples/plugins>`_.
 
-If you develop a CSV converter that you think will be generally
+If you develop a converter that you think will be generally
 useful, please consider submitting a pull request.
 
 Testing
