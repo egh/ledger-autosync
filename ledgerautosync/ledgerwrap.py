@@ -27,7 +27,6 @@ from threading import Thread
 from queue import Queue, Empty
 from ledgerautosync.converter import Converter
 import logging
-from fuzzywuzzy import process
 
 
 csv.register_dialect(
@@ -80,11 +79,6 @@ class MetaLedger(object):
     def get_account_by_payee(self, payee, exclude):
         self.load_payees()
         return self.filter_accounts(self.payees.get(payee, []), exclude)
-
-    def get_fuzzy_account_by_payee(self, payee, exclude):
-        self.load_payees()
-        fuzzed_payee = process.extractOne(payee, self.payees)[0]
-        return self.filter_accounts([fuzzed_payee], exclude)
 
     def __init__(self):
         self.payees = None
