@@ -3,7 +3,6 @@ beautifulsoup4==4.6.0
 cffi==1.11.5
 cryptography==2.3
 entrypoints==0.2.3
-fuzzywuzzy==0.16.0
 idna==2.6
 jeepney==0.3.1
 keyring==12.2.0
