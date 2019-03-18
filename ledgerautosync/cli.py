@@ -83,6 +83,43 @@ def print_results(converter, ofx, ledger, txns, args):
         for pos in ofx.account.statement.positions:
             print(converter.format_position(pos))
 
+def make_ofx_converter(account,
+                       name,
+                       ledger,
+                       indent,
+                       fid,
+                       unknownaccount,
+                       payee_format,
+                       hardcodeaccount,
+                       shortenaccount,
+                       security_list):
+    klasses = OfxConverter.__subclasses__()
+    if len(klasses) > 1:
+        raise Exception("I found more than 1 OfxConverter subclass, but only "
+                        "know how to handle 1. Remove extra subclasses from "
+                        "the plugin directory")
+    elif len(klasses) == 1:
+        return klasses[0](account=account,
+                          name=name,
+                          ledger=ledger,
+                          indent=indent,
+                          fid=fid,
+                          unknownaccount=unknownaccount,
+                          payee_format=payee_format,
+                          hardcodeaccount=hardcodeaccount,
+                          shortenaccount=shortenaccount,
+                          security_list=security_list)
+    else:
+        return OfxConverter(account=account,
+                            name=name,
+                            ledger=ledger,
+                            indent=indent,
+                            fid=fid,
+                            unknownaccount=unknownaccount,
+                            payee_format=payee_format,
+                            hardcodeaccount=hardcodeaccount,
+                            shortenaccount=shortenaccount,
+                            security_list=security_list)
 
 def sync(ledger, accounts, args):
     sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
@@ -91,14 +128,16 @@ def sync(ledger, accounts, args):
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
                                             max_days=args.max)
             if ofx is not None:
-                converter = OfxConverter(account=ofx.account,
-                                         name=acct.description,
-                                         ledger=ledger,
-                                         indent=args.indent,
-                                         unknownaccount=args.unknownaccount,
-                                         payee_format=args.payee_format,
-                                         shortenaccount=args.shortenaccount,
-                                         security_list=SecurityList(ofx))
+                converter = make_ofx_converter(account=ofx.account,
+                                               name=acct.description,
+                                               ledger=ledger,
+                                               indent=args.indent,
+                                               fid=None,
+                                               unknownaccount=args.unknownaccount,
+                                               payee_format=args.payee_format,
+                                               hardcodeaccount=None,
+                                               shortenaccount=args.shortenaccount,
+                                               security_list=SecurityList(ofx))
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -126,16 +165,16 @@ def import_ofx(ledger, args):
     # build SecurityList (including indexing by CUSIP and ticker symbol)
     security_list = SecurityList(ofx)
 
-    converter = OfxConverter(account=ofx.account,
-                             name=accountname,
-                             ledger=ledger,
-                             indent=args.indent,
-                             fid=args.fid,
-                             unknownaccount=args.unknownaccount,
-                             payee_format=args.payee_format,
-                             hardcodeaccount=args.hardcodeaccount,
-                             shortenaccount=args.shortenaccount,
-                             security_list=security_list)
+    converter = make_ofx_converter(account=ofx.account,
+                                   name=accountname,
+                                   ledger=ledger,
+                                   indent=args.indent,
+                                   fid=args.fid,
+                                   unknownaccount=args.unknownaccount,
+                                   payee_format=args.payee_format,
+                                   hardcodeaccount=args.hardcodeaccount,
+                                   shortenaccount=args.shortenaccount,
+                                   security_list=security_list)
     print_results(converter, ofx, ledger, txns, args)
 
 
