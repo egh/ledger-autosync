@@ -312,6 +312,9 @@ class OfxConverter(Converter):
         if (hasattr(txn, 'tferaction') and txn.tferaction is not None):
             tferaction = txn.tferaction.lower()
 
+        if payee != "" and self.lgr is not None:
+            payee = self.lgr.get_autosync_payee(payee, self.name)
+
         payee_format = self.payee_format
 
         if payee_format is None:

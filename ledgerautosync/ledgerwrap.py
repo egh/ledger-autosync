@@ -174,6 +174,15 @@ class Ledger(MetaLedger):
             for line in r:
                 self.add_payee(line[2], line[3])
 
+    def get_autosync_payee(self, payee, account):
+        q = [account, "--last", "1", "--format", "%(quoted(payee))\n",
+             "--limit", 'tag("AutosyncPayee") == "%s"' % (payee)]
+        r = self.run(q)
+        try:
+            return next(r)[0]
+        except StopIteration:
+            return payee
+
 
 class LedgerPython(MetaLedger):
     @staticmethod
@@ -216,6 +225,10 @@ class LedgerPython(MetaLedger):
                                (key, Converter.clean_id(value)))
         return len(q) > 0
 
+    def get_autosync_payee(self, payee, account):
+        logging.error("payee lookup not implemented for LedgerPython, using raw payee")
+        return payee
+
 
 class HLedger(MetaLedger):
     @staticmethod
@@ -257,3 +270,7 @@ class HLedger(MetaLedger):
             next(r)  # skip headers
             for line in r:
                 self.add_payee(line['description'], line['account'])
+
+    def get_autosync_payee(self, payee, account):
+        logging.error("payee lookup not implemented for HLedger, using raw payee")
+        return payee
