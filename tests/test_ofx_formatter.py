@@ -314,3 +314,17 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqual(
             converter.format_payee(ofx.account.statement.transactions[1]),
             'in')
+
+    def test_payee_match(self):
+        ofx = OfxParser.parse(
+            open(os.path.join('fixtures', 'checking-payee-match.ofx')))
+        ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
+        converter = OfxConverter(account=ofx.account, name="Foo", ledger=ledger)
+        self.assertEqualLedgerPosting(
+            converter.convert(
+                ofx.account.statement.transactions[0]).format(),
+            """2011/03/31 Match Payee
+  Foo  -$0.01
+  ; ofxid: 1101.1452687~7.0000489
+  Expenses:Bar  $0.01
+""")

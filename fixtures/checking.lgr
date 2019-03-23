@@ -50,3 +50,8 @@
 2011/03/31 PAYEE TEST"QUOTE
   Assets:Foo                                   $0.01
   Income:Bar                                  -$0.01
+
+2011/03/31 Match Payee
+  ; AutosyncPayee: Payment to MATCH PAYEE and so on and so forth
+  Assets:Foo                                  -$0.01
+  Expenses:Bar                                 $0.01
