@@ -413,8 +413,18 @@ class OfxConverter(Converter):
             posting = Posting(self.name,
                               Amount(txn.amount, self.currency),
                               metadata=posting_metadata)
+            effective_date = None
+            logged_date = txn.date
+
+            # When the user date is different from the date then we
+            # need to add an effective transaction.
+            if txn.user_date is not None:
+                if txn.user_date != txn.date:
+                    effective_date = txn.date
+                    logged_date = txn.user_date
             return Transaction(
-                date=txn.date,
+                date=logged_date,
+                aux_date=effective_date,
                 payee=self.format_payee(txn),
                 postings=[
                     posting,
