@@ -39,8 +39,7 @@ setup(
         'setuptools>=26',
         'ofxclient',
         'ofxparse>=0.16',
-        'BeautifulSoup4',
-        'fuzzywuzzy'
+        'BeautifulSoup4'
     ],
 
     extras_require={

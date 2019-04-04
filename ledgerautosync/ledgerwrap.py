@@ -27,7 +27,6 @@ from threading import Thread
 from queue import Queue, Empty
 from ledgerautosync.converter import Converter
 import logging
-from fuzzywuzzy import process
 
 
 csv.register_dialect(
@@ -60,13 +59,6 @@ class MetaLedger(object):
             return s
         return [clean_str(s) for s in a]
 
-    @staticmethod
-    def clean_payee(s):
-        s = s.replace('%', '')
-        s = s.replace('/', '\/')
-        s = s.replace("'", "")
-        return s
-
     # Return True if this ledgerlike interface is available
     @staticmethod
     def available():
@@ -87,11 +79,6 @@ class MetaLedger(object):
     def get_account_by_payee(self, payee, exclude):
         self.load_payees()
         return self.filter_accounts(self.payees.get(payee, []), exclude)
-
-    def get_fuzzy_account_by_payee(self, payee, exclude):
-        self.load_payees()
-        fuzzed_payee = process.extractOne(payee, self.payees)[0]
-        return self.filter_accounts([fuzzed_payee], exclude)
 
     def __init__(self):
         self.payees = None
@@ -187,6 +174,15 @@ class Ledger(MetaLedger):
             for line in r:
                 self.add_payee(line[2], line[3])
 
+    def get_autosync_payee(self, payee, account):
+        q = [account, "--last", "1", "--format", "%(quoted(payee))\n",
+             "--limit", 'tag("AutosyncPayee") == "%s"' % (payee)]
+        r = self.run(q)
+        try:
+            return next(r)[0]
+        except StopIteration:
+            return payee
+
 
 class LedgerPython(MetaLedger):
     @staticmethod
@@ -229,6 +225,10 @@ class LedgerPython(MetaLedger):
                                (key, Converter.clean_id(value)))
         return len(q) > 0
 
+    def get_autosync_payee(self, payee, account):
+        logging.error("payee lookup not implemented for LedgerPython, using raw payee")
+        return payee
+
 
 class HLedger(MetaLedger):
     @staticmethod
@@ -270,3 +270,7 @@ class HLedger(MetaLedger):
             next(r)  # skip headers
             for line in r:
                 self.add_payee(line['description'], line['account'])
+
+    def get_autosync_payee(self, payee, account):
+        logging.error("payee lookup not implemented for HLedger, using raw payee")
+        return payee

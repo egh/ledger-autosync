@@ -312,6 +312,9 @@ class OfxConverter(Converter):
         if (hasattr(txn, 'tferaction') and txn.tferaction is not None):
             tferaction = txn.tferaction.lower()
 
+        if payee != "" and self.lgr is not None:
+            payee = self.lgr.get_autosync_payee(payee, self.name)
+
         payee_format = self.payee_format
 
         if payee_format is None:
@@ -733,3 +736,52 @@ class MintConverter(CsvConverter):
             date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
             payee=row['Description'],
             postings=postings)
+
+# Simple.com
+class SimpleConverter(CsvConverter):
+    FIELDSET = {
+        "Date",
+        "Recorded at",
+        "Scheduled for",
+        "Amount",
+        "Activity",
+        "Pending",
+        "Raw description",
+        "Description",
+        "Category folder",
+        "Category",
+        "Street address",
+        "City",
+        "State",
+        "Zip",
+        "Latitude",
+        "Longitude",
+        "Memo"}
+
+    def __init__(self, *args, **kwargs):
+        super(SimpleConverter, self).__init__(*args, **kwargs)
+
+    def convert(self, row):
+        amount = abs(float(row['Amount']))
+        reverse = row['Amount'][0] == '-'
+
+        if reverse:
+            account = "Expenses:%s" % (row['Category'])
+        else:
+            account = "Income:%s" % (row['Category'])
+
+        posting_metadata = {
+            "csvid": "simple.%s" % (self.get_csv_id(row)),
+            "raw_description": row['Raw description'],
+            "activity_type"  : row['Activity'],
+        }
+        if row['Memo']:
+            posting_metadata["memo"] = row["Memo"]
+
+        return Transaction(
+           date = datetime.datetime.strptime(row['Date'], "%Y/%m/%d"),
+           payee = row['Description'],
+           postings = [Posting(self.name, Amount(amount, '$', reverse), metadata = posting_metadata),
+                       Posting(account, Amount(amount, '$', reverse = not(reverse)))
+                       ]
+        )
