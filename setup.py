@@ -38,8 +38,7 @@ setup(
     install_requires=[
         'setuptools>=26',
         'ofxclient',
-        'ofxparse>=0.16',
-        'BeautifulSoup4'
+        'ofxparse'
     ],
 
     extras_require={
