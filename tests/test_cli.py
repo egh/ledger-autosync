@@ -117,19 +117,15 @@ class CliTest():
                     mock_stdout.getvalue(),
                     'LEDGER_FILE environment variable not set, and no .ledgerrc file found, and -l argument was not supplied: running with deduplication disabled. All transactions will be printed!\n')
 
-
 @attr('hledger')
 class TestCliHledger(TestCase, CliTest):
     def setUp(self):
-        self.empty_lgr = HLedger(os.path.join('fixtures', 'empty.lgr'))
         self.checking_lgr = HLedger(os.path.join('fixtures', 'checking.lgr'))
 
 
 @attr('ledger')
 class TestCliLedger(TestCase, CliTest):
     def setUp(self):
-        self.empty_lgr = Ledger(os.path.join('fixtures', 'empty.lgr'),
-                                no_pipe=True)
         self.checking_lgr = Ledger(os.path.join('fixtures', 'checking.lgr'),
                                    no_pipe=True)
 
@@ -137,6 +133,5 @@ class TestCliLedger(TestCase, CliTest):
 @attr('ledger-python')
 class TestCliLedgerPython(TestCase, CliTest):
     def setUp(self):
-        self.empty_lgr = LedgerPython(os.path.join('fixtures', 'empty.lgr'))
         self.checking_lgr = LedgerPython(
             os.path.join('fixtures', 'checking.lgr'))

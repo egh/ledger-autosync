@@ -82,10 +82,14 @@ class LedgerTest(object):
             self.lgr.payees['PAYEE TEST:COLON'], [
                 'Assets:Foo', 'Income:Bar'])
 
+    def test_load_payees_with_empty_ledger(self):
+        self.empty_lgr.load_payees()
+
 
 @attr('hledger')
 class TestHledger(TestCase, LedgerTest):
     def setUp(self):
+        self.empty_lgr = HLedger(os.path.join('fixtures', 'empty.lgr'))
         self.lgr = HLedger(self.ledger_path)
         self.dynamic_lgr = HLedger(self.dynamic_ledger_path)
 
@@ -93,6 +97,8 @@ class TestHledger(TestCase, LedgerTest):
 @attr('ledger')
 class TestLedger(LedgerTest, TestCase):
     def setUp(self):
+        self.empty_lgr = Ledger(os.path.join('fixtures', 'empty.lgr'),
+                                no_pipe=True)
         self.lgr = Ledger(self.ledger_path, no_pipe=True)
         self.dynamic_lgr = Ledger(self.dynamic_ledger_path, no_pipe=True)
 
@@ -112,5 +118,6 @@ class TestLedger(LedgerTest, TestCase):
 @attr('ledger-python')
 class TestLedgerPython(TestCase, LedgerTest):
     def setUp(self):
+        self.empty_lgr = LedgerPython(os.path.join('fixtures', 'empty.lgr'))
         self.lgr = LedgerPython(self.ledger_path)
         self.dynamic_lgr = LedgerPython(self.dynamic_ledger_path)

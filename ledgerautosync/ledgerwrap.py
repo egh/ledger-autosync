@@ -267,7 +267,6 @@ class HLedger(MetaLedger):
             self.payees = {}
             cmd = ["reg", "-O", "csv"]
             r = csv.DictReader(self.run(cmd).splitlines())
-            next(r)  # skip headers
             for line in r:
                 self.add_payee(line['description'], line['account'])
 
