@@ -547,6 +547,7 @@ class CsvConverter(Converter):
             unknownaccount=None,
             payee_format=None):
         super(CsvConverter, self).__init__(
+            ledger=ledger,
             indent=indent,
             unknownaccount=unknownaccount,
             payee_format=payee_format)

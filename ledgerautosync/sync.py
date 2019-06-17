@@ -198,6 +198,7 @@ class CsvSynchronizer(Synchronizer):
             converter = CsvConverter.make_converter(
                 set(reader.fieldnames),
                 dialect,
+                ledger=self.lgr,
                 name=accountname,
                 unknownaccount=unknownaccount,
                 payee_format=self.payee_format)
