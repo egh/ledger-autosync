@@ -67,7 +67,8 @@ class MetaLedger(object):
     def add_payee(self, payee, account):
         if payee not in self.payees:
             self.payees[payee] = []
-        self.payees[payee].append(account)
+        if account not in self.payees[payee]:
+            self.payees[payee].append(account)
 
     def filter_accounts(self, accts, exclude):
         accts_filtered = [a for a in accts if a != exclude]
