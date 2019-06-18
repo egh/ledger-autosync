@@ -67,7 +67,8 @@ class MetaLedger(object):
     def add_payee(self, payee, account):
         if payee not in self.payees:
             self.payees[payee] = []
-        self.payees[payee].append(account)
+        if account not in self.payees[payee]:
+            self.payees[payee].append(account)
 
     def filter_accounts(self, accts, exclude):
         accts_filtered = [a for a in accts if a != exclude]
@@ -265,7 +266,7 @@ class HLedger(MetaLedger):
     def load_payees(self):
         if self.payees is None:
             self.payees = {}
-            cmd = ["reg", "-O", "csv"]
+            cmd = ["reg", "-O", "csv", "--actual"]
             r = csv.DictReader(self.run(cmd).splitlines())
             for line in r:
                 self.add_payee(line['description'], line['account'])
