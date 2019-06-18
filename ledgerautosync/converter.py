@@ -315,6 +315,11 @@ class OfxConverter(Converter):
         if payee != "" and self.lgr is not None:
             payee = self.lgr.get_autosync_payee(payee, self.name)
 
+        # If payee is blank but memo is not, then try matching Ledger payee
+        # based on memo instead.
+        if memo != "" and payee == "" and self.lgr is not None:
+            memo = self.lgr.get_autosync_payee(memo, self.name)
+
         payee_format = self.payee_format
 
         if payee_format is None:
