@@ -1,0 +1,10 @@
+Pull request for bugs and feature enhancements are welcome at:
+
+  https://github.com/egh/ledger-autosync
+
+If you are considering a large change, please open an issue first to
+discuss any possible implications or best practices.
+
+If writing a bug fix, please include a regression test that would fail
+without the fix. If writing a new feature, testing that it works as
+expected is very much appreciated.
