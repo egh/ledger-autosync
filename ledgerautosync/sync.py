@@ -188,7 +188,7 @@ class CsvSynchronizer(Synchronizer):
                 f.seek(0)
             else:
                 f.seek(3)
-            dialect = csv.Sniffer().sniff(f.read(1024))
+            dialect = csv.Sniffer().sniff(f.readline())
             if not(has_bom):
                 f.seek(0)
             else:
