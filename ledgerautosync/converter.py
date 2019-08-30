@@ -224,7 +224,8 @@ class Converter(object):
             replace('+', '_').\
             replace('&', '_').\
             replace('[', '_').\
-            replace(']', '_')
+            replace(']', '_').\
+            replace('|', '_')
 
     def __init__(
             self,
