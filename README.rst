@@ -42,7 +42,7 @@ Features
 
 -  import of downloaded OFX files, for banks not supporting automatic
    download
--  import of downloaded CSV files from Paypal, Amazon and Mint
+-  import of downloaded CSV files from Paypal, Simple, Amazon and Mint
 -  any CSV file can be supported via plugins
 
 Platforms
