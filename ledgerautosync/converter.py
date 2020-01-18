@@ -402,7 +402,7 @@ class OfxConverter(Converter):
     # security_list mapping. Otherwise, simply return the CUSIP.
     def maybe_get_ticker(self, cusip):
         security = self.security_list.find_cusip(cusip)
-        if security is not None:
+        if security and security.ticker:
             return security.ticker
         else:
             return cusip
