@@ -409,7 +409,7 @@ class OfxConverter(Converter):
 
     def convert(self, txn):
         """
-        Convert an OFX Transaction to a posting
+        Convert an OFX Transaction to a Transaction
         """
 
         ofxid = self.mk_ofxid(txn.id)
