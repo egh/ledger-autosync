@@ -71,6 +71,15 @@ class WeirdOfxTest(object):
             ofx.account.account_id)
         self.assertEqual(len(txns), 17)
 
+    def test_accented_characters_latin1(self):
+        ofxpath = os.path.join('fixtures', 'accented_characters_latin1.ofx')
+        ofx = OfxSynchronizer.parse_file(ofxpath)
+        sync = OfxSynchronizer(self.lgr)
+        txns = sync.filter(
+            ofx.account.statement.transactions,
+            ofx.account.account_id)
+        self.assertEqual(len(txns), 1)
+
 
 @attr('hledger')
 class TestWeirdOfxHledger(TestCase, WeirdOfxTest):

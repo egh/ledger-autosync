@@ -33,7 +33,8 @@ class TestOfxSync(TestCase):
     def test_fresh_sync(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         txns1 = ofx.account.statement.transactions
         txns2 = sync.filter(txns1, ofx.account.account_id)
         self.assertEqual(txns1, txns2)
@@ -41,11 +42,8 @@ class TestOfxSync(TestCase):
     def test_sync_order(self):
         ledger = Ledger(os.path.join('fixtures', 'empty.lgr'))
         sync = OfxSynchronizer(ledger)
-        ofx = OfxParser.parse(
-            open(
-                os.path.join(
-                    'fixtures',
-                    'checking_order.ofx')))
+        with open(os.path.join('fixtures', 'checking_order.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         txns = sync.filter(
             ofx.account.statement.transactions,
             ofx.account.account_id)
@@ -79,7 +77,7 @@ class TestOfxSync(TestCase):
             return_value=open(
                 os.path.join(
                     'fixtures',
-                    'checking.ofx')))
+                    'checking.ofx'), 'rb'))
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 0)
 
@@ -90,7 +88,7 @@ class TestOfxSync(TestCase):
             return_value=open(
                 os.path.join(
                     'fixtures',
-                    'checking.ofx')))
+                    'checking.ofx'), 'rb'))
         sync = OfxSynchronizer(ledger)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
 
@@ -110,7 +108,7 @@ class TestOfxSync(TestCase):
             return_value=open(
                 os.path.join(
                     'fixtures',
-                    'checking.ofx')))
+                    'checking.ofx'), 'rb'))
         sync = OfxSynchronizer(None)
         self.assertEqual(len(sync.get_new_txns(acct, 7, 7)[1]), 3)
 

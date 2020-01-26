@@ -38,7 +38,8 @@ class OfxSynchronizer(Synchronizer):
 
     @staticmethod
     def parse_file(path):
-        return OfxParser.parse(open(path))
+        with open(path, 'rb') as ofx_file:
+            return OfxParser.parse(ofx_file)
 
     def is_txn_synced(self, acctid, txn):
         if self.lgr is None:
