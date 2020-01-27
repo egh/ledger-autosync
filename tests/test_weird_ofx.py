@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2013, 2014 Erik Hetzner
 #
 # This file is part of ledger-autosync
@@ -78,6 +79,11 @@ class WeirdOfxTest(object):
         txns = sync.filter(
             ofx.account.statement.transactions,
             ofx.account.account_id)
+        converter = OfxConverter(
+            account=ofx.account,
+            name="Foo")
+        self.assertEqual(converter.format_payee(txns[0]),
+                         "Virement Interac à: Jean")
         self.assertEqual(len(txns), 1)
 
 
