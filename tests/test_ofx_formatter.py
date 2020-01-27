@@ -31,7 +31,8 @@ from tests import LedgerTestCase
 @attr('generic')
 class TestOfxConverter(LedgerTestCase):
     def test_checking(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(account=ofx.account, name="Foo")
         self.assertEqualLedgerPosting(
             converter.convert(
@@ -60,7 +61,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_indent(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(account=ofx.account, name="Foo", indent=4)
         # testing indent, so do not use the string collapsing version of assert
         self.assertEqual(
@@ -73,7 +75,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_shortenaccount(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(
             account=ofx.account,
             name="Foo",
@@ -90,7 +93,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_hardcodeaccount(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(
             account=ofx.account,
             name="Foo",
@@ -107,7 +111,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_investments(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'fidelity.ofx')))
+        with open(os.path.join('fixtures', 'fidelity.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(
             account=ofx.account,
             name="Foo",
@@ -131,7 +136,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_dynamic_account(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         ledger = Ledger(
             os.path.join(
                 'fixtures',
@@ -150,7 +156,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_balance_assertion(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         converter = OfxConverter(
             account=ofx.account,
@@ -164,7 +171,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_initial_balance(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         converter = OfxConverter(
             account=ofx.account,
@@ -180,7 +188,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_unknownaccount(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(account=ofx.account, name="Foo",
                                  unknownaccount='Expenses:Unknown')
         self.assertEqualLedgerPosting(
@@ -193,7 +202,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_quote_commodity(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'fidelity.ofx')))
+        with open(os.path.join('fixtures', 'fidelity.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(
             account=ofx.account,
             name="Foo",
@@ -209,11 +219,8 @@ class TestOfxConverter(LedgerTestCase):
 
     # Check that <TRANSFER> txns are parsed.
     def test_transfer_txn(self):
-        ofx = OfxParser.parse(
-            open(
-                os.path.join(
-                    'fixtures',
-                    'investment_401k.ofx')))
+        with open(os.path.join('fixtures', 'investment_401k.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(account=ofx.account, name="Foo",
                                  unknownaccount='Expenses:Unknown')
         if len(ofx.account.statement.transactions) > 2:
@@ -239,7 +246,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_position(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'cusip.ofx')))
+        with open(os.path.join('fixtures', 'cusip.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(account=ofx.account, name="Foo", indent=4,
                                  unknownaccount='Expenses:Unknown',
                                  security_list=SecurityList(ofx))
@@ -250,7 +258,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_dividend(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'income.ofx')))
+        with open(os.path.join('fixtures', 'income.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(account=ofx.account, name="Foo")
         self.assertEqualLedgerPosting(
             converter.convert(
@@ -263,7 +272,8 @@ class TestOfxConverter(LedgerTestCase):
 """)
 
     def test_checking_custom_payee(self):
-        ofx = OfxParser.parse(open(os.path.join('fixtures', 'checking.ofx')))
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(
             account=ofx.account,
             name="Foo",
@@ -295,11 +305,8 @@ class TestOfxConverter(LedgerTestCase):
             'Foo')
 
     def test_investments_custom_payee(self):
-        ofx = OfxParser.parse(
-            open(
-                os.path.join(
-                    'fixtures',
-                    'investment_401k.ofx')))
+        with open(os.path.join('fixtures', 'investment_401k.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         converter = OfxConverter(
             account=ofx.account,
             name="Foo",
@@ -316,8 +323,8 @@ class TestOfxConverter(LedgerTestCase):
             'in')
 
     def test_payee_match(self):
-        ofx = OfxParser.parse(
-            open(os.path.join('fixtures', 'checking-payee-match.ofx')))
+        with open(os.path.join('fixtures', 'checking-payee-match.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
         ledger = Ledger(os.path.join('fixtures', 'checking.lgr'))
         converter = OfxConverter(account=ofx.account, name="Foo", ledger=ledger)
         self.assertEqualLedgerPosting(

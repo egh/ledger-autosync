@@ -37,7 +37,7 @@ class CliTest():
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         acct = config.accounts()[0]
         acct.download = Mock(side_effect=lambda *args, **kwargs:
-                             open(os.path.join('fixtures', 'checking.ofx')))
+                             open(os.path.join('fixtures', 'checking.ofx'), 'rb'))
         config.accounts = Mock(return_value=[acct])
         run(['-l', os.path.join('fixtures', 'empty.lgr')], config)
         acct.download.assert_has_calls([call(days=7), call(days=14)])
@@ -55,7 +55,7 @@ class CliTest():
         bar = next(acct for acct in config.accounts()
                    if acct.description == 'Assets:Checking:Bar')
         foo.download = Mock(side_effect=lambda *args, **kwargs:
-                            open(os.path.join('fixtures', 'checking.ofx')))
+                            open(os.path.join('fixtures', 'checking.ofx'), 'rb'))
         bar.download = Mock()
         config.accounts = Mock(return_value=[foo, bar])
         run(['-l', os.path.join('fixtures', 'checking.lgr'),
@@ -108,7 +108,7 @@ class CliTest():
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         acct = config.accounts()[0]
         acct.download = Mock(side_effect=lambda *args, **kwargs:
-                             open(os.path.join('fixtures', 'checking.ofx')))
+                             open(os.path.join('fixtures', 'checking.ofx'), 'rb'))
         config.accounts = Mock(return_value=[acct])
         with patch('ledgerautosync.cli.find_ledger_file', return_value=None):
             with patch('sys.stderr', new_callable=StringIO) as mock_stdout:
