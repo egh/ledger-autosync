@@ -793,3 +793,99 @@ class SimpleConverter(CsvConverter):
                        Posting(account, Amount(amount, '$', reverse = not(reverse)))
                        ]
         )
+
+class VenmoConverter(CsvConverter):
+    FIELDSET = set(
+        [
+            "Username",
+            "ID",
+            "Datetime",
+            "Type",
+            "Status",
+            "Note",
+            "From",
+            "To",
+            "Amount (total)",
+            "Amount (fee)",
+            "Funding Source",
+            "Destination",
+            "Beginning Balance",
+            "Ending Balance",
+            "Statement Period Venmo Fees",
+            "Year to Date Venmo Fees",
+            "Disclaimer",
+        ]
+    )
+
+    def __init__(self, *args, **kwargs):
+        # Initialize max date to be used for balance assertion
+        self.max_date = datetime.datetime.min
+        super(VenmoConverter, self).__init__(*args, **kwargs)
+
+    def convert(self, row):
+
+        # Venmo has a hierarchical structure with some rows containing
+        # statement level data
+        if not row["ID"]:
+            if row["Ending Balance"]:
+                # This relies `self.max_date` being correct, which in turn
+                # relies on the statement balance being after all transactions.
+                # This seems to be how the statement is currently formatted but
+                # may break if Venmo changes format
+                return Transaction(
+                    date=self.max_date,
+                    cleared=True,
+                    payee="--Autosync Balance Assertion",
+                    postings=[
+                        Posting(
+                            self.name,
+                            Amount(Decimal("0"), currency=self.currency),
+                            asserted=Amount(
+                                row["Ending Balance"].replace("$", "").replace(",", ""),
+                                self.currency,
+                            ),
+                        )
+                    ],
+                ).format(self.indent)
+            else:
+                return ""
+
+        md = re.match(r"^([+-]) \$([0-9,\.]+)", row["Amount (total)"])
+        amount = md.group(2).replace(",", "")
+        if md.group(1) == "-":
+            reverse = True
+            account = self.unknownaccount or "expenses"
+        else:
+            reverse = False
+            account = self.unknownaccount or "income"
+
+        if row["Type"] == "Payment":
+            if reverse:
+                payee = row["To"]
+            else:
+                payee = row["From"]
+        else:
+            if reverse:
+                payee = row["From"]
+            else:
+                payee = row["To"]
+        date = datetime.datetime.strptime(row["Datetime"], "%Y-%m-%dT%H:%M:%S")
+        if date > self.max_date:
+            self.max_date = date
+
+        return Transaction(
+            date=date,
+            payee=payee,
+            metadata={"desc": row["Note"]},
+            postings=[
+                Posting(
+                    self.name,
+                    Amount(amount, "$", reverse=reverse),
+                    metadata={"csvid": self.get_csv_id(row)},
+                ),
+                Posting(account, Amount(amount, "$", reverse=not (reverse))),
+            ],
+        )
+
+    def get_csv_id(self, row):
+        return "venmo.{}".format(Converter.clean_id(row["ID"]))
