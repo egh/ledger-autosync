@@ -292,7 +292,7 @@ transactions')
                         help='specify config file for ofxclient')
     parser.add_argument('-y', '--date-format', type=str, default=None, dest="date_format",
                         help="""Format string to use for printing dates.
-                        See strftime for details on format string syntax. Default is "%Y/%m/%d".""")
+                        See strftime for details on format string syntax. Default is "%%Y/%%m/%%d".""")
     args = parser.parse_args(args)
     if sys.argv[0][-16:] == "hledger-autosync":
         args.hledger = True
