@@ -92,7 +92,8 @@ def make_ofx_converter(account,
                        payee_format,
                        hardcodeaccount,
                        shortenaccount,
-                       security_list):
+                       security_list,
+                       date_format):
     klasses = OfxConverter.__subclasses__()
     if len(klasses) > 1:
         raise Exception("I found more than 1 OfxConverter subclass, but only "
@@ -108,7 +109,8 @@ def make_ofx_converter(account,
                           payee_format=payee_format,
                           hardcodeaccount=hardcodeaccount,
                           shortenaccount=shortenaccount,
-                          security_list=security_list)
+                          security_list=security_list,
+                          date_format=date_format)
     else:
         return OfxConverter(account=account,
                             name=name,
@@ -119,7 +121,8 @@ def make_ofx_converter(account,
                             payee_format=payee_format,
                             hardcodeaccount=hardcodeaccount,
                             shortenaccount=shortenaccount,
-                            security_list=security_list)
+                            security_list=security_list,
+                            date_format=date_format)
 
 def sync(ledger, accounts, args):
     sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
@@ -137,7 +140,8 @@ def sync(ledger, accounts, args):
                                                payee_format=args.payee_format,
                                                hardcodeaccount=None,
                                                shortenaccount=args.shortenaccount,
-                                               security_list=SecurityList(ofx))
+                                               security_list=SecurityList(ofx),
+                                               date_format=args.date_format)
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -174,7 +178,8 @@ def import_ofx(ledger, args):
                                    payee_format=args.payee_format,
                                    hardcodeaccount=args.hardcodeaccount,
                                    shortenaccount=args.shortenaccount,
-                                   security_list=security_list)
+                                   security_list=security_list,
+                                   date_format=args.date_format)
     print_results(converter, ofx, ledger, txns, args)
 
 
@@ -182,7 +187,7 @@ def import_csv(ledger, args):
     if args.account is None:
         raise Exception(
             "When importing a CSV file, you must specify an account name.")
-    sync = CsvSynchronizer(ledger, payee_format=args.payee_format)
+    sync = CsvSynchronizer(ledger, payee_format=args.payee_format, date_format=args.date_format)
     txns = sync.parse_file(args.PATH, accountname=args.account,
                            unknownaccount=args.unknownaccount)
     if args.reverse:
@@ -285,6 +290,9 @@ transactions')
                         help='print CSV transactions in reverse order')
     parser.add_argument('-o', '--ofxconfig', type=str, default=None,
                         help='specify config file for ofxclient')
+    parser.add_argument('-y', '--date-format', type=str, default=None, dest="date_format",
+                        help="""Format string to use for printing dates.
+                        See strftime for details on format string syntax. Default is "%Y/%m/%d".""")
     args = parser.parse_args(args)
     if sys.argv[0][-16:] == "hledger-autosync":
         args.hledger = True
