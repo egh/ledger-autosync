@@ -169,9 +169,10 @@ class OfxSynchronizer(Synchronizer):
 
 
 class CsvSynchronizer(Synchronizer):
-    def __init__(self, lgr, payee_format=None):
+    def __init__(self, lgr, payee_format=None, date_format=None):
         super(CsvSynchronizer, self).__init__(lgr)
         self.payee_format = payee_format
+        self.date_format = date_format
 
     def is_row_synced(self, converter, row):
         if self.lgr is None:
@@ -202,7 +203,9 @@ class CsvSynchronizer(Synchronizer):
                 ledger=self.lgr,
                 name=accountname,
                 unknownaccount=unknownaccount,
-                payee_format=self.payee_format)
+                payee_format=self.payee_format,
+                date_format=self.date_format
+            )
             # Create a new reader in case the converter modified the dialect
             if not(has_bom):
                 f.seek(0)

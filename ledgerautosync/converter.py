@@ -114,13 +114,15 @@ class Transaction(object):
             postings,
             cleared=False,
             metadata={},
-            aux_date=None):
+            aux_date=None,
+            date_format=None):
         self.date = date
         self.aux_date = aux_date
         self.payee = payee
         self.postings = postings
         self.metadata = metadata
         self.cleared = cleared
+        self.date_format = date_format
 
     def format(self, indent=4, assertions=True):
         retval = ""
@@ -128,9 +130,11 @@ class Transaction(object):
         if self.cleared:
             cleared_str = " * "
         aux_date_str = ""
+        if self.date_format is None:
+            self.date_format = "%Y/%m/%d"
         if self.aux_date is not None:
-            aux_date_str = "=%s" % (self.aux_date.strftime("%Y/%m/%d"))
-        retval += "%s%s%s%s\n" % (self.date.strftime("%Y/%m/%d"),
+            aux_date_str = "=%s" % (self.aux_date.strftime(self.date_format))
+        retval += "%s%s%s%s\n" % (self.date.strftime(self.date_format),
                                   aux_date_str, cleared_str, self.payee)
         for k in sorted(self.metadata.keys()):
             retval += "%s; %s: %s\n" % (" " * indent, k, self.metadata[k])
@@ -233,7 +237,8 @@ class Converter(object):
             unknownaccount=None,
             currency='$',
             indent=4,
-            payee_format=None):
+            payee_format=None,
+            date_format=None):
         self.lgr = ledger
         self.indent = indent
         self.unknownaccount = unknownaccount
@@ -241,6 +246,7 @@ class Converter(object):
         self.payee_format = payee_format
         if self.currency == "USD":
             self.currency = "$"
+        self.date_format = date_format
 
     def mk_dynamic_account(self, payee, exclude):
         if self.lgr is None:
@@ -266,12 +272,14 @@ class OfxConverter(Converter):
             hardcodeaccount=None,
             shortenaccount=False,
             security_list=SecurityList(
-            [])):
+            []),
+            date_format=None):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
                                            currency=account.statement.currency,
-                                           payee_format=payee_format)
+                                           payee_format=payee_format,
+                                           date_format=date_format)
         self.real_acctid = account.account_id
         if hardcodeaccount is not None:
             self.acctid = hardcodeaccount
@@ -368,7 +376,9 @@ class OfxConverter(Converter):
                         self.name,
                         Amount(Decimal("0"), currency=self.currency),
                         asserted=Amount(statement.balance, self.currency))
-                ]).format(self.indent)
+                ],
+                date_format=self.date_format,
+            ).format(self.indent)
         else:
             return ""
 
@@ -393,6 +403,7 @@ class OfxConverter(Converter):
                 postings=[
                     posting,
                     posting.clone_inverted("Assets:Equity").format(self.indent)],
+                date_format=self.date_format,
             ).format(
                 self.indent)
         else:
@@ -427,7 +438,8 @@ class OfxConverter(Converter):
                     posting,
                     posting.clone_inverted(
                         self.mk_dynamic_account(self.format_payee(txn),
-                                                exclude=self.name))])
+                                                exclude=self.name))],
+                date_format=self.date_format,)
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name
@@ -510,7 +522,8 @@ class OfxConverter(Converter):
                 aux_date=aux_date,
                 payee=self.format_payee(txn),
                 metadata=metadata,
-                postings=[posting1, posting2]
+                postings=[posting1, posting2],
+                date_format=self.date_format,
             )
 
     def format_position(self, pos):
@@ -552,12 +565,16 @@ class CsvConverter(Converter):
             indent=4,
             ledger=None,
             unknownaccount=None,
-            payee_format=None):
+            payee_format=None,
+            date_format=None,
+    ):
         super(CsvConverter, self).__init__(
             ledger=ledger,
             indent=indent,
             unknownaccount=unknownaccount,
-            payee_format=payee_format)
+            payee_format=payee_format,
+            date_format=date_format,
+        )
         self.name = name
         self.dialect = dialect
 
@@ -618,7 +635,8 @@ class PaypalConverter(CsvConverter):
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
                 payee=self.format_payee(row),
-                postings=postings)
+                postings=postings,
+                date_format=self.date_format,)
 
 # Apparently Paypal has another CSV
 
@@ -662,7 +680,9 @@ class PaypalAlternateConverter(CsvConverter):
             return Transaction(
                 date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
                 payee=self.format_payee(row),
-                postings=[posting,posting.clone_inverted(posting2_account)])
+                postings=[posting,posting.clone_inverted(posting2_account)],
+                date_format=self.date_format,
+            )
 
 
 class AmazonConverter(CsvConverter):
@@ -703,7 +723,9 @@ class AmazonConverter(CsvConverter):
                 "%m/%d/%y"),
             payee=row['Title'],
             postings=[posting,
-                      posting.clone_inverted("Expenses:Misc")])
+                      posting.clone_inverted("Expenses:Misc")],
+            date_format=self.date_format,
+        )
 
 
 class MintConverter(CsvConverter):
@@ -743,7 +765,9 @@ class MintConverter(CsvConverter):
         return Transaction(
             date=datetime.datetime.strptime(row['Date'], "%m/%d/%Y"),
             payee=row['Description'],
-            postings=postings)
+            postings=postings,
+            date_format=self.date_format,
+        )
 
 # Simple.com
 class SimpleConverter(CsvConverter):
@@ -791,7 +815,8 @@ class SimpleConverter(CsvConverter):
            payee = row['Description'],
            postings = [Posting(self.name, Amount(amount, '$', reverse), metadata = posting_metadata),
                        Posting(account, Amount(amount, '$', reverse = not(reverse)))
-                       ]
+                       ],
+           date_format=self.date_format,
         )
 
 class VenmoConverter(CsvConverter):
@@ -846,6 +871,7 @@ class VenmoConverter(CsvConverter):
                             ),
                         )
                     ],
+                    date_format=self.date_format,
                 ).format(self.indent)
             else:
                 return ""
@@ -885,6 +911,7 @@ class VenmoConverter(CsvConverter):
                 ),
                 Posting(account, Amount(amount, "$", reverse=not (reverse))),
             ],
+            date_format=self.date_format,
         )
 
     def get_csv_id(self, row):
