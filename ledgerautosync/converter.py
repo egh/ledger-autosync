@@ -916,3 +916,24 @@ class VenmoConverter(CsvConverter):
 
     def get_csv_id(self, row):
         return "venmo.{}".format(Converter.clean_id(row["ID"]))
+
+
+class FidelityConverterMixin:
+    FIELDSET = set([
+        "Run Date", "Action", "Symbol", "Security Description",
+        "Security Type", "Quantity", "Price ($)",
+        "Commission ($)", "Fees ($)", "Accrued Interest ($)",
+        "Amount ($)", "Settlement Date"])
+
+    def convert(self, row):
+        amount = row['Amount ($)'].replace(",", "")
+        reverse = False
+        if reverse:
+            account = 'expenses'
+        else:
+            account = 'income'
+        return Transaction(
+            date=datetime.datetime.strptime(row['Run Date'].strip(), "%m/%d/%Y"),
+            payee=row['Action'],
+            postings=[Posting(self.name, Amount(amount, '$', reverse=reverse)),
+                      Posting(account, Amount(amount, '$', reverse=not(reverse)))])
