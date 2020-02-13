@@ -171,7 +171,7 @@ class Ledger(MetaLedger):
     def load_payees(self):
         if self.payees is None:
             self.payees = {}
-            r = self.run(["show"])
+            r = self.run(["show", "--actual"])
             for line in r:
                 self.add_payee(line[2], line[3])
 
