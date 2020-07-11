@@ -112,6 +112,7 @@ class Transaction(object):
             date,
             payee,
             postings,
+            checknum=None,
             cleared=False,
             metadata={},
             aux_date=None,
@@ -123,10 +124,12 @@ class Transaction(object):
         self.metadata = metadata
         self.cleared = cleared
         self.date_format = date_format
+        self.checknum = checknum
 
     def format(self, indent=4, assertions=True):
         retval = ""
         cleared_str = " "
+        checknum_str = ""
         if self.cleared:
             cleared_str = " * "
         aux_date_str = ""
@@ -134,8 +137,11 @@ class Transaction(object):
             self.date_format = "%Y/%m/%d"
         if self.aux_date is not None:
             aux_date_str = "=%s" % (self.aux_date.strftime(self.date_format))
-        retval += "%s%s%s%s\n" % (self.date.strftime(self.date_format),
-                                  aux_date_str, cleared_str, self.payee)
+        if self.checknum is not None:
+            checknum_str = " (%d)" % (self.checknum)
+        retval += "%s%s%s%s%s\n" % (self.date.strftime(self.date_format),
+                                    checknum_str,
+                                    aux_date_str, cleared_str, self.payee)
         for k in sorted(self.metadata.keys()):
             retval += "%s; %s: %s\n" % (" " * indent, k, self.metadata[k])
         for posting in self.postings:
@@ -431,6 +437,9 @@ class OfxConverter(Converter):
             posting = Posting(self.name,
                               Amount(txn.amount, self.currency),
                               metadata=posting_metadata)
+            checknum=None
+            if hasattr(txn, 'checknum') and txn.checknum != '':
+                checknum=int(txn.checknum)
             return Transaction(
                 date=txn.date,
                 payee=self.format_payee(txn),
@@ -439,7 +448,9 @@ class OfxConverter(Converter):
                     posting.clone_inverted(
                         self.mk_dynamic_account(self.format_payee(txn),
                                                 exclude=self.name))],
-                date_format=self.date_format,)
+                date_format=self.date_format,
+                checknum=checknum
+            )
         elif isinstance(txn, InvestmentTransaction):
             acct1 = self.name
             acct2 = self.name

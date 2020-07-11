@@ -54,7 +54,7 @@ class TestOfxConverter(LedgerTestCase):
         self.assertEqualLedgerPosting(
             converter.convert(
                 ofx.account.statement.transactions[2]).format(),
-            """2011/04/07 RETURNED CHECK FEE, CHECK # 319 FOR $45.33 ON 04/07/11
+            """2011/04/07 (319) RETURNED CHECK FEE, CHECK # 319 FOR $45.33 ON 04/07/11
   Foo  -$25.00
   ; ofxid: 1101.1452687~7.0000488
   Expenses:Misc  $25.00
