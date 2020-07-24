@@ -494,38 +494,73 @@ class OfxConverter(Converter):
 
             # income/DIV already defined above;
             # this block defines all other posting types
-            if posting1 is None and posting2 is None:
-                posting1 = Posting(
-                    acct1,
-                    Amount(
-                        txn.units,
-                        security,
-                        unlimited=True),
-                    unit_price=Amount(
-                        txn.unit_price,
-                        self.currency,
-                        unlimited=True),
-                    metadata=posting_metadata)
-                posting2 = Posting(
-                    acct2,
-                    Amount(
-                        txn.units *
-                        txn.unit_price,
-                        self.currency,
-                        reverse=True))
+            if posting1 is None and posting2 is None:                
+                posting_list = self._finalize_postings(
+                    acct1, acct2, txn, security, posting_metadata)
             else:
                 # Previously defined if type:income income_type/DIV
-                pass
+                posting_list = [posting1, posting2]
 
             return Transaction(
                 date=txn.tradeDate,
                 aux_date=aux_date,
                 payee=self.format_payee(txn),
                 metadata=metadata,
-                postings=[posting1, posting2],
+                postings=posting_list,
                 date_format=self.date_format,
             )
 
+    def _finalize_postings(self, acct1, acct2, txn,
+                           security, posting_metadata):
+        """Finalize postings to include fees and other post-processing
+
+        :param acct1:  Account for first posting.
+
+        :param acct2:  Account for second posting.
+
+        :param txn:    Instance of Transaction we are working on.
+
+        :param security: security element we are working on.   
+
+        :param posting_metadata:  Posting metadata
+
+        ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
+
+        :return:  A list of Posting instances for txn.
+
+        ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
+
+        PURPOSE:  This method finalizes the postings for txn. We need
+                  this because sometimes the postings are more complicated
+                  (e.g., if we have fees or commissions for a stock trade).
+                  See https://github.com/egh/ledger-autosync/issues/109.
+        """
+        posting_list = []
+        posting_list.append(Posting(
+            acct1,
+            Amount(
+                txn.units,
+                security,
+                unlimited=True),
+            unit_price=Amount(
+                txn.unit_price,
+                self.currency,
+                unlimited=True),
+            metadata=posting_metadata))
+        posting_list.append(Posting(
+            acct2,
+            Amount(
+                txn.units *
+                txn.unit_price + txn.fees,
+                self.currency,
+                reverse=True)))
+        if txn.fees:
+            posting_list.append(Posting(
+                'Expenses:Fees', Amount(
+                    txn.fees, self.currency)))
+
+        return posting_list
+        
     def format_position(self, pos):
         if hasattr(pos, 'date') and hasattr(pos, 'security') and \
            hasattr(pos, 'unit_price'):
