@@ -135,6 +135,31 @@ class TestOfxConverter(LedgerTestCase):
   Assets:Unknown  -$5042.04
 """)
 
+    def test_fee(self):
+        """Test that fees are parsed correctly.
+
+In this case we have a 7-cent fee. We need to make sure that
+the net sale price which shows up is the gross price of 3239.44
+minus 7 cents which equals 3239.37 and that the 7 cent fee
+shows up as an extra posting.
+        """
+        with open(os.path.join('fixtures', 'fidelity_fee.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
+        converter = OfxConverter(
+            account=ofx.account,
+            name="Foo",
+            security_list=SecurityList(ofx))
+        # test fee
+        self.assertEqualLedgerPosting(
+            converter.convert(
+                ofx.account.statement.transactions[13]).format(),
+            """2012/08/01 SELL
+    Foo                                        -100.0 "929042109" @ $32.3944
+    ; ofxid: 7776.01234567890.0123456789021401420120801
+    Assets:Unknown                                       $3239.37
+    Expenses:Fees                                           $0.07
+""")
+        
     def test_dynamic_account(self):
         with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
             ofx = OfxParser.parse(ofx_file)
