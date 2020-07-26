@@ -124,6 +124,7 @@ class TestOfxConverter(LedgerTestCase):
   Foo  100.00000 INTC @ $25.635000000
   ; ofxid: 7776.01234567890.0123456789020201120120720
   Assets:Unknown  -$2563.50
+  Expenses:Commission  $7.95
 """)
         # test no payee/memo
         self.assertEqualLedgerPosting(
@@ -133,6 +134,7 @@ class TestOfxConverter(LedgerTestCase):
   Foo  128.00000 SDRL @ $39.390900000
   ; ofxid: 7776.01234567890.0123456789020901120120727
   Assets:Unknown  -$5042.04
+  Expenses:Commission  $7.95
 """)
 
     def test_fee(self):
@@ -152,12 +154,22 @@ shows up as an extra posting.
         # test fee
         self.assertEqualLedgerPosting(
             converter.convert(
-                ofx.account.statement.transactions[13]).format(),
+                ofx.account.statement.transactions[1]).format(),
             """2012/08/01 SELL
     Foo                                        -100.0 "929042109" @ $32.3944
     ; ofxid: 7776.01234567890.0123456789021401420120801
     Assets:Unknown                                       $3239.37
     Expenses:Fees                                           $0.07
+""")
+        # test fee and comission
+        False and self.assertEqualLedgerPosting(
+            converter.convert(
+                ofx.account.statement.transactions[0]).format(),
+            """2012/08/01 SELL
+  Foo  -100.0 "929042109" @ $32.3944
+  ; ofxid: 7776.01234567890.0123456789021401420120801
+  Assets:Unknown  $3239.37
+  Expenses:Fees  $0.07
 """)
         
     def test_dynamic_account(self):
@@ -240,6 +252,7 @@ shows up as an extra posting.
   Foo  100.00000 INTC @ $25.635000000
   ; ofxid: 7776.01234567890.0123456789020201120120720
   Assets:Unknown  -$2563.50
+  Expenses:Commission  $7.95
 """)
 
     # Check that <TRANSFER> txns are parsed.
