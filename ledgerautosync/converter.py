@@ -569,6 +569,10 @@ class OfxConverter(Converter):
             posting_list.append(Posting(
                 'Expenses:Fees', Amount(
                     txn.fees, self.currency)))
+        if txn.commission:
+            posting_list.append(Posting(
+                'Expenses:Commission', Amount(
+                    txn.commission, self.currency)))
 
         return posting_list
         
