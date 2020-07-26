@@ -162,14 +162,15 @@ shows up as an extra posting.
     Expenses:Fees                                           $0.07
 """)
         # test fee and comission
-        False and self.assertEqualLedgerPosting(
+        self.assertEqualLedgerPosting(
             converter.convert(
                 ofx.account.statement.transactions[0]).format(),
-            """2012/08/01 SELL
-  Foo  -100.0 "929042109" @ $32.3944
-  ; ofxid: 7776.01234567890.0123456789021401420120801
-  Assets:Unknown  $3239.37
-  Expenses:Fees  $0.07
+            """2020/05/22=2020/05/26 SELL
+  Foo  -1.0 "Z9977810Z" @ $8.27
+  ; ofxid: 7776.01234567890.987654321
+  Assets:Unknown  $8.25
+  Expenses:Fees  $0.02
+  Expenses:Commission  $1.00
 """)
         
     def test_dynamic_account(self):
