@@ -38,7 +38,7 @@ setup(
     install_requires=[
         'setuptools>=26',
         'ofxclient',
-        'ofxparse'
+        "ofxparse @ https://github.com/jseutter/ofxparse/tarball/3236cfd96434feb6bc79a8b66f3400f18e2ad3c4"
     ],
 
     extras_require={
