@@ -18,7 +18,7 @@
 
 # flake8: noqa E501
 
-from ledgerautosync import LedgerAutosyncException
+from ledgerautosync import LedgerAutosyncException, config
 from ledgerautosync.cli import run, find_ledger_file
 from ledgerautosync.ledgerwrap import Ledger, LedgerPython, HLedger
 from ofxclient.config import OfxConfig
@@ -33,6 +33,12 @@ from nose.tools import raises
 
 
 class CliTest():
+    def tearDown(self):
+        # Clean up global config
+        for attr in dir(config):
+            if not (attr.startswith("__") or attr == "PATH"):
+                delattr(config, attr)
+
     def test_run(self):
         config = OfxConfig(os.path.join('fixtures', 'ofxclient.ini'))
         acct = config.accounts()[0]
