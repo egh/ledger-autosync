@@ -1,7 +1,7 @@
 asn1crypto==0.24.0
 beautifulsoup4==4.7.1
 cffi==1.12.2
-cryptography==3.2
+cryptography==3.3.2
 entrypoints==0.3
 jeepney==0.4
 keyring==19.0.1
