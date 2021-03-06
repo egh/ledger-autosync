@@ -245,7 +245,8 @@ class Converter(object):
             currency='$',
             indent=4,
             payee_format=None,
-            date_format=None):
+            date_format=None,
+            infer_account=True):
         self.lgr = ledger
         self.indent = indent
         self.unknownaccount = unknownaccount
@@ -254,9 +255,10 @@ class Converter(object):
         if self.currency == "USD":
             self.currency = "$"
         self.date_format = date_format
+        self.infer_account = infer_account
 
     def mk_dynamic_account(self, payee, exclude):
-        if self.lgr is None:
+        if self.lgr is None or not self.infer_account:
             return self.unknownaccount or 'Expenses:Misc'
         else:
             account = self.lgr.get_account_by_payee(payee, exclude)
@@ -280,13 +282,15 @@ class OfxConverter(Converter):
             shortenaccount=False,
             security_list=SecurityList(
             []),
-            date_format=None):
+            date_format=None,
+            infer_account=True):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
                                            currency=account.statement.currency,
                                            payee_format=payee_format,
-                                           date_format=date_format)
+                                           date_format=date_format,
+                                           infer_account=infer_account)
         self.real_acctid = account.account_id
         if hardcodeaccount is not None:
             self.acctid = hardcodeaccount
@@ -618,6 +622,7 @@ class CsvConverter(Converter):
             unknownaccount=None,
             payee_format=None,
             date_format=None,
+            infer_account=True,
     ):
         super(CsvConverter, self).__init__(
             ledger=ledger,
@@ -625,6 +630,7 @@ class CsvConverter(Converter):
             unknownaccount=unknownaccount,
             payee_format=payee_format,
             date_format=date_format,
+            infer_account=infer_account,
         )
         self.name = name
         self.dialect = dialect
