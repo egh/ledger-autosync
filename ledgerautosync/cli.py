@@ -93,7 +93,8 @@ def make_ofx_converter(account,
                        hardcodeaccount,
                        shortenaccount,
                        security_list,
-                       date_format):
+                       date_format,
+                       infer_account):
     klasses = OfxConverter.__subclasses__()
     if len(klasses) > 1:
         raise Exception("I found more than 1 OfxConverter subclass, but only "
@@ -110,7 +111,8 @@ def make_ofx_converter(account,
                           hardcodeaccount=hardcodeaccount,
                           shortenaccount=shortenaccount,
                           security_list=security_list,
-                          date_format=date_format)
+                          date_format=date_format,
+                          infer_account=infer_account)
     else:
         return OfxConverter(account=account,
                             name=name,
@@ -122,7 +124,8 @@ def make_ofx_converter(account,
                             hardcodeaccount=hardcodeaccount,
                             shortenaccount=shortenaccount,
                             security_list=security_list,
-                            date_format=date_format)
+                            date_format=date_format,
+                            infer_account=infer_account)
 
 def sync(ledger, accounts, args):
     sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
@@ -141,7 +144,8 @@ def sync(ledger, accounts, args):
                                                hardcodeaccount=None,
                                                shortenaccount=args.shortenaccount,
                                                security_list=SecurityList(ofx),
-                                               date_format=args.date_format)
+                                               date_format=args.date_format,
+                                               infer_account=args.infer_account)
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -179,7 +183,8 @@ def import_ofx(ledger, args):
                                    hardcodeaccount=args.hardcodeaccount,
                                    shortenaccount=args.shortenaccount,
                                    security_list=security_list,
-                                   date_format=args.date_format)
+                                   date_format=args.date_format,
+                                   infer_account=args.infer_account)
     print_results(converter, ofx, ledger, txns, args)
 
 
@@ -293,6 +298,8 @@ transactions')
     parser.add_argument('-y', '--date-format', type=str, default=None, dest="date_format",
                         help="""Format string to use for printing dates.
                         See strftime for details on format string syntax. Default is "%%Y/%%m/%%d".""")
+    parser.add_argument('--no-infer-account', dest="infer_account", action='store_false', default=True,
+                        help='disable inference of offset account from payee')
     args = parser.parse_args(args)
     if sys.argv[0][-16:] == "hledger-autosync":
         args.hledger = True
