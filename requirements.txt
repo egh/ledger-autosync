@@ -5,7 +5,7 @@ cryptography==3.3.2
 entrypoints==0.3
 jeepney==0.4
 keyring==19.0.1
-lxml==4.6.2
+lxml==4.6.3
 mock==2.0.0
 nose==1.3.7
 ofxclient==2.0.3
