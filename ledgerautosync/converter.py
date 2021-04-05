@@ -126,7 +126,7 @@ class Transaction(object):
         self.date_format = date_format
         self.checknum = checknum
 
-    def format(self, indent=4, assertions=True):
+    def format(self, indent=4, assertions=True, override_currency=None):
         retval = ""
         cleared_str = " "
         checknum_str = ""
@@ -145,7 +145,7 @@ class Transaction(object):
         for k in sorted(self.metadata.keys()):
             retval += "%s; %s: %s\n" % (" " * indent, k, self.metadata[k])
         for posting in self.postings:
-            retval += posting.format(indent, assertions)
+            retval += posting.format(indent, assertions, override_currency)
         return retval
 
 
@@ -163,7 +163,7 @@ class Posting(object):
         self.unit_price = unit_price
         self.metadata = metadata
 
-    def format(self, indent=4, assertions=True):
+    def format(self, indent=4, assertions=True, override_currency=None):
         space_count = 65 - indent - \
             len(self.account) - len(self.amount.format())
         if space_count < 2:
@@ -171,7 +171,7 @@ class Posting(object):
         retval = "%s%s%s%s" % (" " * indent,
                                self.account,
                                " " * space_count,
-                               self.amount.format())
+                               self.amount.format(override_currency))
         if assertions and self.asserted is not None:
             retval = "%s = %s" % (retval, self.asserted.format())
         if self.unit_price is not None:
@@ -195,13 +195,17 @@ class Amount(EasyEquality):
         self.unlimited = unlimited
         self.currency = currency
 
-    def format(self):
+    def format(self, override_currency=None):
         # Commodities must be quoted in ledger if they have
         # whitespace or numerals.
-        if re.search(r'[\s0-9]', self.currency):
-            currency = "\"%s\"" % (self.currency)
+        
+        if override_currency is None:
+            if re.search(r'[\s0-9]', self.currency):
+                currency = "\"%s\"" % (self.currency)
+            else:
+                currency = self.currency
         else:
-            currency = self.currency
+            currency = override_currency
         if self.unlimited:
             number = str(abs(self.number))
         else:
@@ -213,6 +217,9 @@ class Amount(EasyEquality):
         if len(currency) == 1:
             # $ comes before
             return "%s%s%s" % (prefix, currency, number)
+        elif len(currency) == 0:
+            return "%s%s" % (prefix, number)
+
         else:
             # USD comes after
             return "%s%s %s" % (prefix, number, currency)

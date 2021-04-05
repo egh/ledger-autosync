@@ -71,7 +71,7 @@ def print_results(converter, ofx, ledger, txns, args):
                 not(ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL))):
             print(converter.format_initial_balance(ofx.account.statement))
     for txn in txns:
-        print(converter.convert(txn).format(args.indent))
+        print(converter.convert(txn).format(args.indent, args.assertions, args.override_currency))
     if args.assertions:
         print(converter.format_balance(ofx.account.statement))
 
@@ -242,6 +242,10 @@ if importing from file, set account name for import')
         help='do not de-duplicate against a ledger file')
     parser.add_argument('-i', '--indent', type=int, default=4,
                         help='number of spaces to use for indentation')
+    parser.add_argument('-c', '--override_currency', type=str, default=None,
+                        help='force currency of import, added as a postfix to \
+the amounts, unless it is one character in which case it goes at the front, \
+also allows for empty')
     parser.add_argument('--initial', action='store_true', default=False,
                         help='create initial balance entries')
     parser.add_argument('--fid', type=int, default=None,
