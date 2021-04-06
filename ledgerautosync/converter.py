@@ -126,7 +126,7 @@ class Transaction(object):
         self.date_format = date_format
         self.checknum = checknum
 
-    def format(self, indent=4, assertions=True, override_currency=None):
+    def format(self, indent=4, assertions=True):
         retval = ""
         cleared_str = " "
         checknum_str = ""
@@ -145,7 +145,7 @@ class Transaction(object):
         for k in sorted(self.metadata.keys()):
             retval += "%s; %s: %s\n" % (" " * indent, k, self.metadata[k])
         for posting in self.postings:
-            retval += posting.format(indent, assertions, override_currency)
+            retval += posting.format(indent, assertions)
         return retval
 
 
@@ -163,7 +163,7 @@ class Posting(object):
         self.unit_price = unit_price
         self.metadata = metadata
 
-    def format(self, indent=4, assertions=True, override_currency=None):
+    def format(self, indent=4, assertions=True):
         space_count = 65 - indent - \
             len(self.account) - len(self.amount.format())
         if space_count < 2:
@@ -171,7 +171,7 @@ class Posting(object):
         retval = "%s%s%s%s" % (" " * indent,
                                self.account,
                                " " * space_count,
-                               self.amount.format(override_currency))
+                               self.amount.format())
         if assertions and self.asserted is not None:
             retval = "%s = %s" % (retval, self.asserted.format())
         if self.unit_price is not None:
@@ -195,17 +195,14 @@ class Amount(EasyEquality):
         self.unlimited = unlimited
         self.currency = currency
 
-    def format(self, override_currency=None):
+    def format(self):
         # Commodities must be quoted in ledger if they have
         # whitespace or numerals.
         
-        if override_currency is None:
-            if re.search(r'[\s0-9]', self.currency):
-                currency = "\"%s\"" % (self.currency)
-            else:
-                currency = self.currency
+        if re.search(r'[\s0-9]', self.currency):
+            currency = "\"%s\"" % (self.currency)
         else:
-            currency = override_currency
+            currency = self.currency
         if self.unlimited:
             number = str(abs(self.number))
         else:
@@ -253,7 +250,8 @@ class Converter(object):
             indent=4,
             payee_format=None,
             date_format=None,
-            infer_account=True):
+            infer_account=True,
+            override_currency=None):
         self.lgr = ledger
         self.indent = indent
         self.unknownaccount = unknownaccount
@@ -290,11 +288,12 @@ class OfxConverter(Converter):
             security_list=SecurityList(
             []),
             date_format=None,
-            infer_account=True):
+            infer_account=True,
+            currency=None):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
-                                           currency=account.statement.currency,
+                                           currency=currency,
                                            payee_format=payee_format,
                                            date_format=date_format,
                                            infer_account=infer_account)
