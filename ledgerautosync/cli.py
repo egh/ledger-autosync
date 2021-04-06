@@ -94,7 +94,8 @@ def make_ofx_converter(account,
                        shortenaccount,
                        security_list,
                        date_format,
-                       infer_account):
+                       infer_account,
+                       currency):
     klasses = OfxConverter.__subclasses__()
     if len(klasses) > 1:
         raise Exception("I found more than 1 OfxConverter subclass, but only "
@@ -112,7 +113,8 @@ def make_ofx_converter(account,
                           shortenaccount=shortenaccount,
                           security_list=security_list,
                           date_format=date_format,
-                          infer_account=infer_account)
+                          infer_account=infer_account,
+                          currency=currency)
     else:
         return OfxConverter(account=account,
                             name=name,
@@ -125,7 +127,8 @@ def make_ofx_converter(account,
                             shortenaccount=shortenaccount,
                             security_list=security_list,
                             date_format=date_format,
-                            infer_account=infer_account)
+                            infer_account=infer_account,
+                            currency=currency)
 
 def sync(ledger, accounts, args):
     sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
@@ -133,6 +136,11 @@ def sync(ledger, accounts, args):
         try:
             (ofx, txns) = sync.get_new_txns(acct, resync=args.resync,
                                             max_days=args.max)
+            if args.override_currency is None:
+                currency = ofx.account.statement.currency
+            else:
+                currency = args.override_currency
+
             if ofx is not None:
                 converter = make_ofx_converter(account=ofx.account,
                                                name=acct.description,
@@ -145,7 +153,8 @@ def sync(ledger, accounts, args):
                                                shortenaccount=args.shortenaccount,
                                                security_list=SecurityList(ofx),
                                                date_format=args.date_format,
-                                               infer_account=args.infer_account)
+                                               infer_account=args.infer_account,
+                                               currency=currency)
                 print_results(converter, ofx, ledger, txns, args)
         except KeyboardInterrupt:
             raise
@@ -170,6 +179,11 @@ def import_ofx(ledger, args):
         else:
             accountname = UNKNOWN_BANK_ACCOUNT
 
+    if args.override_currency is None:
+        currency=ofx.account.statement.currency
+    else:
+        currency = args.override_currency
+
     # build SecurityList (including indexing by CUSIP and ticker symbol)
     security_list = SecurityList(ofx)
 
@@ -184,7 +198,9 @@ def import_ofx(ledger, args):
                                    shortenaccount=args.shortenaccount,
                                    security_list=security_list,
                                    date_format=args.date_format,
-                                   infer_account=args.infer_account)
+                                   infer_account=args.infer_account,
+                                   currency=currency
+                                   )
     print_results(converter, ofx, ledger, txns, args)
 
 
@@ -242,6 +258,10 @@ if importing from file, set account name for import')
         help='do not de-duplicate against a ledger file')
     parser.add_argument('-i', '--indent', type=int, default=4,
                         help='number of spaces to use for indentation')
+    parser.add_argument('-c', '--override_currency', type=str, default=None,
+                        help='force currency of import, added as a postfix to \
+the amounts, unless it is one character in which case it goes at the front, \
+also allows for empty')
     parser.add_argument('--initial', action='store_true', default=False,
                         help='create initial balance entries')
     parser.add_argument('--fid', type=int, default=None,

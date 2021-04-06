@@ -74,6 +74,20 @@ class TestOfxConverter(LedgerTestCase):
     Expenses:Misc                                          -$0.01
 """)
 
+    def test_override_currency(self):
+        with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
+            ofx = OfxParser.parse(ofx_file)
+        converter = OfxConverter(account=ofx.account, name="Foo", indent=4, override_currency="CAD")
+        # testing override_currency
+        self.assertEqual(
+            converter.convert(
+                ofx.account.statement.transactions[0]).format(),
+            """2011/03/31 DIVIDEND EARNED FOR PERIOD OF 03/01/2011 THROUGH 03/31/2011 ANNUAL PERCENTAGE YIELD EARNED IS 0.05%
+    Foo                                                     0.01 CAD
+    ; ofxid: 1101.1452687~7.0000486
+    Expenses:Misc                                          -0.01 CAD
+""")
+
     def test_shortenaccount(self):
         with open(os.path.join('fixtures', 'checking.ofx'), 'rb') as ofx_file:
             ofx = OfxParser.parse(ofx_file)

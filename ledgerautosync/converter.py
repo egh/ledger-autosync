@@ -198,6 +198,7 @@ class Amount(EasyEquality):
     def format(self):
         # Commodities must be quoted in ledger if they have
         # whitespace or numerals.
+        
         if re.search(r'[\s0-9]', self.currency):
             currency = "\"%s\"" % (self.currency)
         else:
@@ -213,6 +214,9 @@ class Amount(EasyEquality):
         if len(currency) == 1:
             # $ comes before
             return "%s%s%s" % (prefix, currency, number)
+        elif len(currency) == 0:
+            return "%s%s" % (prefix, number)
+
         else:
             # USD comes after
             return "%s%s %s" % (prefix, number, currency)
@@ -246,7 +250,8 @@ class Converter(object):
             indent=4,
             payee_format=None,
             date_format=None,
-            infer_account=True):
+            infer_account=True,
+            override_currency=None):
         self.lgr = ledger
         self.indent = indent
         self.unknownaccount = unknownaccount
@@ -283,11 +288,12 @@ class OfxConverter(Converter):
             security_list=SecurityList(
             []),
             date_format=None,
-            infer_account=True):
+            infer_account=True,
+            currency=None):
         super(OfxConverter, self).__init__(ledger=ledger,
                                            indent=indent,
                                            unknownaccount=unknownaccount,
-                                           currency=account.statement.currency,
+                                           currency=currency,
                                            payee_format=payee_format,
                                            date_format=date_format,
                                            infer_account=infer_account)
