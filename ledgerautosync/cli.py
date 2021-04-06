@@ -71,7 +71,7 @@ def print_results(converter, ofx, ledger, txns, args):
                 not(ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL))):
             print(converter.format_initial_balance(ofx.account.statement))
     for txn in txns:
-        print(converter.convert(txn).format(args.indent, args.assertions))
+        print(converter.convert(txn).format(args.indent))
     if args.assertions:
         print(converter.format_balance(ofx.account.statement))
 
