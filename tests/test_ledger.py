@@ -17,23 +17,24 @@
 # <http://www.gnu.org/licenses/>.
 
 
-from ledgerautosync.ledgerwrap import Ledger, HLedger, LedgerPython
-from nose.plugins.attrib import attr
-from unittest import TestCase
 import os
 import os.path
 import tempfile
+from unittest import TestCase
+
+from nose.plugins.attrib import attr
+
+from ledgerautosync.ledgerwrap import HLedger, Ledger, LedgerPython
 
 
 class LedgerTest(object):
-    ledger_path = os.path.join('fixtures', 'checking.lgr')
-    dynamic_ledger_path = os.path.join(
-        'fixtures', 'checking-dynamic-account.lgr')
+    ledger_path = os.path.join("fixtures", "checking.lgr")
+    dynamic_ledger_path = os.path.join("fixtures", "checking-dynamic-account.lgr")
 
     def check_transaction(self):
         self.assertTrue(
-            self.lgr.check_transaction_by_id(
-                "ofxid", "1101.1452687~7.0000486"))
+            self.lgr.check_transaction_by_id("ofxid", "1101.1452687~7.0000486")
+        )
 
     def test_nonexistent_transaction(self):
         self.assertFalse(self.lgr.check_transaction_by_id("ofxid", "FOO"))
@@ -43,62 +44,61 @@ class LedgerTest(object):
 
     def test_get_account_by_payee(self):
         account = self.lgr.get_account_by_payee(
-            "AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )",
-            exclude="Assets:Foo")
+            "AUTOMATIC WITHDRAWAL, ELECTRIC BILL WEB(S )", exclude="Assets:Foo"
+        )
         self.assertEqual(account, "Expenses:Bar")
 
     def test_get_ambiguous_account_by_payee(self):
-        account = self.dynamic_lgr.get_account_by_payee(
-            "Generic", exclude="Assets:Foo")
+        account = self.dynamic_lgr.get_account_by_payee("Generic", exclude="Assets:Foo")
         # shoud use the latest
         self.assertEqual(account, "Expenses:Bar")
 
     def test_ofx_payee_quoting(self):
-        payees = ['PAYEE TEST/SLASH',
-                  'PAYEE TEST,COMMA',
-                  'PAYEE TEST:COLON',
-                  'PAYEE TEST*STAR',
-                  'PAYEE TEST#HASH',
-                  'PAYEE TEST"QUOTE',
-                  'PAYEE TEST.PERIOD']
+        payees = [
+            "PAYEE TEST/SLASH",
+            "PAYEE TEST,COMMA",
+            "PAYEE TEST:COLON",
+            "PAYEE TEST*STAR",
+            "PAYEE TEST#HASH",
+            'PAYEE TEST"QUOTE',
+            "PAYEE TEST.PERIOD",
+        ]
         for payee in payees:
             self.assertNotEqual(
-                self.lgr.get_account_by_payee(
-                    payee, ['Assets:Foo']), None, msg="Did not find %s in %s" %
-                (payee, self.lgr))
+                self.lgr.get_account_by_payee(payee, ["Assets:Foo"]),
+                None,
+                msg="Did not find %s in %s" % (payee, self.lgr),
+            )
 
     def test_ofx_id_quoting(self):
         self.assertEqual(
-            self.lgr.check_transaction_by_id(
-                "ofxid",
-                "1/2"),
+            self.lgr.check_transaction_by_id("ofxid", "1/2"),
             True,
-            msg="Did not find 1/2 in %s" %
-            (self.lgr))
+            msg="Did not find 1/2 in %s" % (self.lgr),
+        )
 
     def test_load_payees(self):
         self.lgr.load_payees()
         self.assertEqual(
-            self.lgr.payees['PAYEE TEST:COLON'], [
-                'Assets:Foo', 'Income:Bar'])
+            self.lgr.payees["PAYEE TEST:COLON"], ["Assets:Foo", "Income:Bar"]
+        )
 
     def test_load_payees_with_empty_ledger(self):
         self.empty_lgr.load_payees()
 
 
-@attr('hledger')
+@attr("hledger")
 class TestHledger(TestCase, LedgerTest):
     def setUp(self):
-        self.empty_lgr = HLedger(os.path.join('fixtures', 'empty.lgr'))
+        self.empty_lgr = HLedger(os.path.join("fixtures", "empty.lgr"))
         self.lgr = HLedger(self.ledger_path)
         self.dynamic_lgr = HLedger(self.dynamic_ledger_path)
 
 
-@attr('ledger')
+@attr("ledger")
 class TestLedger(LedgerTest, TestCase):
     def setUp(self):
-        self.empty_lgr = Ledger(os.path.join('fixtures', 'empty.lgr'),
-                                no_pipe=True)
+        self.empty_lgr = Ledger(os.path.join("fixtures", "empty.lgr"), no_pipe=True)
         self.lgr = Ledger(self.ledger_path, no_pipe=True)
         self.dynamic_lgr = Ledger(self.dynamic_ledger_path, no_pipe=True)
 
@@ -107,7 +107,7 @@ class TestLedger(LedgerTest, TestCase):
         os.close(f)  # Who wants to deal with low-level file descriptors?
         # Create an init file that will narrow the test data to a period that
         # contains no trasnactions
-        with open(tmprcpath, 'w') as f:
+        with open(tmprcpath, "w") as f:
             f.write("--period 2012")
         # If the command returns no trasnactions, as we would expect if we
         # parsed the init file, then this will throw an exception.
@@ -115,9 +115,9 @@ class TestLedger(LedgerTest, TestCase):
         os.unlink(tmprcpath)
 
 
-@attr('ledger-python')
+@attr("ledger-python")
 class TestLedgerPython(TestCase, LedgerTest):
     def setUp(self):
-        self.empty_lgr = LedgerPython(os.path.join('fixtures', 'empty.lgr'))
+        self.empty_lgr = LedgerPython(os.path.join("fixtures", "empty.lgr"))
         self.lgr = LedgerPython(self.ledger_path)
         self.dynamic_lgr = LedgerPython(self.dynamic_ledger_path)

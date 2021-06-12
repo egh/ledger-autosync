@@ -16,14 +16,14 @@
 # along with ledger-autosync. If not, see
 # <http://www.gnu.org/licenses/>.
 
-from unittest import TestCase
 import re
+from unittest import TestCase
 
 
 class LedgerTestCase(TestCase):
     def assertEqualLedgerPosting(self, a, b, msg=None):
         """Checks that two strings are the same posting. Collapses all space
         sequences > len(2)."""
-        a1 = re.sub('  +', '  ', a)
-        b1 = re.sub('  +', '  ', b)
+        a1 = re.sub("  +", "  ", a)
+        b1 = re.sub("  +", "  ", b)
         return self.assertEqual(a1, b1, msg=msg)

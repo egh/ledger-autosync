@@ -18,22 +18,18 @@
 
 
 import csv
+import distutils.spawn
+import logging
 import os
 import re
-import distutils.spawn
 import subprocess
-from subprocess import Popen, PIPE
+from queue import Empty, Queue
+from subprocess import PIPE, Popen
 from threading import Thread
-from queue import Queue, Empty
+
 from ledgerautosync.converter import Converter
-import logging
 
-
-csv.register_dialect(
-    'ledger',
-    delimiter=',',
-    quoting=csv.QUOTE_ALL,
-    escapechar="\\")
+csv.register_dialect("ledger", delimiter=",", quoting=csv.QUOTE_ALL, escapechar="\\")
 
 
 def mk_ledger(ledger_file):
@@ -53,10 +49,11 @@ class MetaLedger(object):
     @staticmethod
     def windows_clean(a):
         def clean_str(s):
-            s = s.replace('%', '')
-            s = s.replace(' ', '\ ')
-            s = s.replace('/', '\/')
+            s = s.replace("%", "")
+            s = s.replace(" ", "\ ")
+            s = s.replace("/", "\/")
             return s
+
         return [clean_str(s) for s in a]
 
     # Return True if this ledgerlike interface is available
@@ -88,36 +85,43 @@ class MetaLedger(object):
 class Ledger(MetaLedger):
     @staticmethod
     def available():
-        return ((distutils.spawn.find_executable('ledger') is not None) and
-                (Popen(["ledger", "--version"], stdout=PIPE, universal_newlines=True).
-                 communicate()[0]).startswith("Ledger 3"))
+        return (distutils.spawn.find_executable("ledger") is not None) and (
+            Popen(
+                ["ledger", "--version"], stdout=PIPE, universal_newlines=True
+            ).communicate()[0]
+        ).startswith("Ledger 3")
 
     def __init__(self, ledger_file=None, no_pipe=True):
-        if distutils.spawn.find_executable('ledger') is None:
+        if distutils.spawn.find_executable("ledger") is None:
             raise Exception("ledger was not found in $PATH")
         self._item = ""
 
         def enqueue_output(out, queue):
             buff = ""
-            while (buff is not None):
+            while buff is not None:
                 buff = out.read(1)
-                if (buff is not None):
+                if buff is not None:
                     self._item += buff
                 if self._item.endswith("] "):  # prompt
                     queue.put(self._item[0:-2])
                     self._item = ""
             out.close()
-        self.use_pipe = (os.name == 'posix') and not(no_pipe)
+
+        self.use_pipe = (os.name == "posix") and not (no_pipe)
         self.args = ["ledger", "--args-only"]
         if ledger_file is not None:
             self.args += ["-f", ledger_file]
         if self.use_pipe:
-            self.p = Popen(self.args, bufsize=1, stdin=PIPE, stdout=PIPE,
-                           universal_newlines=True, close_fds=True)
+            self.p = Popen(
+                self.args,
+                bufsize=1,
+                stdin=PIPE,
+                stdout=PIPE,
+                universal_newlines=True,
+                close_fds=True,
+            )
             self.q = Queue()
-            self.t = Thread(
-                target=enqueue_output, args=(
-                    self.p.stdout, self.q))
+            self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))
             self.t.daemon = True  # thread dies with the program
             self.t.start()
             # read output until prompt
@@ -132,11 +136,12 @@ class Ledger(MetaLedger):
     @staticmethod
     def pipe_quote(a):
         def quote(s):
-            s = s.replace('/', '\\\\/')
-            s = s.replace('%', '')
-            if not(re.match(r"^\w+$", s)):
-                s = "\"%s\"" % (s)
+            s = s.replace("/", "\\\\/")
+            s = s.replace("%", "")
+            if not (re.match(r"^\w+$", s)):
+                s = '"%s"' % (s)
             return s
+
         return [quote(s) for s in a]
 
     def run(self, cmd):
@@ -146,19 +151,18 @@ class Ledger(MetaLedger):
             self.p.stdin.write("\n")
             logging.debug(" ".join(Ledger.pipe_quote(cmd)))
             try:
-                return csv.reader(self.q.get(True, 5), dialect='ledger')
+                return csv.reader(self.q.get(True, 5), dialect="ledger")
             except Empty:
                 logging.error("Could not get prompt from ledger!")
                 exit(1)
         else:
             cmd = self.args + ["csv"] + cmd
-            if os.name == 'nt':
+            if os.name == "nt":
                 cmd = MetaLedger.windows_clean(cmd)
             return csv.reader(
-                subprocess.check_output(
-                    cmd,
-                    universal_newlines=True).splitlines(),
-                dialect='ledger')
+                subprocess.check_output(cmd, universal_newlines=True).splitlines(),
+                dialect="ledger",
+            )
 
     def check_transaction_by_id(self, key, value):
         q = ["-E", "meta", "%s=%s" % (key, Converter.clean_id(value))]
@@ -176,8 +180,15 @@ class Ledger(MetaLedger):
                 self.add_payee(line[2], line[3])
 
     def get_autosync_payee(self, payee, account):
-        q = [account, "--last", "1", "--format", "%(quoted(payee))\n",
-             "--limit", 'tag("AutosyncPayee") == "%s"' % (payee)]
+        q = [
+            account,
+            "--last",
+            "1",
+            "--format",
+            "%(quoted(payee))\n",
+            "--limit",
+            'tag("AutosyncPayee") == "%s"' % (payee),
+        ]
         r = self.run(q)
         try:
             return next(r)[0]
@@ -190,6 +201,7 @@ class LedgerPython(MetaLedger):
     def available():
         try:
             import ledger  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -207,7 +219,8 @@ class LedgerPython(MetaLedger):
             if string_read:
                 self.session = ledger.Session()
                 self.journal = self.session.read_journal_from_string(
-                    open(ledger_file).read())
+                    open(ledger_file).read()
+                )
             else:
                 self.journal = ledger.read_journal(ledger_file)
 
@@ -218,12 +231,10 @@ class LedgerPython(MetaLedger):
             self.payees = {}
             for xact in self.journal:
                 for post in xact.posts():
-                    self.add_payee(
-                        xact.payee, post.reported_account().fullname())
+                    self.add_payee(xact.payee, post.reported_account().fullname())
 
     def check_transaction_by_id(self, key, value):
-        q = self.journal.query("-E meta %s=\"%s\"" %
-                               (key, Converter.clean_id(value)))
+        q = self.journal.query('-E meta %s="%s"' % (key, Converter.clean_id(value)))
         return len(q) > 0
 
     def get_autosync_payee(self, payee, account):
@@ -234,18 +245,19 @@ class LedgerPython(MetaLedger):
 class HLedger(MetaLedger):
     @staticmethod
     def available():
-        return (distutils.spawn.find_executable('hledger') is not None)
+        return distutils.spawn.find_executable("hledger") is not None
 
     @staticmethod
     def quote(a):
         def quote_str(s):
-            s = s.replace('(', '\(')
-            s = s.replace(')', '\)')
+            s = s.replace("(", "\(")
+            s = s.replace(")", "\)")
             return s
+
         return [quote_str(s) for s in a]
 
     def __init__(self, ledger_file=None):
-        if distutils.spawn.find_executable('hledger') is None:
+        if distutils.spawn.find_executable("hledger") is None:
             raise Exception("hledger was not found in $PATH")
         self.args = ["hledger"]
         if ledger_file is not None:
@@ -254,14 +266,14 @@ class HLedger(MetaLedger):
 
     def run(self, cmd):
         cmd = HLedger.quote(self.args + cmd)
-        if os.name == 'nt':
+        if os.name == "nt":
             cmd = MetaLedger.windows_clean(cmd)
         logging.debug(" ".join(cmd))
         return subprocess.check_output(cmd, universal_newlines=True)
 
     def check_transaction_by_id(self, key, value):
         cmd = ["reg", "tag:%s=%s" % (key, Converter.clean_id(value))]
-        return self.run(cmd) != ''
+        return self.run(cmd) != ""
 
     def load_payees(self):
         if self.payees is None:
@@ -269,7 +281,7 @@ class HLedger(MetaLedger):
             cmd = ["reg", "-O", "csv", "--real"]
             r = csv.DictReader(self.run(cmd).splitlines())
             for line in r:
-                self.add_payee(line['description'], line['account'])
+                self.add_payee(line["description"], line["account"])
 
     def get_autosync_payee(self, payee, account):
         logging.error("payee lookup not implemented for HLedger, using raw payee")

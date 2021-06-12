@@ -18,63 +18,77 @@
 
 # flake8: noqa E501
 
-from ledgerautosync.converter import CsvConverter, AmazonConverter, MintConverter, \
-    PaypalConverter, PaypalAlternateConverter, Amount, Posting
-from decimal import Decimal
-import hashlib
 import csv
+import hashlib
+from decimal import Decimal
 
 from nose.plugins.attrib import attr
+
+from ledgerautosync.converter import (
+    AmazonConverter,
+    Amount,
+    CsvConverter,
+    MintConverter,
+    PaypalAlternateConverter,
+    PaypalConverter,
+    Posting,
+)
 from tests import LedgerTestCase
 
 
-@attr('generic')
+@attr("generic")
 class TestPosting(LedgerTestCase):
     def test_format(self):
         self.assertEqualLedgerPosting(
             Posting(
-                "Foo",
-                Amount(Decimal("10.00"), "$"),
-                metadata={'foo': 'bar'}
+                "Foo", Amount(Decimal("10.00"), "$"), metadata={"foo": "bar"}
             ).format(indent=2),
-            "  Foo  $10.00\n  ; foo: bar\n")
+            "  Foo  $10.00\n  ; foo: bar\n",
+        )
 
 
-@attr('generic')
+@attr("generic")
 class TestAmount(LedgerTestCase):
     def test_amount(self):
         self.assertEqual(
             "$10.00",
             Amount(Decimal("10.001"), "$").format(),
-            "Formats to 2 points precision by default")
+            "Formats to 2 points precision by default",
+        )
         self.assertEqual(
             "10.00 USD",
             Amount(Decimal(10), "USD").format(),
-            "Longer commodity names come after")
+            "Longer commodity names come after",
+        )
         self.assertEqual(
             "-$10.00",
             Amount(Decimal(10), "$", reverse=True).format(),
-            "Reverse flag works.")
+            "Reverse flag works.",
+        )
         self.assertEqual(
-            "10.00 \"ABC123\"",
+            '10.00 "ABC123"',
             Amount(Decimal(10), "ABC123").format(),
-            "Currencies with numbers are quoted")
+            "Currencies with numbers are quoted",
+        )
         self.assertEqual(
-            "10.00 \"A BC\"",
+            '10.00 "A BC"',
             Amount(Decimal(10), "A BC").format(),
-            "Currencies with whitespace are quoted")
+            "Currencies with whitespace are quoted",
+        )
         self.assertEqual(
-            "$10.001",
-            Amount(Decimal("10.001"), "$", unlimited=True).format())
+            "$10.001", Amount(Decimal("10.001"), "$", unlimited=True).format()
+        )
 
 
-@attr('generic')
+@attr("generic")
 class TestCsvConverter(LedgerTestCase):
     def test_get_csv_id(self):
         converter = CsvConverter(None)
-        h = {'foo': 'bar', 'bar': 'foo'}
-        self.assertEqual(converter.get_csv_id(h), hashlib.md5(
-            "bar=foo\nfoo=bar\n".encode('utf-8')).hexdigest())
+        h = {"foo": "bar", "bar": "foo"}
+        self.assertEqual(
+            converter.get_csv_id(h),
+            hashlib.md5("bar=foo\nfoo=bar\n".encode("utf-8")).hexdigest(),
+        )
 
 
 class CsvConverterTestCase(LedgerTestCase):
@@ -83,41 +97,41 @@ class CsvConverterTestCase(LedgerTestCase):
         f.seek(0)
         dialect.skipinitialspace = True
         reader = csv.DictReader(f, dialect=dialect)
-        converter = CsvConverter.make_converter(
-            set(reader.fieldnames), dialect, name)
+        converter = CsvConverter.make_converter(set(reader.fieldnames), dialect, name)
         f.seek(0)
         reader = csv.DictReader(f, dialect=dialect)
         return (reader, converter)
 
 
-@attr('generic')
+@attr("generic")
 class TestPaypalConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/paypal.csv') as f:
-            (reader, converter) = self.make_converter(f, 'Foo')
+        with open("fixtures/paypal.csv") as f:
+            (reader, converter) = self.make_converter(f, "Foo")
             self.assertEqual(type(converter), PaypalConverter)
             self.assertEqual(
-                converter.convert(
-                    next(reader)).format(),
+                converter.convert(next(reader)).format(),
                 """2016/06/04 Jane Doe someone@example.net My Friend ID: XYZ1, Recurring Payment Sent
     Foo                                                -20.00 USD
     ; csvid: paypal.XYZ1
     Expenses:Misc                                       20.00 USD
-""")
+""",
+            )
             self.assertEqual(
                 converter.convert(next(reader)).format(),
                 """2016/06/04 Debit Card ID: XYZ2, Charge From Debit Card
     Foo                                               1120.00 USD
     ; csvid: paypal.XYZ2
     Transfer:Paypal                                  -1120.00 USD
-""")
+""",
+            )
 
 
-@attr('generic')
+@attr("generic")
 class TestPaypalAlternateConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/paypal_alternate.csv') as f:
-            (reader, converter) = self.make_converter(f, 'Foo')
+        with open("fixtures/paypal_alternate.csv") as f:
+            (reader, converter) = self.make_converter(f, "Foo")
             self.assertEqual(type(converter), PaypalAlternateConverter)
             self.assertEqual(
                 converter.convert(next(reader)).format(),
@@ -125,28 +139,28 @@ class TestPaypalAlternateConverter(CsvConverterTestCase):
     Foo                                                   -$12.34
     ; csvid: 1209a7bb0d17276248d463b71a6a8b8c
     Expenses:Misc                                          $12.34
-""")
+""",
+            )
             self.assertEqual(
                 converter.convert(next(reader)).format(),
                 """2016/12/31 Bank Account: Add Funds from a Bank Account
     Foo                                                    $12.34
     ; csvid: 581e62da71bab74c7ce61854c2b6b6a5
     Transfer:Paypal                                       -$12.34
-""")
+""",
+            )
 
     def test_mk_amount(self):
         converter = PaypalAlternateConverter(None)
         row = {"Currency": "USD", "Amount": "12.34"}
-        self.assertEqual(
-            converter.mk_amount(row), Amount(
-                Decimal('12.34'), "USD"))
+        self.assertEqual(converter.mk_amount(row), Amount(Decimal("12.34"), "USD"))
 
 
-@attr('generic')
+@attr("generic")
 class TestAmazonConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/amazon.csv') as f:
-            (reader, converter) = self.make_converter(f, 'Foo')
+        with open("fixtures/amazon.csv") as f:
+            (reader, converter) = self.make_converter(f, "Foo")
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
                 converter.convert(next(reader)).format(),
@@ -155,14 +169,15 @@ class TestAmazonConverter(CsvConverterTestCase):
     ; csvid: amazon.123-4567890-1234567
     ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=123-4567890-1234567
     Expenses:Misc                                         -$21.90
-""")
+""",
+            )
 
 
-@attr('generic')
+@attr("generic")
 class TestAmazonConverter2(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/amazon2.csv') as f:
-            (reader, converter) = self.make_converter(f, 'Foo')
+        with open("fixtures/amazon2.csv") as f:
+            (reader, converter) = self.make_converter(f, "Foo")
             self.assertEqual(type(converter), AmazonConverter)
             self.assertEqual(
                 converter.convert(next(reader)).format(),
@@ -171,13 +186,14 @@ class TestAmazonConverter2(CsvConverterTestCase):
     ; csvid: amazon.111-1111111-1111111
     ; url: https://www.amazon.com/gp/css/summary/print.html/ref=od_aui_print_invoice?ie=UTF8&orderID=111-1111111-1111111
     Expenses:Misc                                          -$9.99
-""")
+""",
+            )
 
 
-@attr('generic')
+@attr("generic")
 class TestMintConverter(CsvConverterTestCase):
     def test_format(self):
-        with open('fixtures/mint.csv') as f:
+        with open("fixtures/mint.csv") as f:
             (reader, converter) = self.make_converter(f)
             self.assertEqual(type(converter), MintConverter)
             self.assertEqual(
@@ -186,11 +202,13 @@ class TestMintConverter(CsvConverterTestCase):
     1234                                                   $29.99
     ; csvid: mint.a7c028a73d76956453dab634e8e5bdc1
     Expenses:Shopping                                     -$29.99
-""")
+""",
+            )
             self.assertEqual(
                 converter.convert(next(reader)).format(),
                 """2016/06/02 Autopay Rautopay Auto
     1234                                                 -$123.45
     ; csvid: mint.a404e70594502dd62bfc6f15d80b7cd7
     Credit Card Payment                                   $123.45
-""")
+""",
+            )
