@@ -1,4 +1,4 @@
-# Copyright (c) 2013, 2014 Erik Hetzner
+# Copyright (c) 2013-2021 Erik Hetzner
 # Portions Copyright (c) 2016 James S Blachly, MD
 #
 # This file is part of ledger-autosync
