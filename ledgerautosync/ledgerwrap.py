@@ -50,8 +50,8 @@ class MetaLedger(object):
     def windows_clean(a):
         def clean_str(s):
             s = s.replace("%", "")
-            s = s.replace(" ", "\ ")
-            s = s.replace("/", "\/")
+            s = s.replace(" ", "\\ ")
+            s = s.replace("/", "\\/")
             return s
 
         return [clean_str(s) for s in a]
@@ -250,8 +250,8 @@ class HLedger(MetaLedger):
     @staticmethod
     def quote(a):
         def quote_str(s):
-            s = s.replace("(", "\(")
-            s = s.replace(")", "\)")
+            s = s.replace("(", "\\(")
+            s = s.replace(")", "\\)")
             return s
 
         return [quote_str(s) for s in a]
