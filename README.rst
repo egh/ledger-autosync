@@ -410,4 +410,4 @@ useful, please consider submitting a pull request.
 Testing
 -------
 
-ledger-autosync uses pytest for tests. To test, run pytest in the project directory. This will test the ledger, hledger and ledger-python (if available) interfaces.
+ledger-autosync uses pytest for tests. To test, run pytest in the project directory. This will test the ledger, hledger and ledger-python interfaces. If hledger or the ledger-python interface is not found, these tests will be skipped.

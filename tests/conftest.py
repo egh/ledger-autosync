@@ -34,11 +34,8 @@ def ledger(request):
     kwargs = {}
     if request.param == Ledger:
         kwargs["no_pipe"] = True
-    if request.param == LedgerPython:
-        try:
-            import ledger
-        except ImportError:
-            pytest.skip("ledger python interface not found")
+    if not request.param.available():
+        pytest.skip(f"{request.param} not found")
     if ledger_impls is not None:
         if request.param not in ledger_impls.args[0]:
             pytest.skip("Test not applicable for this ledger.")
