@@ -37,12 +37,11 @@ setup(
         "ofxclient",
         "ofxparse @ https://github.com/jseutter/ofxparse/tarball/3236cfd96434feb6bc79a8b66f3400f18e2ad3c4",
     ],
-    extras_require={"test": ["nose>=1.0", "mock"]},
+    extras_require={"test": ["pytest"]},
     entry_points={
         "console_scripts": [
             "ledger-autosync = ledgerautosync.cli:run",
             "hledger-autosync = ledgerautosync.cli:run",
         ]
     },
-    test_suite="nose.collector",
 )

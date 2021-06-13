@@ -1,4 +1,4 @@
-# Copyright (c) 2013, 2014 Erik Hetzner
+# Copyright (c) 2013-2021 Erik Hetzner
 #
 # This file is part of ledger-autosync
 #

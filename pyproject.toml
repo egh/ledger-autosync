@@ -1,3 +1,11 @@
 [tool.isort]
 profile = "black"
 multi_line_output = 3
+
+[tool.pytest.ini_options]
+markers = [
+  "ofx_file: ofx fixture file to use in test",
+  "lgr_file: lgr fixture file to use in test",
+  "csv_file: csv fixture file to use in test",
+  "ledger_impls: List of Ledger implementations (as wrapper classes) that this test applies to. Default is all."
+]

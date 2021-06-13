@@ -410,9 +410,4 @@ useful, please consider submitting a pull request.
 Testing
 -------
 
-ledger-autosync uses nose for tests. To test, run nosetests in the
-project directory. This will test the ledger, hledger and
-ledger-python interfaces. To test a single interface, use nosetests -a
-hledger. To test the generic code, use nosetests -a generic. To test
-both, use nosetests -a generic -a hledger. For some reason
-nosetests -a '!hledger' will not work.
+ledger-autosync uses pytest for tests. To test, run pytest in the project directory. This will test the ledger, hledger and ledger-python (if available) interfaces.

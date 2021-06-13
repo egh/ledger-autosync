@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013, 2014 Erik Hetzner
+# Copyright (c) 2013-2021 Erik Hetzner
 #
 # This file is part of ledger-autosync
 #
@@ -19,22 +19,24 @@
 
 
 import os.path
-from unittest import TestCase
 
-from nose.plugins.attrib import attr
-from nose.tools import raises
+import pytest
 from ofxclient.config import OfxConfig
 
 from ledgerautosync import EmptyInstitutionException
 from ledgerautosync.cli import run
 from ledgerautosync.converter import OfxConverter
-from ledgerautosync.ledgerwrap import HLedger, Ledger, LedgerPython
 from ledgerautosync.sync import OfxSynchronizer
 
 
-class WeirdOfxTest(object):
-    @raises(EmptyInstitutionException)
-    def test_no_institution_no_fid(self):
+@pytest.fixture
+def ofx_sync(ledger):
+    return OfxSynchronizer(ledger)
+
+
+@pytest.mark.lgr_file("empty.lgr")
+def test_no_institution_no_fid(ledger):
+    with pytest.raises(EmptyInstitutionException):
         config = OfxConfig(os.path.join("fixtures", "ofxclient.ini"))
         run(
             [
@@ -47,56 +49,39 @@ class WeirdOfxTest(object):
             config,
         )
 
-    def test_no_institution(self):
-        ofxpath = os.path.join("fixtures", "no-institution.ofx")
-        sync = OfxSynchronizer(self.lgr)
-        ofx = OfxSynchronizer.parse_file(ofxpath)
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
-        self.assertEqual(len(txns), 3)
 
-    @raises(EmptyInstitutionException)
-    def test_no_institution_no_accountname(self):
-        ofxpath = os.path.join("fixtures", "no-institution.ofx")
-        ofx = OfxSynchronizer.parse_file(ofxpath)
+@pytest.mark.ofx_file("no-institution.ofx")
+@pytest.mark.lgr_file("empty.lgr")
+def test_no_institution(ofx, ofx_sync):
+    txns = ofx_sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+    assert len(txns) == 3
+
+
+@pytest.mark.ofx_file("no-institution.ofx")
+@pytest.mark.lgr_file("empty.lgr")
+def test_no_institution_no_accountname(ofx):
+    with pytest.raises(EmptyInstitutionException):
         OfxConverter(account=ofx.account, name=None)
 
-    def test_apostrophe(self):
-        ofxpath = os.path.join("fixtures", "apostrophe.ofx")
-        ofx = OfxSynchronizer.parse_file(ofxpath)
-        sync = OfxSynchronizer(self.lgr)
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
-        self.assertEqual(len(txns), 1)
 
-    def test_one_settleDate(self):
-        ofxpath = os.path.join("fixtures", "fidelity-one-dtsettle.ofx")
-        ofx = OfxSynchronizer.parse_file(ofxpath)
-        sync = OfxSynchronizer(self.lgr)
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
-        self.assertEqual(len(txns), 17)
-
-    def test_accented_characters_latin1(self):
-        ofxpath = os.path.join("fixtures", "accented_characters_latin1.ofx")
-        ofx = OfxSynchronizer.parse_file(ofxpath)
-        sync = OfxSynchronizer(self.lgr)
-        txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
-        converter = OfxConverter(account=ofx.account, name="Foo")
-        self.assertEqual(converter.format_payee(txns[0]), "Virement Interac à: Jean")
-        self.assertEqual(len(txns), 1)
+@pytest.mark.ofx_file("apostrophe.ofx")
+@pytest.mark.lgr_file("empty.lgr")
+def test_apostrophe(ofx, ofx_sync):
+    txns = ofx_sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+    assert len(txns) == 1
 
 
-@attr("hledger")
-class TestWeirdOfxHledger(TestCase, WeirdOfxTest):
-    def setUp(self):
-        self.lgr = HLedger(os.path.join("fixtures", "empty.lgr"))
+@pytest.mark.ofx_file("fidelity-one-dtsettle.ofx")
+@pytest.mark.lgr_file("empty.lgr")
+def test_one_settleDate(ofx, ofx_sync):
+    txns = ofx_sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+    assert len(txns) == 17
 
 
-@attr("ledger")
-class TestWeirdOfxLedger(TestCase, WeirdOfxTest):
-    def setUp(self):
-        self.lgr = Ledger(os.path.join("fixtures", "empty.lgr"), no_pipe=True)
-
-
-@attr("ledger-python")
-class TestWeirdOfxLedgerPython(TestCase, WeirdOfxTest):
-    def setUp(self):
-        self.lgr = LedgerPython(os.path.join("fixtures", "empty.lgr"))
+@pytest.mark.ofx_file("accented_characters_latin1.ofx")
+@pytest.mark.lgr_file("empty.lgr")
+def test_accented_characters_latin1(ofx, ofx_sync):
+    txns = ofx_sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+    converter = OfxConverter(account=ofx.account, name="Foo")
+    assert converter.format_payee(txns[0]) == "Virement Interac à: Jean"
+    assert len(txns) == 1
