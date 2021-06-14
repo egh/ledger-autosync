@@ -7,6 +7,8 @@ before_install:
  - sudo apt-get update
  - sudo apt-get install ledger
  - sudo apt-get install hledger
-install: "pip install -r requirements.txt"
+ - pip install poetry
+ - pip install --upgrade pip
+install: poetry install
 # command to run tests
-script: pytest
+script: poetry run python -m pytest
