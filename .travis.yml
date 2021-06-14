@@ -1,11 +1,9 @@
-dist: xenial
 language: python
 python:
   - "3.6"
   - "3.7"
   - "3.8"
 before_install:
- - sudo add-apt-repository ppa:mbudde/ledger -y
  - sudo apt-get update
  - sudo apt-get install ledger
  - sudo apt-get install hledger
