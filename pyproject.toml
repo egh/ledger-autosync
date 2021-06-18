@@ -9,3 +9,40 @@ markers = [
   "csv_file: csv fixture file to use in test",
   "ledger_impls: List of Ledger implementations (as wrapper classes) that this test applies to. Default is all."
 ]
+
+[tool.poetry]
+name = "ledger-autosync"
+version = "1.0.2"
+description = "Automatically sync your bank's data with ledger"
+authors = ["Erik Hetzner <egh@e6h.org>"]
+license = "GPLv3"
+homepage = "https://gitlab.com/egh/ledger-autosync"
+repository = "https://gitlab.com/egh/ledger-autosync"
+keywords = ["ledger", "accounting"]
+readme = "README.rst"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: OS Independent",
+  "Topic :: Office/Business :: Financial :: Accounting",
+  "Topic :: Office/Business :: Financial :: Investment",
+  "Topic :: Office/Business :: Financial",
+]
+packages = [
+    { include = "ledgerautosync" }
+]
+[tool.poetry.scripts]
+"ledger-autosync" = "ledgerautosync.cli:run"
+"hledger-autosync" = "ledgerautosync.cli:run"
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+ofxclient = "^2.0.3"
+ofxparse = "^0.21"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
