@@ -21,7 +21,7 @@ import re
 import pytest
 
 from ledgerautosync.converter import OfxConverter, SecurityList
-from ledgerautosync.ledgerwrap import HLedger
+from ledgerautosync.ledgerwrap import Ledger
 
 
 def clean_posting(posting):
@@ -335,10 +335,8 @@ def test_investments_custom_payee(ofx):
 
 @pytest.mark.ofx_file("checking-payee-match.ofx")
 @pytest.mark.lgr_file("checking.lgr")
+@pytest.mark.ledger_impls([Ledger])
 def test_payee_match(ofx, ledger):
-    if isinstance(ledger, HLedger):
-        pytest.skip("This doesn't work work Hledger")
-
     converter = OfxConverter(account=ofx.account, name="Foo", ledger=ledger)
     assert (
         make_clean_posting(converter, ofx.account.statement.transactions[0])
