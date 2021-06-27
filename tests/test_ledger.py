@@ -111,7 +111,7 @@ def test_load_payees_with_empty_ledger(ledger):
 
 
 @pytest.mark.lgr_file("checking.lgr")
-@pytest.mark.ledger_impls([Ledger, LedgerPython])
+@pytest.mark.ledger_impls([Ledger])
 def test_args_only(ledger):
     (f, tmprcpath) = tempfile.mkstemp(".ledgerrc")
     os.close(f)  # Who wants to deal with low-level file descriptors?
