@@ -370,7 +370,7 @@ The following converter in the file ``~/.config/ledger-autosync/plugins/my.py``:
     import re
 
     class SomeConverter(CsvConverter):
-        FIELDSET = set(["Date", "Name", Amount", "Balance"])
+        FIELDSET = set(["Date", "Name", "Amount", "Balance"])
 
         def __init__(self, *args, **kwargs):
             super(SomeConverter, self).__init__(*args, **kwargs)
