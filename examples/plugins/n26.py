@@ -30,20 +30,24 @@ class N26Converter(CsvConverter):
 
     def convert(self, row):
         amt = Decimal(row["Amount (EUR)"])
+        curr_foreign = self.mk_currency(row["Type Foreign Currency"] or "EUR")
+        amt_foreign = Decimal(row["Amount (Foreign Currency)"]) if row["Amount (Foreign Currency)"] else amt
         if amt < 0:
             reverse   = False
             acct_from = self.name
             curr_from = self.mk_currency("EUR")
+            amt_from  = Amount(amt, curr_from, reverse=reverse)
             acct_to   = "Expenses:Misc"
-            curr_to   = self.mk_currency(row["Type Foreign Currency"] or "EUR")
+            curr_to   = curr_foreign
+            amt_to    = Amount(amt_foreign, curr_to,   reverse=not reverse)
         else:
             reverse   = True
             acct_from = "Assets:Other"
-            curr_from = self.mk_currency(row["Type Foreign Currency"] or "EUR")
+            curr_from = curr_foreign
+            amt_from  = Amount(amt_foreign, curr_from, reverse=reverse)
             acct_to   = self.name
             curr_to   = self.mk_currency("EUR")
-        amt_from = Amount(amt, curr_from, reverse=reverse)
-        amt_to   = Amount(amt, curr_to,   reverse=not reverse)
+            amt_to    = Amount(amt, curr_to,   reverse=not reverse)
 
         payee = re.sub(r"[A-Za-z]+('[A-Za-z]+)?",lambda word: word.group(0).capitalize(),row["Payee"])
         meta = {"csvid": self.get_csv_id(row)}
