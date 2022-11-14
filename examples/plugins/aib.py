@@ -13,11 +13,6 @@ class AIBConverter(CsvConverter):
     def __init__(self, *args, **kwargs):
         super(AIBConverter, self).__init__(*args, **kwargs)
 
-    def mk_amount(self, amt, reverse=False):
-        return Amount(
-            Decimal(amt), "€", reverse=reverse
-        )
-
     def convert(self, row):
         meta = {"csvid": self.get_csv_id(row)}
         debit  = Decimal(row["Debit Amount"])  if row["Debit Amount"]  else None
