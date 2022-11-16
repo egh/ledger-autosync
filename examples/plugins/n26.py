@@ -22,12 +22,6 @@ class N26Converter(CsvConverter):
             currency = "€"
         return currency
 
-    def mk_amount(self, amt, currency, reverse=False):
-        currency = self.mk_currency(currency)
-        return Amount(
-            Decimal(amt), currency, reverse=reverse
-        )
-
     def convert(self, row):
         amt = Decimal(row["Amount (EUR)"])
         curr_foreign = self.mk_currency(row["Type Foreign Currency"] or "EUR")
@@ -39,7 +33,7 @@ class N26Converter(CsvConverter):
             amt_from  = Amount(amt, curr_from, reverse=reverse)
             acct_to   = "Expenses:Misc"
             curr_to   = curr_foreign
-            amt_to    = Amount(amt_foreign, curr_to,   reverse=not reverse)
+            amt_to    = Amount(amt_foreign, curr_to, reverse=not reverse)
         else:
             reverse   = True
             acct_from = "Assets:Other"
