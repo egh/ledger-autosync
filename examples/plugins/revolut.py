@@ -22,12 +22,6 @@ class RevolutConverter(CsvConverter):
             currency = "€"
         return currency
 
-    def mk_amount(self, amt, currency, reverse=False):
-        currency = self.mk_currency(currency)
-        return Amount(
-            Decimal(amt), currency, reverse=reverse
-        )
-
     def convert(self, row):
         amt = Decimal(row["Amount"])
         currency = self.mk_currency(row["Currency"])
