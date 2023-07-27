@@ -18,12 +18,12 @@
 
 
 import csv
-import distutils.spawn
 import logging
 import os
 import re
 import subprocess
 from queue import Empty, Queue
+from shutil import which as find_executable
 from subprocess import PIPE, Popen
 from threading import Thread
 
@@ -85,14 +85,14 @@ class MetaLedger(object):
 class Ledger(MetaLedger):
     @staticmethod
     def available():
-        return (distutils.spawn.find_executable("ledger") is not None) and (
+        return (find_executable("ledger") is not None) and (
             Popen(
                 ["ledger", "--version"], stdout=PIPE, universal_newlines=True
             ).communicate()[0]
         ).startswith("Ledger 3")
 
     def __init__(self, ledger_file=None, no_pipe=True):
-        if distutils.spawn.find_executable("ledger") is None:
+        if find_executable("ledger") is None:
             raise Exception("ledger was not found in $PATH")
         self._item = ""
 
@@ -245,7 +245,7 @@ class LedgerPython(MetaLedger):
 class HLedger(MetaLedger):
     @staticmethod
     def available():
-        return distutils.spawn.find_executable("hledger") is not None
+        return find_executable("hledger") is not None
 
     @staticmethod
     def quote(a):
@@ -257,7 +257,7 @@ class HLedger(MetaLedger):
         return [quote_str(s) for s in a]
 
     def __init__(self, ledger_file=None):
-        if distutils.spawn.find_executable("hledger") is None:
+        if find_executable("hledger") is None:
             raise Exception("hledger was not found in $PATH")
         self.args = ["hledger"]
         if ledger_file is not None:
