@@ -24,6 +24,8 @@ class RevolutConverter(CsvConverter):
 
     def convert(self, row):
         amt = Decimal(row["Amount"])
+        if not amt:
+            return ""
         currency = self.mk_currency(row["Currency"])
         cleared = row["State"] == "COMPLETED"
         if row["Type"] == "TOPUP":
@@ -48,7 +50,7 @@ class RevolutConverter(CsvConverter):
 
         date     = datetime.datetime.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
         aux_date = datetime.datetime.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S") if row["Completed Date"] else None
-        if date.date() == aux_date.date():
+        if aux_date and (date.date() == aux_date.date()):
             aux_date = None
 
         postings = [posting_to, posting_from]
