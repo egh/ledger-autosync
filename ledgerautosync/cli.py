@@ -21,7 +21,7 @@
 
 
 import argparse
-import imp
+import importlib.util
 import logging
 import os
 import os.path
@@ -233,10 +233,12 @@ def load_plugins(config_dir):
             # Quiet loader
             import ledgerautosync.plugins  # noqa: F401
 
-            path = os.path.join(plugin_dir, plugin)
-            imp.load_source(
-                "ledgerautosync.plugins.%s" % (os.path.splitext(plugin)[0]), path
-            )
+            file_path = os.path.join(plugin_dir, plugin)
+            module_name = f"ledgerautosync.plugins.{os.path.splitext(plugin)[0]}"
+            spec = importlib.util.spec_from_file_location(module_name, file_path)
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
 
 
 def run(args=None, config=None):
