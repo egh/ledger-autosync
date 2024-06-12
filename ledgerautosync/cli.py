@@ -278,6 +278,12 @@ if importing from file, set account name for import",
         help="specify ledger file to READ for syncing",
     )
     parser.add_argument(
+        "--rules",
+        type=str,
+        default=None,
+        help="specify rule file to READ for Payee matching",
+    )
+    parser.add_argument(
         "-L",
         "--no-ledger",
         dest="no_ledger",
@@ -451,6 +457,12 @@ All transactions will be printed!\n"
     config_dir = os.environ.get(
         "XDG_CONFIG_HOME", os.path.join(os.path.expanduser("~"), ".config")
     )
+
+    if args.rules and os.path.exists(args.rules):
+        with open(args.rules) as f:
+            for line in f:
+                regex, account = line.strip().split("\t")
+                ledger.add_rule(re.compile(regex, re.IGNORECASE), account)
 
     load_plugins(config_dir)
 

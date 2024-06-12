@@ -75,11 +75,19 @@ class MetaLedger(object):
             return None
 
     def get_account_by_payee(self, payee, exclude):
+        for regex, account in self.rules:
+            if regex.match(payee):
+                return account
+
         self.load_payees()
         return self.filter_accounts(self.payees.get(payee, []), exclude)
 
+    def add_rule(self, regex, account):
+        self.rules.append((regex, account))
+
     def __init__(self):
         self.payees = None
+        self.rules = []
 
 
 class Ledger(MetaLedger):
