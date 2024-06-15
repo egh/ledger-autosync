@@ -221,7 +221,8 @@ def import_csv(ledger, args):
     if args.reverse:
         txns = reversed(txns)
     for txn in txns:
-        print(txn.format(args.indent, args.assertions))
+        if txn is not None:
+            print(txn.format(args.indent, args.assertions))
 
 
 def load_plugins(config_dir):

@@ -400,6 +400,9 @@ Running ``ledger-autosync file.csv -a assets:bank`` will generate:
         assets:bank                                $1.06
         income                                    -$1.06
 
+To ignore a row you can return `None`_ from your `convert`_ method.
+ledger-autosync will produce no output for that row.
+
 For more examples, see
 https://gitlab.com/egh/ledger-autosync/blob/master/ledgerautosync/converter.py#L421
 or the `example plugins directory <examples/plugins>`_.
