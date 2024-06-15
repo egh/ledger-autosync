@@ -36,12 +36,13 @@ packages = [
 "hledger-autosync" = "ledgerautosync.cli:run"
 
 [tool.poetry.dependencies]
-python = ">=3.6"
+python = ">=3.8"
 ofxclient = "^2.0.3"
 ofxparse = "^0.21"
+lxml = "5.2.2"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.4"
+pytest = "^8.2.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
