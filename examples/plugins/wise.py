@@ -10,12 +10,39 @@ import datetime
 from decimal import Decimal
 import re
 
-from ledgerautosync.converter import Amount, Converter, CsvConverter, Posting, Transaction
+from ledgerautosync.converter import (
+    Amount,
+    Converter,
+    CsvConverter,
+    Posting,
+    Transaction,
+)
+
 
 class WiseConverter(CsvConverter):
-    FIELDSET = set(["TransferWise ID","Date","Amount","Currency","Description","Payment Reference","Running Balance",
-                    "Exchange From","Exchange To","Exchange Rate","Payer Name","Payee Name","Payee Account Number",
-                    "Merchant","Card Last Four Digits","Card Holder Full Name","Attachment","Note","Total fees"])
+    FIELDSET = set(
+        [
+            "TransferWise ID",
+            "Date",
+            "Amount",
+            "Currency",
+            "Description",
+            "Payment Reference",
+            "Running Balance",
+            "Exchange From",
+            "Exchange To",
+            "Exchange Rate",
+            "Payer Name",
+            "Payee Name",
+            "Payee Account Number",
+            "Merchant",
+            "Card Last Four Digits",
+            "Card Holder Full Name",
+            "Attachment",
+            "Note",
+            "Total fees",
+        ]
+    )
 
     def __init__(self, *args, **kwargs):
         super(WiseConverter, self).__init__(*args, **kwargs)
@@ -31,9 +58,7 @@ class WiseConverter(CsvConverter):
 
     def mk_amount(self, amt, currency, reverse=False):
         currency = self.mk_currency(currency)
-        return Amount(
-            Decimal(amt), currency, reverse=reverse
-        )
+        return Amount(Decimal(amt), currency, reverse=reverse)
 
     def convert(self, row):
         tid = row["TransferWise ID"]
@@ -41,29 +66,44 @@ class WiseConverter(CsvConverter):
         amt = Decimal(row["Amount"])
         acct_from = self.name
         curr_from = self.mk_currency(row["Currency"])
-        acct_to   = "Expenses:Misc"
-        curr_to   = curr_from
-        amt_from  = Amount(amt, curr_from)
-        amt_to    = Amount(amt, curr_to, reverse=True)
+        acct_to = "Expenses:Misc"
+        curr_to = curr_from
+        amt_from = Amount(amt, curr_from)
+        amt_to = Amount(amt, curr_to, reverse=True)
 
-        fee_not_included = tid.startswith("CARD-") and row["Currency"] == "USD" and row["Exchange To"]
+        fee_not_included = (
+            tid.startswith("CARD-") and row["Currency"] == "USD" and row["Exchange To"]
+        )
 
         if row["Exchange To"]:
-            rate      = Decimal(row["Exchange Rate"])
-            curr      = self.mk_currency(row["Currency"])
+            rate = Decimal(row["Exchange Rate"])
+            curr = self.mk_currency(row["Currency"])
             curr_from = self.mk_currency(row["Exchange From"])
-            curr_to   = self.mk_currency(row["Exchange To"])
+            curr_to = self.mk_currency(row["Exchange To"])
             if curr == curr_from:
-                amt_from  = Amount(amt,curr_from)
+                amt_from = Amount(amt, curr_from)
                 # Card transactions from USD to other currencies do not consider the fees in the exchange rate
-                amt_to    = Amount((amt + (Decimal(row["Total fees"]) if tid.startswith("CARD-") and not (row["Currency"] == "USD" and row["Exchange To"]) else Decimal(0)))  * rate, curr_to, reverse=True)
+                amt_to = Amount(
+                    (
+                        amt
+                        + (
+                            Decimal(row["Total fees"])
+                            if tid.startswith("CARD-")
+                            and not (row["Currency"] == "USD" and row["Exchange To"])
+                            else Decimal(0)
+                        )
+                    )
+                    * rate,
+                    curr_to,
+                    reverse=True,
+                )
                 acct_from = self.name
             else:
                 # Do not import this exchange from this statement; instead use the statement for the matching "from" currency
                 if tid.startswith("BALANCE-"):
                     return ""
-                amt_from  = Amount(amt / rate, curr_from, reverse=True)
-                amt_to     = Amount(amt, curr_to)
+                amt_from = Amount(amt / rate, curr_from, reverse=True)
+                amt_to = Amount(amt, curr_to)
                 acct_from = self.name if tid.startswith("BALANCE-") else "Expenses:Misc"
                 if tid.startswith("BALANCE-"):
                     acct_to = self.name
@@ -81,7 +121,7 @@ class WiseConverter(CsvConverter):
         meta = {"csvid": self.get_csv_id(row)}
 
         posting_from = Posting(acct_from, amt_from, metadata=meta)
-        posting_to   = Posting(acct_to,   amt_to)
+        posting_to = Posting(acct_to, amt_to)
 
         return Transaction(
             date=datetime.datetime.strptime(row["Date"], "%d-%m-%Y"),
@@ -89,9 +129,13 @@ class WiseConverter(CsvConverter):
             date_format="%Y-%m-%d",
             checknum=checknum,
             payee=payee,
-            postings=[posting_to, posting_from]
+            postings=[posting_to, posting_from],
         )
 
     def get_csv_id(self, row):
-        fmt = 'wise.fee.{}' if row["Description"].startswith("Wise Charges for:") else "wise.{}"
+        fmt = (
+            "wise.fee.{}"
+            if row["Description"].startswith("Wise Charges for:")
+            else "wise.{}"
+        )
         return fmt.format(Converter.clean_id(row["TransferWise ID"]))
