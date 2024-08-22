@@ -400,7 +400,7 @@ Running ``ledger-autosync file.csv -a assets:bank`` will generate:
         assets:bank                                $1.06
         income                                    -$1.06
 
-To ignore a row you can return `None`_ from your `convert`_ method.
+To ignore a row you can return ``None`` from your ``convert`` method.
 ledger-autosync will produce no output for that row.
 
 For more examples, see
