@@ -37,12 +37,12 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-ofxclient = "^2.0.3"
-ofxparse = "^0.21"
-lxml = "5.2.2"
+ofxclient = "*"
+ofxparse = "*"
+lxml = "*"
 
 [tool.poetry.dev-dependencies]
-pytest = "^8.2.2"
+pytest = "*"
 black = "*"
 
 [build-system]
