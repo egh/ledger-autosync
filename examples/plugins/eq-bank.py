@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2025 Devin Davis
+
 from ledgerautosync.converter import CsvConverter, Posting, Transaction, Amount
 import datetime
 import re
